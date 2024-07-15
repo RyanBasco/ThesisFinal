@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:testing/TouristDashboard/Details.dart';
+import 'package:testing/TouristDashboard/Notifications.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -175,7 +176,10 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                     IconButton(
                       icon: Icon(Icons.notifications, size: 30),
                       onPressed: () {
-                        // Handle notifications icon press
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Notifications()),
+                        );
                       },
                     ),
                   ],

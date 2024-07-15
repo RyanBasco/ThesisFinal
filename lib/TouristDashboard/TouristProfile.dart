@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:testing/Authentication/TouristLogin.dart';
 import 'package:testing/TouristDashboard/GenerateQR.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/ScanQR.dart';
@@ -436,8 +437,10 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         bottom: 100,
                         child: GestureDetector(
                           onTap: () {
-                            print('Log out icon tapped');
-                            // Add your functionality here
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginPageScreen()),
+                            );
                           },
                           child: Row(
                             children: [

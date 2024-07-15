@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -19,20 +20,27 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
     switch (index) {
       case 0:
+        // Handle "Home"
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserdashboardPageState()),
         );
         break;
       case 1:
-        // Current page
+        // Handle "My QR"
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => QRPage()),
+        );
         break;
       case 2:
+        // Handle "Wallet"
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => RegistrationPage()),
         );
         break;
+      // case 3: // No need to navigate to the same page (Profile)
     }
   }
 
