@@ -1,0 +1,314 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:testing/TouristDashboard/Registration.dart';
+import 'package:testing/TouristDashboard/UserDashboard.dart';
+
+class ChangePasswordPage extends StatefulWidget {
+  @override
+  _ChangePasswordPageState createState() => _ChangePasswordPageState();
+}
+
+class _ChangePasswordPageState extends State<ChangePasswordPage> {
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
+        );
+        break;
+      case 1:
+        // Current page
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RegistrationPage()),
+        );
+        break;
+    }
+  }
+
+  TextEditingController _currentPasswordController = TextEditingController();
+  TextEditingController _newPasswordController = TextEditingController();
+  TextEditingController _confirmPasswordController = TextEditingController();
+
+  bool _obscureCurrentPassword = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
+
+  void _togglePasswordVisibility(String field) {
+    setState(() {
+      switch (field) {
+        case 'current':
+          _obscureCurrentPassword = !_obscureCurrentPassword;
+          break;
+        case 'new':
+          _obscureNewPassword = !_obscureNewPassword;
+          break;
+        case 'confirm':
+          _obscureConfirmPassword = !_obscureConfirmPassword;
+          break;
+      }
+    });
+  }
+
+  void _changePassword() async {
+    // Ensure new password and confirm password match
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Passwords do not match.')),
+      );
+      return;
+    }
+
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        // Fetch current password from Firestore
+        var snapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
+
+        var userData = snapshot.data();
+        String currentStoredPassword = userData?['password'] ?? '';
+
+        // Compare entered current password with stored password
+        if (_currentPasswordController.text != currentStoredPassword) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Current password is incorrect.')),
+          );
+          return;
+        }
+
+        // Update password in Firestore
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .update({'password': _newPasswordController.text});
+
+        // Password updated successfully
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Password updated successfully.')),
+        );
+
+        // Clear text fields
+        _currentPasswordController.clear();
+        _newPasswordController.clear();
+        _confirmPasswordController.clear();
+      } catch (error) {
+        print('Failed to update password: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update password. Please try again.')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User not found.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white, // Ensure the background color is white
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Color(0xFF2C812A),
+        unselectedItemColor: Colors.black,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code),
+            label: 'My QR',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_balance_wallet),
+            label: 'Wallet',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFEEFFA9),
+              Color(0xFFDBFF4C),
+              Color(0xFF51F643),
+            ],
+            stops: [0.15, 0.54, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context); // Navigate back to the previous page
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.arrow_back, color: Colors.black),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Change Password',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 30),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Change Password',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2C812A),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 20),
+                      _buildInputField(
+                        labelText: 'Current Password',
+                        controller: _currentPasswordController,
+                        obscureText: _obscureCurrentPassword,
+                        toggleVisibility: () {
+                          _togglePasswordVisibility('current');
+                        },
+                      ),
+                      SizedBox(height: 20),
+                      _buildInputField(
+                        labelText: 'New Password',
+                        controller: _newPasswordController,
+                        obscureText: _obscureNewPassword,
+                        toggleVisibility: () {
+                          _togglePasswordVisibility('new');
+                        },
+                      ),
+                      SizedBox(height: 20),
+                      _buildInputField(
+                        labelText: 'Confirm Password',
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        toggleVisibility: () {
+                          _togglePasswordVisibility('confirm');
+                        },
+                      ),
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: _changePassword,
+                        child: Text('Save Password'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String labelText,
+    required TextEditingController controller,
+    required bool obscureText,
+    required VoidCallback toggleVisibility,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          labelText,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: TextFormField(
+            controller: controller,
+            obscureText: obscureText,
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              border: InputBorder.none,
+              suffixIcon: IconButton(
+                icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+                onPressed: toggleVisibility,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

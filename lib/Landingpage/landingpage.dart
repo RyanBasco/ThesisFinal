@@ -42,15 +42,18 @@ class _LandingPageState extends State<LandingPage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFFDEE77A),
-              Color(0xFF7C8144),
+              Color(0xFFEEFFA9),
+              Color(0xFFDBFF4C),
+              Color(0xFF51F643),
             ],
-             stops: [5.0, 3.2],
+            stops: [0.15, 0.54, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: Center(
           child: Image.asset(
-            'assets/Guimarasvist.png',
+            'assets/guimarasvist.png',
             fit: BoxFit.contain, // Adjust the image fit
             width: MediaQuery.of(context).size.width * 0.8, // Adjust the width as needed
             height: MediaQuery.of(context).size.height * 0.8, // Adjust the height as needed

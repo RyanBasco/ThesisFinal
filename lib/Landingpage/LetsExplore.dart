@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:testing/Landingpage/LetsExplore.dart';
 import 'package:testing/Landingpage/getstarted.dart';
 
-class NextPage extends StatelessWidget {
+class ExplorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,40 +24,34 @@ class NextPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/mango.png',
+              'assets/bag.png',
               width: 550,  // Set the desired width
               height: 350, // Set the desired height
             ),
             SizedBox(height: 20),
             Text(
-              'WELCOME TO GUIMARAS!',
+              'Let’s Explore Guimaras',
               style: TextStyle(
                 color: Color(0xFF2C812A),
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'CinzelDecorative',
               ),
             ),
             SizedBox(height: 10),
-            Text(
-              'Province of Guimaras',
-              style: TextStyle(
-                color: Color(0xFF2C812A),
-                fontSize: 19,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 5),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 40), // Add horizontal padding
               alignment: Alignment.center,
               child: Text(
-                'THE ISLAND THAT FITS YOUR TASTE',
-                textAlign: TextAlign.center,
+                'Embark on an unforgettable journey\n'
+                'through the picturesque landscapes\n'
+                'and hidden gems of Guimaras, the\n'
+                'pristine island paradise nestled in the\n'
+                'heart of the Philippines.',
+                textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: Color(0xFF114F3A),
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  fontSize: 16,
                 ),
               ),
             ),
@@ -74,11 +67,11 @@ class NextPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ExplorePage()),
+                  MaterialPageRoute(builder: (context) => GetStartedPage()),
                 );
               },
               child: Text(
-                'Get Started',
+                'Next >',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,

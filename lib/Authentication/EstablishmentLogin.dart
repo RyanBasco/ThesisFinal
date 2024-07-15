@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:testing/Authentication/EstablishmentSignup.dart';
 import 'package:testing/Authentication/TouristSignup.dart';
+import 'package:testing/EstablishmentDashboard/Establishmentdashboard.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
-import 'package:testing/Authentication/EstablishmentLogin.dart';
+import 'package:testing/Authentication/TouristLogin.dart'; // Import TouristLoginPage
 
-class LoginPageScreen extends StatefulWidget {
+class EstablishmentLoginPage extends StatefulWidget {
   @override
-  _LoginPageScreenState createState() => _LoginPageScreenState();
+  _EstablishmentLoginPageState createState() => _EstablishmentLoginPageState();
 }
 
-class _LoginPageScreenState extends State<LoginPageScreen> {
+class _EstablishmentLoginPageState extends State<EstablishmentLoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
@@ -36,37 +38,13 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
       // Navigate to UserDashboard
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-      );
-    } on FirebaseAuthException catch (e) {
-      print("Failed to login: ${e.message}");
-      String message;
-      switch (e.code) {
-        case 'invalid-email':
-          message = 'The email address is not valid.';
-          break;
-        case 'user-disabled':
-          message = 'The user corresponding to the given email has been disabled.';
-          break;
-        case 'user-not-found':
-          message = 'There is no user corresponding to the given email.';
-          break;
-        case 'wrong-password':
-          message = 'The password is invalid for the given email.';
-          break;
-        default:
-          message = 'An unknown error occurred.';
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to login: $message"),
-        ),
+        MaterialPageRoute(builder: (context) => EstablishmentDashboardPage()),
       );
     } catch (e) {
       print("Failed to login: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Failed to login: An unknown error occurred."),
+          content: Text("Failed to login: $e"),
         ),
       );
     }
@@ -77,35 +55,20 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFEEFFA9),
-                  Color(0xFFDBFF4C),
-                  Color(0xFF51F643),
-                ],
-                stops: [0.15, 0.54, 1.0],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
           SingleChildScrollView(
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.all(20),
+              color: Colors.white,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 80),
+                  SizedBox(height: 80), // Adjusted space for the back arrow
                   SizedBox(
                     width: 250,
                     height: 250,
                     child: Image.asset(
-                      'assets/guimarasvist.png',
+                      'assets/establishment.png',
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -245,20 +208,20 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SignupPage()),
+                          MaterialPageRoute(builder: (context) => EstablishmentsignupPage()), // Make sure to define a proper page for establishment signup if needed
                         );
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Don't have an account yet? ",
+                            "Create an ",
                             style: TextStyle(
                               color: Colors.black,
                             ),
                           ),
                           Text(
-                            'Sign Up',
+                            'Establishment Account',
                             style: TextStyle(
                               color: Color(0xFF2D60F7),
                             ),
@@ -272,23 +235,16 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
             ),
           ),
           Positioned(
-            top: 60,
-            right: 20,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
+            top: 40, // Adjusted position for the arrow
+            left: 10,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => EstablishmentLoginPage()),
+                  MaterialPageRoute(builder: (context) => LoginPageScreen()),
                 );
               },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.business,
-                  color: Color(0xFF114F3A),
-                  size: 30,
-                ),
-              ),
             ),
           ),
         ],
