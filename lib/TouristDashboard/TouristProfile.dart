@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:testing/Authentication/TouristLogin.dart';
-import 'package:testing/TouristDashboard/GenerateQR.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
-import 'package:testing/TouristDashboard/ScanQR.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/UserProfile/Addfriends.dart';
 import 'package:testing/UserProfile/Changepassword.dart';
 import 'package:testing/UserProfile/Editprofile.dart';
+import 'package:testing/UserProfile/HelpCenter.dart';
 
 class TouristprofilePage extends StatefulWidget {
   @override
@@ -395,8 +394,10 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         bottom: 150,
                         child: GestureDetector(
                           onTap: () {
-                            print('Help and support icon tapped');
-                            // Add your functionality here
+                             Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Helpcenter()),
+                            );
                           },
                           child: Row(
                             children: [

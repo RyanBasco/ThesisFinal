@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:testing/EstablishmentDetails/Directions.dart';
+import 'package:testing/EstablishmentDetails/mapstesting.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -20,28 +22,24 @@ class _DetailsPageState extends State<DetailsPage> {
 
     switch (index) {
       case 0:
-        // Check if "Home" option is tapped (handled in the same page)
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserdashboardPageState()),
         );
         break;
       case 1:
-        // Handle "My QR" or any custom functionality
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => QRPage()),
         );
         break;
       case 2:
-        // Check if "Wallet" option is tapped
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => RegistrationPage()),
         );
         break;
       case 3:
-        // Check if "Profile" option is tapped
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => TouristprofilePage()),
@@ -50,11 +48,17 @@ class _DetailsPageState extends State<DetailsPage> {
     }
   }
 
-
   void _toggleBookmark() {
     setState(() {
       _isBookmarked = !_isBookmarked;
     });
+  }
+
+  void _navigateToDirectionsPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => DirectionsPage()),
+    );
   }
 
   @override
@@ -226,6 +230,149 @@ class _DetailsPageState extends State<DetailsPage> {
                                 ],
                               ),
                             ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20), // Adjust the padding values as needed
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20), // Adjust padding to separate the boxes
+                      child: Container(
+                        width: 120,
+                        height: 40,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.phone, color: Colors.black, size: 20),
+                            SizedBox(width: 5),
+                            Text(
+                              'Contact',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 80), // Adjust padding to separate the boxes
+                      child: Container(
+                        width: 120,
+                        height: 40,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.facebook, color: Colors.black, size: 20),
+                            SizedBox(width: 5),
+                            Text(
+                              'Facebook',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'About',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                      width: double.infinity,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                          'Detailed description about the place goes here...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: ElevatedButton.icon(
+                        onPressed: _navigateToDirectionsPage, // Navigate to DirectionsPage
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF2C812A),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        ),
+                        icon: Icon(Icons.directions, color: Colors.white),
+                        label: Text(
+                          'Directions',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ),

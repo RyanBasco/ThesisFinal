@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:testing/ItineraryPage/Itinerary.dart';
 import 'package:testing/TouristDashboard/GenerateQR.dart';
-import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:testing/TouristDashboard/QrPage.dart';
+
 
 class RegistrationPage extends StatefulWidget {
   @override
@@ -20,7 +20,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     } else if (index == 3) { // Check if "Itinerary" option is tapped
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ItineraryPage()), // Navigate to ItineraryPage
+        MaterialPageRoute(builder: (context) => QRPage()), // Navigate to ItineraryPage
       );
     } else {
       setState(() {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
-import 'package:testing/TouristDashboard/Details.dart';
+import 'package:testing/EstablishmentDetails/Details.dart';
 import 'package:testing/TouristDashboard/Notifications.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
