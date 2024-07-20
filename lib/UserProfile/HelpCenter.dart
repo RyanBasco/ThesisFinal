@@ -3,6 +3,10 @@ import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:testing/UserProfile/Agriecofarm.dart';
+import 'package:testing/UserProfile/EmergencyHotline.dart';
+import 'package:testing/UserProfile/Tourguides.dart';
+import 'package:testing/UserProfile/TravelandTourAgencies.dart';
 
 class Helpcenter extends StatefulWidget {
   @override
@@ -192,7 +196,10 @@ class _HelpcenterState extends State<Helpcenter> {
                     SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
-                        // Handle emergency hotlines action
+                        Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => EmergencyHotline()),
+                      );
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -228,7 +235,10 @@ class _HelpcenterState extends State<Helpcenter> {
                     SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
-                        // Handle travel and tour agencies action
+                        Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Travelandtouragencies()),
+                      );
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -264,7 +274,10 @@ class _HelpcenterState extends State<Helpcenter> {
                     SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
-                        // Handle tour guides action
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Tourguides()),
+                      );
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -300,7 +313,10 @@ class _HelpcenterState extends State<Helpcenter> {
                     SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
-                        // Handle agri-eco farm sites action
+                        Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Agriecofarm()),
+                            );
                       },
                       child: Container(
                         decoration: BoxDecoration(
