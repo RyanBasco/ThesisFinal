@@ -5,6 +5,7 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/UserProfile/Agriecofarm.dart';
 import 'package:testing/UserProfile/EmergencyHotline.dart';
+import 'package:testing/UserProfile/Inquiries.dart';
 import 'package:testing/UserProfile/Tourguides.dart';
 import 'package:testing/UserProfile/TravelandTourAgencies.dart';
 
@@ -352,7 +353,10 @@ class _HelpcenterState extends State<Helpcenter> {
                     SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
-                        // Handle inquiries action
+                        Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Inquiries()),
+                            );
                       },
                       child: Container(
                         decoration: BoxDecoration(
