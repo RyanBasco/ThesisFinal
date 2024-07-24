@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
+import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class Notifications extends StatefulWidget {
@@ -11,7 +12,7 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late String _currentUserEmail;
 
@@ -38,10 +39,6 @@ class _NotificationsState extends State<Notifications> {
     switch (index) {
       case 0:
         // Handle "Home"
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-        );
         break;
       case 1:
         // Handle "My QR"
@@ -55,9 +52,14 @@ class _NotificationsState extends State<Notifications> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => RegistrationPage()),
+        );       
+        break;
+      case 3:
+      Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TouristprofilePage()),
         );
         break;
-      // case 3: // No need to navigate to the same page (Profile)
     }
   }
 
@@ -78,8 +80,8 @@ class _NotificationsState extends State<Notifications> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
+            icon: Icon(Icons.qr_code),
+            label: 'My Qr',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet),
@@ -156,6 +158,8 @@ class _NotificationsState extends State<Notifications> {
                   return Column(
                     children: requests.map((request) {
                       String senderEmail = request['senderEmail'];
+                      String senderFirstName = request['senderFirstName'];
+                      String senderLastName = request['senderLastName'];
                       String status = request['status'];
                       String requestId = request.id;
 
@@ -172,8 +176,8 @@ class _NotificationsState extends State<Notifications> {
                             children: [
                               Text(
                                 status == 'accepted'
-                                    ? 'You accepted $senderEmail\'s friend request'
-                                    : '$senderEmail sent you a friend request',
+                                    ? 'You accepted $senderFirstName $senderLastName\'s friend request'
+                                    : '$senderFirstName $senderLastName sent you a friend request',
                                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               if (status != 'accepted') ...[

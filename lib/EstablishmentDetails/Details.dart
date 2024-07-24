@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:testing/EstablishmentDetails/Directions.dart';
-import 'package:testing/EstablishmentDetails/mapstesting.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';

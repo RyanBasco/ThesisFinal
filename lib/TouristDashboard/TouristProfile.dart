@@ -9,6 +9,7 @@ import 'package:testing/UserProfile/Addfriends.dart';
 import 'package:testing/UserProfile/Changepassword.dart';
 import 'package:testing/UserProfile/Editprofile.dart';
 import 'package:testing/UserProfile/HelpCenter.dart';
+import 'package:testing/UserProfile/Mybookmarks.dart';
 
 class TouristprofilePage extends StatefulWidget {
   @override
@@ -352,8 +353,10 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         bottom: 250,
                         child: GestureDetector(
                           onTap: () {
-                            print('My bookmarks icon tapped');
-                            // Add your functionality here
+                             Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => BookmarkPage()),
+                            );
                           },
                           child: Row(
                             children: [

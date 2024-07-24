@@ -7,6 +7,7 @@ import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 
+
 class UserdashboardPageState extends StatefulWidget {
   @override
   _UserdashboardPageState createState() => _UserdashboardPageState();
@@ -27,33 +28,31 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     _fetchUserData();
   }
 
- void _fetchUserData() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      var querySnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .where('email', isEqualTo: user.email)
-          .get();
+  void _fetchUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        var querySnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .get();
 
-      if (querySnapshot.size > 0) {
-        var userData = querySnapshot.docs.first.data();
-        setState(() {
-          _firstName = userData['first_name'] ?? ''; // Safe access using ??
-          _lastName = userData['last_name'] ?? ''; // Safe access using ??
-        });
-      } else {
-        print('User data not found for email: ${user.email}');
-        // Handle case where user data is not found
+        if (querySnapshot.size > 0) {
+          var userData = querySnapshot.docs.first.data();
+          setState(() {
+            _firstName = userData['first_name'] ?? ''; // Safe access using ??
+            _lastName = userData['last_name'] ?? ''; // Safe access using ??
+          });
+        } else {
+          print('User data not found for email: ${user.email}');
+          // Handle case where user data is not found
+        }
+      } catch (error) {
+        print('Failed to fetch user data: $error');
+        // Handle error as needed
       }
-    } catch (error) {
-      print('Failed to fetch user data: $error');
-      // Handle error as needed
     }
   }
-}
-
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -62,28 +61,24 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
 
     switch (index) {
       case 0:
-        // Check if "Home" option is tapped (handled in the same page)
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserdashboardPageState()),
         );
         break;
       case 1:
-        // Handle "My QR" or any custom functionality
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => QRPage()),
         );
         break;
       case 2:
-        // Check if "Wallet" option is tapped
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => RegistrationPage()),
         );
         break;
       case 3:
-        // Check if "Profile" option is tapped
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => TouristprofilePage()),
@@ -104,6 +99,36 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     });
   }
 
+  void _toggleBookmark(int index) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        var bookmarkRef = FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('Bookmarks')
+            .doc('bookmark_$index');
+
+        if (_isBookmarked[index]) {
+          await bookmarkRef.delete();
+        } else {
+          await bookmarkRef.set({
+            'title': index == 0 ? 'JL Pension House' : 'JM Backpackers Hotel',
+            'imagePath': index == 0 ? 'assets/Pension.png' : 'assets/windmill.png',
+            'location': 'San Miguel, Jordan',
+          });
+        }
+
+        setState(() {
+          _isBookmarked[index] = !_isBookmarked[index];
+        });
+      } catch (error) {
+        print('Failed to update bookmark: $error');
+        // Handle error as needed
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,7 +141,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
           selectedItemColor: Color(0xFF2C812A),
-          unselectedItemColor: Colors.black, // Changed unselected item color to black
+          unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
           items: [
@@ -263,36 +288,57 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   ),
                 ),
               ),
-              Padding(
+             Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Column(
                   children: [
-                    _buildCategoryBar('Places', 0),
-                    _buildCategoryBar('Foods', 1),
-                    _buildCategoryBar('', 2),
+                    // Row for Accommodation and Food & Drinks
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0), // Adjust padding as needed
+                            child: _buildCategoryBar('Accommodation', 0),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0), // Adjust padding as needed
+                            child: _buildCategoryBar('Food & Drinks', 1),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10), // Adjust spacing as needed
+                    // Souvenir Shop with reduced width
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0), // Adjust padding as needed
+                      child: Container(
+                        width: 200, // Set a specific width for the Souvenir Shop container
+                        child: _buildCategoryBar('Souvenir Shop', 2),
+                      ),
+                    ),
                   ],
                 ),
               ),
+
               SizedBox(height: 20), // Added space before Search Results
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'Search Results',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
+                    color: Color(0xFF2C812A),
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C812A), // Green color
                   ),
                 ),
               ),
-              SizedBox(height: 10), // Added space before the boxes
-              _buildResultBoxWithImage('JL Pension House', 'assets/explore.png', true, 0),
               SizedBox(height: 10),
-              _buildResultBoxWithImage('Result 2', 'assets/windmill.png', false, 1),
-              SizedBox(height: 10),
-              _buildResultBoxWithImage('Result 3', 'assets/mango.png', false, 2),
-              SizedBox(height: 20), // Added space after the boxes
+              _buildResultBoxWithImage('JL Pension House', 'assets/Pension.png', true, 0),
+              _buildResultBoxWithImage('JM Backpackers Hotel', 'assets/windmill.png', false, 1),
+              SizedBox(height: 20), // Added space
             ],
           ),
         ),
@@ -301,76 +347,68 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   Widget _buildRoundedBarWithShadow(String text, int index) {
-    bool isSelected = _selectedBarIndex == index;
-    return GestureDetector(
-      onTap: () {
-        _onBarSelected(index);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFF288F13) : Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: Offset(0, 7),
-            ),
-          ],
-        ),
+  return GestureDetector(
+    onTap: () => _onBarSelected(index),
+    child: Container(
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: _selectedBarIndex == index ? Color(0xFF288F13) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Center(
         child: Text(
           text,
           style: TextStyle(
-            fontSize: 16,
+            color: _selectedBarIndex == index ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.white : Colors.black,
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildCategoryBar(String text, int index) {
-    bool isSelected = _selectedCategoryIndex == index;
-    return GestureDetector(
-      onTap: () {
-        _onCategorySelected(index);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFF288F13) : Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: Offset(0, 7),
-            ),
-          ],
-        ),
+  return GestureDetector(
+    onTap: () => _onCategorySelected(index),
+    child: Container(
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: _selectedCategoryIndex == index ? Color(0xFF288F13) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Center(
         child: Text(
           text,
           style: TextStyle(
-            fontSize: 16,
+            color: _selectedCategoryIndex == index ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.white : Colors.black,
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirstBox, int index) {
-  // Dummy rating for demonstration
-  int totalStars = 5;
-  int highlightedStars = index == 1 ? 3 : 4; // Highlight 3 stars for JM Backpackers Hotel
 
-  bool isBookmarked = _isBookmarked[index]; // Track bookmark state per box
-
+Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirstBox, int index) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
     child: Stack(
@@ -418,7 +456,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            isFirstBox ? 'JL Pension House' : 'JM Backpackers Hotel',
+                            resultText,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -429,13 +467,11 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              setState(() {
-                                _isBookmarked[index] = !isBookmarked;
-                              });
+                              _toggleBookmark(index);
                             },
                             child: Icon(
                               Icons.bookmark,
-                              color: isBookmarked ? Colors.yellow : Colors.grey,
+                              color: _isBookmarked[index] ? Colors.yellow : Colors.grey,
                               size: 30,
                             ),
                           ),
@@ -444,11 +480,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                       SizedBox(height: 5),
                       Row(
                         children: [
-                          Icon(
-                            Icons.location_on,
-                            color: Colors.green,
-                            size: 20,
-                          ),
+                          Icon(Icons.location_on, color: Colors.green),
                           SizedBox(width: 5),
                           Text(
                             'San Miguel, Jordan',
@@ -459,16 +491,6 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 5),
-                      Row(
-                        children: List.generate(
-                          totalStars,
-                          (index) => Icon(
-                            index < highlightedStars ? Icons.star : Icons.star_border,
-                            color: Colors.yellow,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -476,37 +498,39 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
             ],
           ),
         ),
-        if (isFirstBox) // Only show the green arrow for the first box
-          Positioned(
-            bottom: 25,
-            right: 10,
-            child: GestureDetector(
-              onTap: () {
-                // Handle click on the green arrow icon for JL Pension House
-                print('Green arrow clicked for JL Pension House');
-                // Navigate to details page or perform any action here
+        Positioned(
+          right: 10,
+          bottom: 10,
+          child: GestureDetector(
+            onTap: () {
+              if (isFirstBox) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => DetailsPage()), // Replace with your details page widget
+                  MaterialPageRoute(builder: (context) => DetailsPage()),
                 );
-              },
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(10),
-                ),
+              }
+            },
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                border: Border.all(color: Color(0xFF2C812A), width: 2),
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Center(
                 child: Transform.rotate(
-                  angle: 335 * 3.1415926535 / 180,
+                  angle: 330 * 3.14159 / 180, // Rotate 45 degrees
                   child: Icon(
                     Icons.arrow_forward,
-                    color: Colors.white,
+                    color: Color(0xFF2C812A),
+                    size: 20,
                   ),
                 ),
               ),
             ),
           ),
+        ),
       ],
     ),
   );

@@ -217,12 +217,22 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 
   void _sendFriendRequest(String recipientEmail) async {
+  // Fetch the current user's details from the 'Users' collection based on email
+  QuerySnapshot senderSnapshot = await _usersCollection.where('email', isEqualTo: _currentUserEmail).get();
+
+  if (senderSnapshot.docs.isNotEmpty) {
+    var senderData = senderSnapshot.docs.first.data() as Map<String, dynamic>;
+    String senderFirstName = senderData['first_name'] ?? 'First Name';
+    String senderLastName = senderData['last_name'] ?? 'Last Name';
+
     // Assuming there's a collection 'FriendRequests' in Firestore
     CollectionReference requestsCollection = FirebaseFirestore.instance.collection('FriendRequests');
 
     // Prepare a document for the recipient user
     await requestsCollection.add({
       'senderEmail': _currentUserEmail,
+      'senderFirstName': senderFirstName,
+      'senderLastName': senderLastName,
       'recipientEmail': recipientEmail,
       'status': 'pending', // Initial status of the request
       'timestamp': Timestamp.now(),
@@ -233,5 +243,12 @@ class _FriendsPageState extends State<FriendsPage> {
       content: Text('Friend request sent to $recipientEmail'),
       duration: Duration(seconds: 2),
     ));
+  } else {
+    // Handle the case where the user document does not exist
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('User details not found. Unable to send friend request.'),
+      duration: Duration(seconds: 2),
+    ));
   }
+}
 }
