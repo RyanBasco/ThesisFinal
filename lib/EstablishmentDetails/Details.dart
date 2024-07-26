@@ -194,13 +194,6 @@ class _DetailsPageState extends State<DetailsPage> {
                                       color: Color(0xFF288F13), // Text color
                                     ),
                                   ),
-                                  GestureDetector(
-                                    onTap: _toggleBookmark,
-                                    child: Icon(
-                                      _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                                      color: _isBookmarked ? Colors.yellow : Colors.grey,
-                                    ),
-                                  ),
                                 ],
                               ),
                               SizedBox(height: 8),

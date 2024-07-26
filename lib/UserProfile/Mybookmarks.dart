@@ -21,29 +21,30 @@ class _BookmarkPageState extends State<BookmarkPage> {
   }
 
   void _fetchBookmarkedItems() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        var querySnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('Bookmarks')
-            .get();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .collection('Bookmarks')
+          .get();
 
-        setState(() {
-          _bookmarkedItems = querySnapshot.docs
-              .map((doc) => {
-                    'id': doc.id, // Include the document ID for deletion
-                    ...doc.data() as Map<String, dynamic>,
-                  })
-              .toList();
-        });
-      } catch (error) {
-        print('Failed to fetch bookmarked items: $error');
-        // Handle error as needed
-      }
+      setState(() {
+        _bookmarkedItems = querySnapshot.docs
+            .map((doc) => {
+                  'id': doc.id, // Include document ID for deletion
+                  ...doc.data() as Map<String, dynamic>,
+                })
+            .toList();
+      });
+    } catch (error) {
+      print('Failed to fetch bookmarked items: $error');
+      // Handle error as needed
     }
   }
+}
+
 
   void _showConfirmationDialog(String docId) {
     showDialog(

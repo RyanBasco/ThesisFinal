@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
 import 'package:testing/Authentication/TouristLogin.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
@@ -19,12 +20,14 @@ class TouristprofilePage extends StatefulWidget {
 class _TouristprofilePageState extends State<TouristprofilePage> {
   String _firstName = '';
   String _lastName = '';
+  String _userId = '';
   int _selectedIndex = 3; // Set initial index to 'Profile'
 
   @override
   void initState() {
     super.initState();
     _fetchUserData();
+    _generateUserId();
   }
 
   void _fetchUserData() async {
@@ -50,6 +53,22 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
       }
     }
   }
+
+  void _generateUserId() {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    // Generate a hash code from the user's email
+    final emailHash = user.email?.hashCode ?? 0;
+
+    // Map the hash code to a 4-digit number
+    final userId = (emailHash.abs() % 9000 + 1000).toString();
+
+    setState(() {
+      _userId = userId;
+    });
+  }
+}
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -199,6 +218,23 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
+                        top: 10, // Adjusted to align with the profile icon
+                        bottom: 490,
+                        left: 70, // Adjust position to bottom right
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black,
+                          ),
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      Positioned(
                         top: 30,
                         left: 120,
                         child: Column(
@@ -209,6 +245,14 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'User ID: $_userId',
+                              style: TextStyle(
+                                fontSize: 16,
                                 color: Colors.black,
                               ),
                             ),
@@ -265,7 +309,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         bottom: 310,
                         child: GestureDetector(
                           onTap: () {
-                           Navigator.push(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => ChangePasswordPage()),
                             );
@@ -324,7 +368,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   color: Color(0xFF2C812A),
                                 ),
                                 child: Icon(
-                                  Icons.person_add,
+                                  Icons.group_add,
                                   color: Colors.white,
                                   size: 20,
                                 ),
@@ -337,7 +381,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 83), // Add space between text and arrow
+                              SizedBox(width: 85), // Add space between text and arrow
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
@@ -353,7 +397,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         bottom: 250,
                         child: GestureDetector(
                           onTap: () {
-                             Navigator.push(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => BookmarkPage()),
                             );
@@ -381,7 +425,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 61), // Add space between text and arrow
+                              SizedBox(width: 63), // Add space between text and arrow
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
@@ -392,12 +436,12 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 370,
+                        top: 400,
                         left: 20,
-                        bottom: 150,
+                        bottom: 170,
                         child: GestureDetector(
                           onTap: () {
-                             Navigator.push(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => Helpcenter()),
                             );
@@ -412,20 +456,20 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   color: Color(0xFF2C812A),
                                 ),
                                 child: Icon(
-                                  Icons.help,
+                                  Icons.help_outline,
                                   color: Colors.white,
                                   size: 20,
                                 ),
                               ),
                               SizedBox(width: 25),
                               Text(
-                                'Help & Support',
+                                'Help Center',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 60), // Add space between text and arrow
+                              SizedBox(width: 85), // Add space between text and arrow
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
@@ -436,9 +480,8 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 450,
+                        top: 490,
                         left: 20,
-                        bottom: 100,
                         child: GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -453,7 +496,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Color(0xFF2C812A),
+                                  color: Colors.red,
                                 ),
                                 child: Icon(
                                   Icons.logout,
@@ -463,13 +506,13 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                               ),
                               SizedBox(width: 25),
                               Text(
-                                'Log Out',
+                                'Logout',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: const Color.fromARGB(255, 237, 8, 8),
+                                  color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 113), // Add space between text and arrow
+                              SizedBox(width: 120), // Add space between text and arrow
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,

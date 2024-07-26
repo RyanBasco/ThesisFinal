@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:testing/Authentication/TouristSignup.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/Authentication/EstablishmentLogin.dart';
@@ -11,66 +12,66 @@ class LoginPageScreen extends StatefulWidget {
 
 class _LoginPageScreenState extends State<LoginPageScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _login(BuildContext context) async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
-
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      print("User logged in: ${userCredential.user!.uid}");
-
-      // Re-authenticate or refresh token if needed
-      await _auth.currentUser?.getIdToken(true);
-
-      // Navigate to UserDashboard
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-      );
-    } on FirebaseAuthException catch (e) {
-      print("Failed to login: ${e.message}");
-      String message;
-      switch (e.code) {
-        case 'invalid-email':
-          message = 'The email address is not valid.';
-          break;
-        case 'user-disabled':
-          message = 'The user corresponding to the given email has been disabled.';
-          break;
-        case 'user-not-found':
-          message = 'There is no user corresponding to the given email.';
-          break;
-        case 'wrong-password':
-          message = 'The password is invalid for the given email.';
-          break;
-        default:
-          message = 'An unknown error occurred.';
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to login: $message"),
-        ),
-      );
-    } catch (e) {
-      print("Failed to login: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to login: An unknown error occurred."),
-        ),
-      );
-    }
+  if (!_formKey.currentState!.validate()) {
+    return;
   }
+
+  String email = _emailController.text.trim();
+  String password = _passwordController.text.trim();
+
+  try {
+    // Query Firestore for a document with the matching email
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .where('email', isEqualTo: email)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentSnapshot userDoc = querySnapshot.docs.first;
+      String storedPassword = userDoc['password'];
+
+      // Compare entered password with stored password
+      if (password == storedPassword) {
+        print("User authenticated successfully.");
+
+        // Navigate to UserDashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
+        );
+      } else {
+        // Incorrect password
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to login: Invalid password."),
+          ),
+        );
+      }
+    } else {
+      // User not found in Firestore
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to login: User not found."),
+        ),
+      );
+    }
+  } catch (e) {
+    print("Failed to login: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Failed to login: An unknown error occurred."),
+      ),
+    );
+  }
+}
+
+
 
   @override
   Widget build(BuildContext context) {

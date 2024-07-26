@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/Registration.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:intl/intl.dart';
+
 
 class EditProfile extends StatefulWidget {
   @override
@@ -144,17 +146,18 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != DateTime.now())
-      setState(() {
-        _birthdayController.text = "${picked.toLocal()}".split(' ')[0];
-      });
+  DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(1900),
+    lastDate: DateTime(2101),
+  );
+  if (picked != null && picked != DateTime.now()) {
+    setState(() {
+      _birthdayController.text = DateFormat('MMMM d, yyyy').format(picked);
+    });
   }
+}
 
   Widget _buildTextField({
     required String labelText,
@@ -316,6 +319,35 @@ class _EditProfileState extends State<EditProfile> {
                             Icons.person,
                             color: Colors.white,
                             size: 55,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 10, // Adjusted to align with the profile icon
+                        bottom: 490,
+                        left: 70, // Adjust position to bottom right
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black,
+                          ),
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                     Positioned(
+                        top: 60, // Adjusted for better positioning
+                        right: 60,
+                        child: Text(
+                          'Upload Image',
+                          style: TextStyle(
+                            color: Color(0xFF2C812A), // Set color to 2C812A
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),

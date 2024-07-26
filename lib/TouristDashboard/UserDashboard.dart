@@ -20,7 +20,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   TextEditingController _searchController = TextEditingController();
   int _selectedBarIndex = -1; // Track selected bar index, -1 for none
   int _selectedCategoryIndex = -1; // Track selected category index, -1 for none
-  List<bool> _isBookmarked = [false, false, false]; // Track bookmark states
+  List<bool> _isBookmarked = [false, false, false, false, false]; // Track bookmark states
 
   @override
   void initState() {
@@ -100,34 +100,67 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   void _toggleBookmark(int index) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        var bookmarkRef = FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('Bookmarks')
-            .doc('bookmark_$index');
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      var bookmarkRef = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .collection('Bookmarks')
+          .doc('bookmark_$index'); // Ensure unique ID for each bookmark
 
-        if (_isBookmarked[index]) {
-          await bookmarkRef.delete();
-        } else {
-          await bookmarkRef.set({
-            'title': index == 0 ? 'JL Pension House' : 'JM Backpackers Hotel',
-            'imagePath': index == 0 ? 'assets/Pension.png' : 'assets/windmill.png',
-            'location': 'San Miguel, Jordan',
-          });
+      if (_isBookmarked[index]) {
+        // Remove bookmark
+        await bookmarkRef.delete();
+      } else {
+        // Add bookmark
+        String title;
+        String imagePath;
+
+        switch (index) {
+          case 0:
+            title = 'JL Pension House';
+            imagePath = 'assets/Pension.png';
+            break;
+          case 1:
+            title = 'JM Backpackers Hotel';
+            imagePath = 'assets/windmill.png';
+            break;
+          case 2:
+            title = 'Mancol Oasis Lodge';
+            imagePath = 'assets/Mancol.png';
+            break;
+          case 3:
+            title = 'Sidewalkers Pension House';
+            imagePath = 'assets/Sidewalkers.png';
+            break;
+          case 4:
+            title = 'Zemkamps Chalet';
+            imagePath = 'assets/Tree.png';
+            break;
+          default:
+            title = 'Unknown';
+            imagePath = '';
+            break;
         }
 
-        setState(() {
-          _isBookmarked[index] = !_isBookmarked[index];
+        await bookmarkRef.set({
+          'title': title,
+          'imagePath': imagePath,
+          'location': 'San Miguel, Jordan',
         });
-      } catch (error) {
-        print('Failed to update bookmark: $error');
-        // Handle error as needed
       }
+
+      setState(() {
+        _isBookmarked[index] = !_isBookmarked[index];
+      });
+    } catch (error) {
+      print('Failed to update bookmark: $error');
+      // Handle error as needed
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -323,26 +356,36 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                 ),
               ),
 
-              SizedBox(height: 20), // Added space before Search Results
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'Search Results',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Color(0xFF2C812A),
-                    fontWeight: FontWeight.bold,
+             SizedBox(height: 20), // Added space before Search Results
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    'Search Results',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color(0xFF2C812A),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 10),
-              _buildResultBoxWithImage('JL Pension House', 'assets/Pension.png', true, 0),
-              _buildResultBoxWithImage('JM Backpackers Hotel', 'assets/windmill.png', false, 1),
-              SizedBox(height: 20), // Added space
+                  SizedBox(height: 10),
+                  _buildResultBoxWithImage('JL Pension House', 'assets/Pension.png', true, 0),
+                  _buildResultBoxWithImage('JM Backpackers Hotel', 'assets/windmill.png', false, 1),
+                  SizedBox(height: 10), // Added space
+                Column(
+                  children: [
+                    _buildResultBoxWithImage('Mancol Oasis Lodge', 'assets/Mancol.png', false, 2),
+                    SizedBox(height: 10), // Space between containers
+                    _buildResultBoxWithImage('Sidewalkers Pension House', 'assets/Sidewalkers.png', false, 3),
+                    SizedBox(height: 10), // Space between containers
+                    _buildResultBoxWithImage('Zemkamps Chalet', 'assets/Tree.png', false, 4),
+                  ],
+                ),
+                SizedBox(height: 20), // Added space after the last container
             ],
-          ),
         ),
-      ),
+        )
+      )
     );
   }
 
@@ -455,15 +498,17 @@ Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirs
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            resultText,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: isFirstBox ? Color(0xFF288F13) : Colors.green,
+                          Expanded(
+                            child: Text(
+                              resultText,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isFirstBox ? Color(0xFF288F13) : Colors.green,
+                              ),
+                              maxLines: 2, // Allow text to wrap to the next line
+                              overflow: TextOverflow.ellipsis, // Display ellipsis if text overflows
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                           GestureDetector(
                             onTap: () {
@@ -471,7 +516,7 @@ Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirs
                             },
                             child: Icon(
                               Icons.bookmark,
-                              color: _isBookmarked[index] ? Colors.yellow : Colors.grey,
+                              color: _isBookmarked.length > index && _isBookmarked[index] ? Colors.yellow : Colors.grey,
                               size: 30,
                             ),
                           ),
