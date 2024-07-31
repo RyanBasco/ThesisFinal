@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
-import 'package:testing/TouristDashboard/Registration.dart';
+import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class ChangePasswordPage extends StatefulWidget {
@@ -80,30 +80,23 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        // Fetch current password from Firestore
-        var snapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .get();
+        // Re-authenticate user
+        AuthCredential credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: _currentPasswordController.text,
+        );
 
-        var userData = snapshot.data();
-        String currentStoredPassword = userData?['password'] ?? '';
+        await user.reauthenticateWithCredential(credential);
 
-        // Compare entered current password with stored password
-        if (_currentPasswordController.text != currentStoredPassword) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Current password is incorrect.')),
-          );
-          return;
-        }
+        // Update password in Firebase Authentication
+        await user.updatePassword(_newPasswordController.text);
 
-        // Update password in Firestore
+        // Update password in Firestore (optional, you can remove this if not needed)
         await FirebaseFirestore.instance
             .collection('Users')
             .doc(user.uid)
             .update({'password': _newPasswordController.text});
 
-        // Password updated successfully
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Password updated successfully.')),
         );

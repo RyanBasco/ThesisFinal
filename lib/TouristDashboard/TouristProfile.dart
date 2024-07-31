@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 import 'package:testing/Authentication/TouristLogin.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
-import 'package:testing/TouristDashboard/Registration.dart';
+import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/UserProfile/Addfriends.dart';
 import 'package:testing/UserProfile/Changepassword.dart';

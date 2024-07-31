@@ -18,26 +18,21 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _login(BuildContext context) async {
-  if (!_formKey.currentState!.validate()) {
-    return;
-  }
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-  String email = _emailController.text.trim();
-  String password = _passwordController.text.trim();
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-  try {
-    // Query Firestore for a document with the matching email
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .where('email', isEqualTo: email)
-        .get();
+    try {
+      // Sign in with Firebase Authentication
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    if (querySnapshot.docs.isNotEmpty) {
-      DocumentSnapshot userDoc = querySnapshot.docs.first;
-      String storedPassword = userDoc['password'];
-
-      // Compare entered password with stored password
-      if (password == storedPassword) {
+      if (userCredential.user != null) {
         print("User authenticated successfully.");
 
         // Navigate to UserDashboard
@@ -46,32 +41,21 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           MaterialPageRoute(builder: (context) => UserdashboardPageState()),
         );
       } else {
-        // Incorrect password
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Failed to login: Invalid password."),
+            content: Text("Failed to login: Invalid email or password."),
           ),
         );
       }
-    } else {
-      // User not found in Firestore
+    } catch (e) {
+      print("Failed to login: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Failed to login: User not found."),
+          content: Text("Failed to login: $e"),
         ),
       );
     }
-  } catch (e) {
-    print("Failed to login: $e");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Failed to login: An unknown error occurred."),
-      ),
-    );
   }
-}
-
-
 
   @override
   Widget build(BuildContext context) {

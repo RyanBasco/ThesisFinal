@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
-import 'package:testing/TouristDashboard/Registration.dart';
+import 'package:testing/TouristDashboard/TouristProfile.dart';
+import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart'; // Adjust the import path as necessary
 
 class FriendsPage extends StatefulWidget {
@@ -15,11 +16,15 @@ class _FriendsPageState extends State<FriendsPage> {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   CollectionReference _usersCollection = FirebaseFirestore.instance.collection('Users');
   late String _currentUserEmail;
+  List<DocumentSnapshot> _allUsers = [];
+  List<DocumentSnapshot> _filteredUsers = [];
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _fetchCurrentUserEmail();
+    _searchController.addListener(_filterUsers);
   }
 
   void _fetchCurrentUserEmail() async {
@@ -28,7 +33,28 @@ class _FriendsPageState extends State<FriendsPage> {
       setState(() {
         _currentUserEmail = user.email!;
       });
+      _fetchUsers();
     }
+  }
+
+  void _fetchUsers() async {
+    QuerySnapshot snapshot = await _usersCollection.where('email', isNotEqualTo: _currentUserEmail).get();
+    setState(() {
+      _allUsers = snapshot.docs;
+      _filteredUsers = _allUsers;
+    });
+  }
+
+  void _filterUsers() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredUsers = _allUsers.where((user) {
+        String firstName = (user['first_name'] ?? '').toLowerCase();
+        String lastName = (user['last_name'] ?? '').toLowerCase();
+        String email = (user['email'] ?? '').toLowerCase();
+        return firstName.contains(query) || lastName.contains(query) || email.contains(query);
+      }).toList();
+    });
   }
 
   void _onItemTapped(int index) {
@@ -38,28 +64,66 @@ class _FriendsPageState extends State<FriendsPage> {
 
     switch (index) {
       case 0:
-        // Handle "Home"
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserdashboardPageState()),
         );
         break;
       case 1:
-        // Handle "My QR"
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => QRPage()),
         );
         break;
       case 2:
-        // Handle "Wallet"
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
+          MaterialPageRoute(builder: (context) => TouristprofilePage()),
         );
         break;
-      // case 3: // No need to navigate to the same page (Profile)
     }
+  }
+
+  void _sendFriendRequest(String recipientEmail) async {
+    QuerySnapshot senderSnapshot = await _usersCollection.where('email', isEqualTo: _currentUserEmail).get();
+
+    if (senderSnapshot.docs.isNotEmpty) {
+      var senderData = senderSnapshot.docs.first.data() as Map<String, dynamic>;
+      String senderFirstName = senderData['first_name'] ?? 'First Name';
+      String senderLastName = senderData['last_name'] ?? 'Last Name';
+
+      CollectionReference requestsCollection = FirebaseFirestore.instance.collection('FriendRequests');
+
+      await requestsCollection.add({
+        'senderEmail': _currentUserEmail,
+        'senderFirstName': senderFirstName,
+        'senderLastName': senderLastName,
+        'recipientEmail': recipientEmail,
+        'status': 'pending',
+        'timestamp': Timestamp.now(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Friend request sent to $recipientEmail'),
+        duration: Duration(seconds: 2),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('User details not found. Unable to send friend request.'),
+        duration: Duration(seconds: 2),
+      ));
+    }
+  }
+
+  void _deleteUser(DocumentSnapshot user) {
+    setState(() {
+      _filteredUsers.remove(user);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('User removed from view.'),
+      duration: Duration(seconds: 2),
+    ));
   }
 
   @override
@@ -113,70 +177,67 @@ class _FriendsPageState extends State<FriendsPage> {
                 ],
               ),
             ),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _usersCollection.where('email', isNotEqualTo: _currentUserEmail).snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-                  List<DocumentSnapshot> users = snapshot.data?.docs ?? [];
-                  if (users.isEmpty) {
-                    return Center(child: Text('No other users found.'));
-                  }
-
-                  return ListView.builder(
-                    itemCount: users.length,
-                    itemBuilder: (context, index) {
-                      var user = users[index];
-                      String firstName = user['first_name'] ?? 'First Name';
-                      String lastName = user['last_name'] ?? 'Last Name';
-                      String email = user['email'] ?? 'No Email';
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        child: Container(
-                          padding: EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('$firstName $lastName', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                              SizedBox(height: 5),
-                              Text(email, style: TextStyle(fontSize: 16)),
-                              SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      _sendFriendRequest(email); // Call method to send friend request
-                                    },
-                                    child: Text('Add Friend'),
-                                  ),
-                                  SizedBox(width: 10),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      // Implement delete logic here
-                                    },
-                                    child: Text('Delete'),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search by name or email',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.search),
+                ),
               ),
+            ),
+            Expanded(
+              child: _filteredUsers.isEmpty
+                  ? Center(child: Text('No users found.'))
+                  : ListView.builder(
+                      itemCount: _filteredUsers.length,
+                      itemBuilder: (context, index) {
+                        var user = _filteredUsers[index];
+                        String firstName = user['first_name'] ?? 'First Name';
+                        String lastName = user['last_name'] ?? 'Last Name';
+                        String email = user['email'] ?? 'No Email';
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Container(
+                            padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('$firstName $lastName', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                SizedBox(height: 5),
+                                Text(email, style: TextStyle(fontSize: 16)),
+                                SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        _sendFriendRequest(email);
+                                      },
+                                      child: Text('Add Friend'),
+                                    ),
+                                    SizedBox(width: 10),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        _deleteUser(user);
+                                      },
+                                      child: Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -215,40 +276,4 @@ class _FriendsPageState extends State<FriendsPage> {
       ),
     );
   }
-
-  void _sendFriendRequest(String recipientEmail) async {
-  // Fetch the current user's details from the 'Users' collection based on email
-  QuerySnapshot senderSnapshot = await _usersCollection.where('email', isEqualTo: _currentUserEmail).get();
-
-  if (senderSnapshot.docs.isNotEmpty) {
-    var senderData = senderSnapshot.docs.first.data() as Map<String, dynamic>;
-    String senderFirstName = senderData['first_name'] ?? 'First Name';
-    String senderLastName = senderData['last_name'] ?? 'Last Name';
-
-    // Assuming there's a collection 'FriendRequests' in Firestore
-    CollectionReference requestsCollection = FirebaseFirestore.instance.collection('FriendRequests');
-
-    // Prepare a document for the recipient user
-    await requestsCollection.add({
-      'senderEmail': _currentUserEmail,
-      'senderFirstName': senderFirstName,
-      'senderLastName': senderLastName,
-      'recipientEmail': recipientEmail,
-      'status': 'pending', // Initial status of the request
-      'timestamp': Timestamp.now(),
-    });
-
-    // Show a snackbar or toast to confirm the request was sent
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Friend request sent to $recipientEmail'),
-      duration: Duration(seconds: 2),
-    ));
-  } else {
-    // Handle the case where the user document does not exist
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('User details not found. Unable to send friend request.'),
-      duration: Duration(seconds: 2),
-    ));
-  }
-}
 }

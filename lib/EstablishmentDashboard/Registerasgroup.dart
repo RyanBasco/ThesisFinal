@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:testing/TouristDashboard/Registration.dart';
+import 'package:testing/Wallet/Wallet.dart';
 
 class EstablishmentdailyPage extends StatefulWidget {
   @override

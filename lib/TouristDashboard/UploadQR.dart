@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:testing/TouristDashboard/Registration.dart';
+import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:testing/EstablishmentDashboard/Establishmentdaily.dart';
-import 'package:testing/TouristDashboard/Registration.dart';
+import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 
 class EstablishmentDashboardPage extends StatefulWidget {

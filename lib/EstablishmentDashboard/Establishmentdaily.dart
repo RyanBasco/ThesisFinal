@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:testing/EstablishmentDashboard/Establishmentdaily.dart';
 import 'package:testing/EstablishmentDashboard/Establishmentdashboard.dart';
 import 'package:testing/EstablishmentDashboard/Qrview.dart';
-import 'package:testing/TouristDashboard/Registration.dart';
+import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 
 
