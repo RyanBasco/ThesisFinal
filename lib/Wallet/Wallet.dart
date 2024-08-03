@@ -160,7 +160,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               'Expenses',
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 18,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                               textAlign: TextAlign.left,
@@ -190,28 +190,88 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               ),
                             ),
                           ),
+                          SizedBox(height: 16),
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'THIS MONTH',
+                              style: TextStyle(
+                                color: Color(0xFF848484),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Container(
+                            width: 200,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Color(0xFF848484),
+                                width: 20, // Increased thickness
+                              ),
+                            ),
+                            child: Center(
+                              child: Container(
+                                width: 130,
+                                height: 130,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Food & Drinks',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '₱',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        // Handle button press
-                      },
-                      icon: Icon(Icons.insert_drive_file, color: Color(0xFF288F13)),
-                      label: Text(
-                        'Records',
-                        style: TextStyle(
-                          color: Color(0xFF288F13),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          // Handle button press
+                        },
+                        icon: Icon(Icons.insert_drive_file, color: Color(0xFF288F13)),
+                        label: Text(
+                          'Records',
+                          style: TextStyle(
+                            color: Color(0xFF288F13),
+                          ),
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: BorderSide(color: Color(0xFF288F13)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          side: BorderSide(color: Color(0xFF288F13)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                       ),
                     ),
                   ],
@@ -224,5 +284,3 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 }
-
-

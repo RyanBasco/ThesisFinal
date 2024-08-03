@@ -217,20 +217,38 @@ class _NotificationsState extends State<Notifications> {
   }
 
   void _acceptFriendRequest(String requestId) async {
+  try {
     // Update status of the friend request in Firestore
     await _firestore.collection('FriendRequests').doc(requestId).update({
       'status': 'accepted',
     });
 
     // Refresh the UI or handle any necessary state changes
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
+  } catch (e) {
+    // Handle the error
+    if (mounted) {
+      setState(() {});
+    }
   }
+}
 
-  void _deleteFriendRequest(String requestId) async {
+void _deleteFriendRequest(String requestId) async {
+  try {
     // Delete the friend request document from Firestore
     await _firestore.collection('FriendRequests').doc(requestId).delete();
 
     // Refresh the UI
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
+  } catch (e) {
+    // Handle the error
+    if (mounted) {
+      setState(() {});
+    }
   }
+}
 }

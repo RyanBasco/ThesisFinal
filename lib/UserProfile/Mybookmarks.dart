@@ -13,6 +13,7 @@ class BookmarkPage extends StatefulWidget {
 class _BookmarkPageState extends State<BookmarkPage> {
   List<Map<String, dynamic>> _bookmarkedItems = []; // Store bookmarked items
   int _selectedIndex = 3; // Track the selected index for bottom navigation
+  String _selectedCategory = ""; // Track the selected category
 
   @override
   void initState() {
@@ -21,30 +22,29 @@ class _BookmarkPageState extends State<BookmarkPage> {
   }
 
   void _fetchBookmarkedItems() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      var querySnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .collection('Bookmarks')
-          .get();
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        var querySnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('Bookmarks')
+            .get();
 
-      setState(() {
-        _bookmarkedItems = querySnapshot.docs
-            .map((doc) => {
-                  'id': doc.id, // Include document ID for deletion
-                  ...doc.data() as Map<String, dynamic>,
-                })
-            .toList();
-      });
-    } catch (error) {
-      print('Failed to fetch bookmarked items: $error');
-      // Handle error as needed
+        setState(() {
+          _bookmarkedItems = querySnapshot.docs
+              .map((doc) => {
+                    'id': doc.id, // Include document ID for deletion
+                    ...doc.data() as Map<String, dynamic>,
+                  })
+              .toList();
+        });
+      } catch (error) {
+        print('Failed to fetch bookmarked items: $error');
+        // Handle error as needed
+      }
     }
   }
-}
-
 
   void _showConfirmationDialog(String docId) {
     showDialog(
@@ -121,6 +121,47 @@ class _BookmarkPageState extends State<BookmarkPage> {
       case 3:
         break;
     }
+  }
+
+  void _onCategoryTap(String category) {
+    setState(() {
+      _selectedCategory = _selectedCategory == category ? "" : category;
+    });
+  }
+
+  Widget _buildCategoryBox(String category) {
+    bool isSelected = _selectedCategory == category;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onCategoryTap(category),
+        child: Container(
+          margin: const EdgeInsets.only(right: 15), // Increased space between boxes
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: isSelected ? Color(0xFF2C812A) : Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              category,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildBookmarkedItem(Map<String, dynamic> item) {
@@ -248,6 +289,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
           ),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
@@ -265,7 +307,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Bookmarks',
+                      'My Bookmarks',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -274,6 +316,31 @@ class _BookmarkPageState extends State<BookmarkPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: Text(
+                'Categories',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C812A),
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  _buildCategoryBox('Places'),
+                  SizedBox(width: 5), // Added space between boxes
+                  _buildCategoryBox('Food'),
+                  SizedBox(width: 5), // Added space between boxes
+                  _buildCategoryBox('Other'),
                 ],
               ),
             ),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:google_ml_kit/google_ml_kit.dart'; // Add this import
 import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'dart:io';
 
 class UploadQR extends StatefulWidget {
   @override
@@ -12,6 +14,7 @@ class UploadQR extends StatefulWidget {
 class _UploadQRState extends State<UploadQR> {
   int _selectedIndex = 1;
   FilePickerResult? _selectedFiles;
+  List<PlatformFile> _validFiles = []; // List to store only valid files
 
   void _onItemTapped(int index) {
     setState(() {
@@ -49,8 +52,70 @@ class _UploadQRState extends State<UploadQR> {
       allowMultiple: true,
     );
 
-    setState(() {});
+    if (_selectedFiles != null) {
+      List<PlatformFile> validFiles = [];
+      for (var file in _selectedFiles!.files) {
+        bool isValid = await _isValidQRCode(File(file.path!));
+        if (isValid) {
+          validFiles.add(file); // Add only valid files
+        } else {
+          _showInvalidQRCodeDialog();
+        }
+      }
+      setState(() {
+        _validFiles = validFiles;
+      });
+    }
   }
+
+  Future<bool> _isValidQRCode(File file) async {
+    try {
+      final inputImage = InputImage.fromFile(file);
+      final barcodeScanner = GoogleMlKit.vision.barcodeScanner();
+      final barcodes = await barcodeScanner.processImage(inputImage);
+
+      return barcodes.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void _showInvalidQRCodeDialog() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('QR Code is Not Valid'),
+        content: Text(
+          'Uploaded image is not a valid QR code image. Please upload a valid QR code image.',
+        ),
+        actions: [
+          Center(
+            child: SizedBox(
+              width: 200, // Increase the width as needed
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Color(0xFF288F13), // Button background color
+                ),
+                child: Text(
+                  'Okay',
+                  style: TextStyle(
+                    color: Colors.white, // Text color
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +291,7 @@ class _UploadQRState extends State<UploadQR> {
               ),
             ),
           ),
-          if (_selectedFiles != null)
+          if (_validFiles.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Column(
@@ -241,9 +306,9 @@ class _UploadQRState extends State<UploadQR> {
                   const SizedBox(height: 10),
                   ListView.separated(
                     shrinkWrap: true,
-                    itemCount: _selectedFiles?.files.length ?? 0,
+                    itemCount: _validFiles.length,
                     itemBuilder: (context, index) {
-                      return Text(_selectedFiles?.files[index].name ?? '',
+                      return Text(_validFiles[index].name,
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold));
                     },

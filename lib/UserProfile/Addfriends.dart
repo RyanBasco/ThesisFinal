@@ -46,16 +46,28 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 
   void _filterUsers() {
-    String query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredUsers = _allUsers.where((user) {
-        String firstName = (user['first_name'] ?? '').toLowerCase();
-        String lastName = (user['last_name'] ?? '').toLowerCase();
-        String email = (user['email'] ?? '').toLowerCase();
-        return firstName.contains(query) || lastName.contains(query) || email.contains(query);
-      }).toList();
-    });
-  }
+  String query = _searchController.text.toLowerCase().trim();
+  List<String> queryParts = query.split(' ');
+
+  setState(() {
+    _filteredUsers = _allUsers.where((user) {
+      String firstName = (user['first_name'] ?? '').toLowerCase();
+      String lastName = (user['last_name'] ?? '').toLowerCase();
+      String email = (user['email'] ?? '').toLowerCase();
+
+      bool matchesFirstName = queryParts.any((part) => firstName.contains(part));
+      bool matchesLastName = queryParts.any((part) => lastName.contains(part));
+      bool matchesEmail = email.contains(query);
+
+      // Check if the query is contained within either first name, last name, or email
+      return (queryParts.isEmpty ||
+              (matchesFirstName || matchesLastName)) ||
+             matchesEmail;
+    }).toList();
+  });
+}
+
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -166,7 +178,7 @@ class _FriendsPageState extends State<FriendsPage> {
                     ),
                   ),
                   Text(
-                    'Friends',
+                    'Add Friends',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -178,13 +190,31 @@ class _FriendsPageState extends State<FriendsPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Search by name or email',
-                  border: OutlineInputBorder(),
+                  hintText: 'Search...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30.0), // Oval shape with curved edges
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                   prefixIcon: Icon(Icons.search),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 24.0, top: 8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Quick Add',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
@@ -221,7 +251,10 @@ class _FriendsPageState extends State<FriendsPage> {
                                       onPressed: () {
                                         _sendFriendRequest(email);
                                       },
-                                      child: Text('Add Friend'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Color(0xCC288F13), // 80% opacity color
+                                      ),
+                                      child: Text('Add Friend', style: TextStyle(color: Colors.white)), // Change text color to white
                                     ),
                                     SizedBox(width: 10),
                                     ElevatedButton(
