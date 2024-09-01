@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Wallet/Categories.dart';
+import 'package:testing/Wallet/Tomatoredarc.dart';
 import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -128,25 +129,39 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 child: Column(
                   children: [
                     Container(
+                      width: double.infinity, // This will make the box take up the full width available
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Color(0xFF288F13)),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Center(
-                        child: Text(
-                          'Total Expenses',
-                          style: TextStyle(
-                            color: Color(0xFF288F13),
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                      child: Column(
+                        children: [
+                          Text(
+                            'Total Expenses',
+                            style: TextStyle(
+                              color: Color(0xFF288F13),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
+                          SizedBox(height: 8),
+                          Text(
+                            '₱ 4,745.00',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 0, 0, 0),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(height: 16),
                     Container(
+                      width: double.infinity, // Full width
+                      height: 420, // Increased height
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -206,45 +221,49 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           Container(
                             width: 200,
                             height: 200,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Color(0xFF848484),
-                                width: 20, // Increased thickness
-                              ),
-                            ),
-                            child: Center(
-                              child: Container(
-                                width: 130,
-                                height: 130,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Food & Drinks',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        '₱',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
+                            child: Stack(
+                              children: [
+                                // Combined arcs (Tomato red and light green)
+                                Positioned.fill(
+                                  child: CustomPaint(
+                                    painter: CombinedArcPainter(),
                                   ),
                                 ),
-                              ),
+                                // Inner white circle with text
+                                Center(
+                                  child: Container(
+                                    width: 130,
+                                    height: 130,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Food & Drinks',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            '₱',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
