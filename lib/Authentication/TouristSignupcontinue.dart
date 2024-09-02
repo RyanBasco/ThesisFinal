@@ -482,44 +482,44 @@ Widget build(BuildContext context) {
   }
 
   Future<void> saveUserData(String userId) async {
-    // Realtime Database reference
-    DatabaseReference userRef = FirebaseDatabase.instance.ref().child('UserID').child(userId);
+  // Realtime Database reference
+  DatabaseReference userRef = FirebaseDatabase.instance.ref().child('UserID').child(userId);
 
-    // Firestore reference
-    CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
+  // Firestore reference
+  CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
 
-    Map<String, dynamic> userData = {
-      'last_name': widget.lastName,
-      'first_name': widget.firstName,
-      'email': _emailController.text,
-      'nationality': widget.nationality,
-      'province': widget.province,
-      'city': widget.city,
-      'country': widget.country,
-      'birthday': widget.birthday,
-      'sex': widget.sex,
-      'password': _passwordController.text, // Store password securely (consider hashing in real apps)
-      'civil_status': widget.civilStatus,
-      'purpose_of_travel': _purposeController.text,
-      'contact_number': _contactNumberController.text, // Include contact number
-    };
+  Map<String, dynamic> userData = {
+    'last_name': widget.lastName,
+    'first_name': widget.firstName,
+    'email': _emailController.text,
+    'nationality': widget.nationality,
+    'province': widget.province,
+    'city': widget.city,
+    'country': widget.country,
+    'birthday': widget.birthday,
+    'sex': widget.sex,
+    'password': _passwordController.text, // Store password securely (consider hashing in real apps)
+    'civil_status': widget.civilStatus,
+    'purpose_of_travel': _purposeController.text,
+    'contact_number': _contactNumberController.text, // Include contact number
+  };
 
-    // Remove empty strings from the data before saving
-    userData.removeWhere((key, value) => value == '');
+  // Remove empty strings from the data before saving
+  userData.removeWhere((key, value) => value == '');
 
-    try {
-      // Save to Realtime Database
-      await userRef.set(userData);
+  try {
+    // Save to Realtime Database
+    await userRef.set(userData);
+    print('User data saved successfully to Realtime Database.');
 
-      // Save to Firestore
-      await usersCollection.doc(userId).set(userData);
-
-      print('User data saved successfully');
-    } catch (error) {
-      print('Failed to save user data: $error');
-      setState(() {
-        _passwordWarning = 'Failed to save user data: $error';
-      });
-    }
+    // Save to Firestore
+    await usersCollection.doc(userId).set(userData);
+    print('User data saved successfully to Firestore.');
+  } catch (error) {
+    print('Failed to save user data: $error');
+    setState(() {
+      _passwordWarning = 'Failed to save user data: $error';
+    });
   }
+}
 }
