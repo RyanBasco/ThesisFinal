@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:testing/Wallet/Wallet.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:testing/Wallet/Wallet.dart';
 
 class DirectionsPage extends StatefulWidget {
   @override
@@ -9,34 +12,19 @@ class DirectionsPage extends StatefulWidget {
 }
 
 class _DirectionsPageState extends State<DirectionsPage> {
-  int _selectedIndex = 1;
+  File? _selectedImage;
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 100,
+    );
 
-    switch (index) {
-      case 0:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-        );
-        break;
-      case 1:
-        break; // Current page
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
-        );
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => TouristprofilePage()),
-        );
-        break;
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
     }
   }
 
@@ -49,8 +37,31 @@ class _DirectionsPageState extends State<DirectionsPage> {
         ),
         child: BottomNavigationBar(
           backgroundColor: Colors.white,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+          currentIndex: 1,
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserdashboardPageState()),
+                );
+                break;
+              case 1:
+                break; // Current page
+              case 2:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegistrationPage()),
+                );
+                break;
+              case 3:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TouristprofilePage()),
+                );
+                break;
+            }
+          },
           selectedItemColor: Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
@@ -119,6 +130,32 @@ class _DirectionsPageState extends State<DirectionsPage> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              // Circle icon in the middle
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  margin: const EdgeInsets.all(20),
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey[300],
+                    image: _selectedImage != null
+                        ? DecorationImage(
+                            image: FileImage(_selectedImage!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: _selectedImage == null
+                      ? Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.grey[700],
+                        )
+                      : null,
                 ),
               ),
               // Add your content here

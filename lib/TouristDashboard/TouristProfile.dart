@@ -11,6 +11,8 @@ import 'package:testing/UserProfile/Changepassword.dart';
 import 'package:testing/UserProfile/Editprofile.dart';
 import 'package:testing/UserProfile/HelpCenter.dart';
 import 'package:testing/UserProfile/Mybookmarks.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class TouristprofilePage extends StatefulWidget {
   @override
@@ -22,12 +24,39 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
   String _lastName = '';
   String _userId = '';
   int _selectedIndex = 3; // Set initial index to 'Profile'
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
     _fetchUserData();
     _generateUserId();
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+        _saveProfileImage(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _saveProfileImage(String imagePath) async {
+    // Save the selected image path to Firestore
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .update({'profile_image': imagePath});
+      } catch (error) {
+        print('Failed to save profile image: $error');
+      }
+    }
   }
 
   void _fetchUserData() async {
@@ -204,33 +233,41 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                       Positioned(
                         top: 20,
                         left: 20,
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.black,
-                          ),
-                          child: Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 55,
+                        child: GestureDetector(
+                          onTap: _pickImage,
+                          child: CircleAvatar(
+                            backgroundColor: Colors.black,
+                            radius: 45,
+                            child: _profileImage == null
+                                ? Icon(Icons.person, color: Colors.white, size: 55)
+                                : ClipOval(
+                                    child: Image.file(
+                                      _profileImage!,
+                                      fit: BoxFit.cover,
+                                      width: 110,
+                                      height: 110,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
                       Positioned(
-                        top: 10, // Adjusted to align with the profile icon
-                        bottom: 490,
-                        left: 70, // Adjust position to bottom right
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.black,
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 20,
+                        top: 10,
+                        bottom: 470,
+                        left: 80,
+                        child: GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.black,
+                            ),
+                            child: Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ),

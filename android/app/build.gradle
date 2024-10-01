@@ -26,8 +26,8 @@ if (flutterVersionName == null) {
 
 android {
     namespace = "com.example.testing"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdkVersion 34 // Updated to 34
+    ndkVersion = flutter.ndkVersion // Keep this if flutter defines it correctly
 
     configurations {
         all*.exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
@@ -40,8 +40,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.testing"
-        minSdkVersion 23 // Set minSdkVersion to 23
-        targetSdk = flutter.targetSdkVersion
+        minSdkVersion 23 // Minimum SDK version
+        targetSdkVersion 34 // Updated to 34
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
@@ -49,6 +49,8 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }
@@ -60,9 +62,9 @@ flutter {
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.0.0')
     implementation 'com.google.firebase:firebase-database-ktx'
-    implementation 'com.google.firebase:firebase-auth' // Ensure this is included if using Firebase Authentication
+    implementation 'com.google.firebase:firebase-auth' // Firebase Authentication included
 
-    // Add or update OkHttp and Okio
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0' // Latest version
-    implementation 'com.squareup.okio:okio:3.2.0' // Latest version
+    // Add or update OkHttp and Okio libraries
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0' // Latest OkHttp version
+    implementation 'com.squareup.okio:okio:3.2.0' // Latest Okio version
 }
