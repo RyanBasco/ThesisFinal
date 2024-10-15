@@ -5,6 +5,8 @@ import 'package:firebase_database/firebase_database.dart'; // Import FirebaseDat
 import 'package:testing/Authentication/EstablishmentLogin.dart';
 
 class EstablishmentsignupPage extends StatefulWidget {
+  const EstablishmentsignupPage({super.key});
+
   @override
   _EstablishmentsignupPageState createState() => _EstablishmentsignupPageState();
 }
@@ -18,9 +20,9 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _emailExists = false;
+  final bool _emailExists = false;
 
-  List<String> _types = [
+  final List<String> _types = [
     'Hotels',
     'Hostels',
     'Vacation Rentals',
@@ -48,28 +50,28 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           color: Colors.white,
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 40),
+                const SizedBox(height: 40),
                 Row(
                   children: [
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: Icon(
+                      child: const Icon(
                         Icons.arrow_back,
                         color: Color(0xFF114F3A),
                         size: 30,
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Text(
+                    const SizedBox(width: 10),
+                    const Text(
                       'Sign Up to Establishment',
                       style: TextStyle(
                         color: Color(0xFF114F3A),
@@ -79,7 +81,7 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _buildInputContainer(
                   'Establishment Name',
                   _establishmentNameController,
@@ -91,7 +93,7 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                     return null;
                   },
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 _buildDropdownContainer(
                   hintText: 'Type',
                   icon: Icons.category,
@@ -100,7 +102,7 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                       value: value,
                       child: Text(
                         value,
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                       ),
                     );
                   }).toList(),
@@ -116,7 +118,7 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                     return null;
                   },
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 _buildInputContainer(
                   'Location',
                   _locationController,
@@ -128,9 +130,9 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                     return null;
                   },
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 _buildContactInfoContainer(),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 _buildInputContainer(
                   'Email',
                   _emailController,
@@ -145,7 +147,7 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                     return null;
                   },
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 _buildInputContainer(
                   'Password',
                   _passwordController,
@@ -160,7 +162,7 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                     return null;
                   },
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
@@ -169,13 +171,13 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF2C812A),
+                      backgroundColor: const Color(0xFF2C812A),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      minimumSize: Size(200, 50),
+                      minimumSize: const Size(200, 50),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Sign up',
                       style: TextStyle(
                         color: Colors.white,
@@ -184,11 +186,11 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       'Already have an account yet? ',
                       style: TextStyle(
                         color: Colors.black, // Change color to black
@@ -201,7 +203,7 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                           MaterialPageRoute(builder: (context) => EstablishmentLoginPage()),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         'Log In',
                         style: TextStyle(
                           color: Color(0xFF2D60F7),
@@ -222,10 +224,10 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
   Widget _buildInputContainer(String hintText, TextEditingController controller, {bool isPassword = false, IconData? icon, String? Function(String?)? validator}) {
     return Container(
       height: 60,
-      padding: EdgeInsets.symmetric(horizontal: 20), // Increase horizontal padding
-      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20), // Increase horizontal padding
+      margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: Color(0xFF5CA14E),
+        color: const Color(0xFF5CA14E),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -234,16 +236,16 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
             icon,
             color: Colors.white,
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Expanded(
             child: TextFormField(
               controller: controller,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               obscureText: isPassword && _obscurePassword,
               validator: validator,
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: TextStyle(color: Colors.white),
+                hintStyle: const TextStyle(color: Colors.white),
                 border: InputBorder.none,
               ),
             ),
@@ -268,10 +270,10 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
   Widget _buildDropdownContainer({required String hintText, required IconData icon, required List<DropdownMenuItem<String>> items, required Function(String?) onChanged, String? Function(String?)? validator}) {
     return Container(
       height: 60,
-      padding: EdgeInsets.symmetric(horizontal: 20), // Increase horizontal padding
-      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20), // Increase horizontal padding
+      margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: Color(0xFF5CA14E),
+        color: const Color(0xFF5CA14E),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -280,19 +282,19 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
             icon,
             color: Colors.white,
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Expanded(
             child: DropdownButtonHideUnderline(
               child: DropdownButtonFormField<String>(
                 hint: Text(
                   hintText,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
                 iconEnabledColor: Colors.white,
                 items: items,
                 onChanged: onChanged,
                 value: _selectedType,
-                style: TextStyle(color: Colors.white), // Set text color of selected value
+                style: const TextStyle(color: Colors.white), // Set text color of selected value
                 dropdownColor: Colors.grey[600], // Set background color of dropdown items
                 elevation: 16, // Increase elevation to make the dropdown appear above other widgets
                 isExpanded: true, // Allow the dropdown to take up the entire width
@@ -308,23 +310,23 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
   Widget _buildContactInfoContainer() {
     return Container(
       height: 60,
-      padding: EdgeInsets.symmetric(horizontal: 20), // Increase horizontal padding
-      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20), // Increase horizontal padding
+      margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: Color(0xFF5CA14E),
+        color: const Color(0xFF5CA14E),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.phone,
             color: Colors.white,
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Expanded(
             child: TextFormField(
               controller: _contactinfoController,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9]')), // Only allow numeric input
                 LengthLimitingTextInputFormatter(11), // Limit to 11 characters
@@ -336,7 +338,7 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
                 }
                 return null;
               },
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Contact Info',
                 hintStyle: TextStyle(color: Colors.white),
                 border: InputBorder.none,
@@ -370,13 +372,13 @@ class _EstablishmentsignupPageState extends State<EstablishmentsignupPage> {
 
       // Show a snackbar with the success message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Establishment registered successfully!'),
         ),
       );
 
       // Navigate back to the login page after a short delay
-      Future.delayed(Duration(seconds: 2), () {
+      Future.delayed(const Duration(seconds: 2), () {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => EstablishmentLoginPage()),

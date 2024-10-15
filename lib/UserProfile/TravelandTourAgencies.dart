@@ -5,6 +5,8 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class Travelandtouragencies extends StatefulWidget {
+  const Travelandtouragencies({super.key});
+
   @override
   _TravelandtouragenciesState createState() => _TravelandtouragenciesState();
 }
@@ -53,11 +55,11 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -80,7 +82,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -104,7 +106,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         radius: 24,
                         backgroundColor: Colors.white,
                         child: Icon(Icons.close, color: Colors.black, size: 30),
@@ -113,8 +115,8 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 30, bottom: 10),
+              const Padding(
+                padding: EdgeInsets.only(left: 30, bottom: 10),
                 child: Text(
                   'Travel and Tour\nAgencies',
                   style: TextStyle(
@@ -124,14 +126,14 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF83E6F4),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -140,7 +142,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                           bottomRight: Radius.circular(0),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'SAN MIGUEL, JORDAN',
                           style: TextStyle(
@@ -152,8 +154,8 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF288F13),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(0),
@@ -162,7 +164,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                           bottomRight: Radius.circular(15),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Column(
                           children: [
                             Text(
@@ -244,10 +246,10 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20), // Adding some space between the boxes
+                    const SizedBox(height: 20), // Adding some space between the boxes
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF83E6F4),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -256,7 +258,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                           bottomRight: Radius.circular(0),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'ZALDIVAR, BUENAVISTA',
                           style: TextStyle(
@@ -268,8 +270,8 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF288F13),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(0),
@@ -278,7 +280,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                           bottomRight: Radius.circular(15),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Column(
                           children: [
                             Text(
@@ -302,10 +304,10 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                         ),
                       ),
                     ),
-                     SizedBox(height: 20), // Adding some space between the boxes
+                     const SizedBox(height: 20), // Adding some space between the boxes
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF83E6F4),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -314,7 +316,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                           bottomRight: Radius.circular(0),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'HOSKYN, JORDAN',
                           style: TextStyle(
@@ -326,8 +328,8 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF288F13),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(0),
@@ -336,7 +338,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                           bottomRight: Radius.circular(15),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Column(
                           children: [
                             Text(
@@ -360,10 +362,10 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                         ),
                       ),
                     ),
-                  SizedBox(height: 20), // Adding some space between the boxes
+                  const SizedBox(height: 20), // Adding some space between the boxes
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF83E6F4),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -372,7 +374,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                           bottomRight: Radius.circular(0),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'BALCON MELLIZA, JORDAN',
                           style: TextStyle(
@@ -384,8 +386,8 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF288F13),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(0),
@@ -394,7 +396,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                           bottomRight: Radius.circular(15),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Column(
                           children: [
                             Text(
@@ -421,7 +423,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                   ],
                 ),
               ),
-              SizedBox(height: 70),
+              const SizedBox(height: 70),
               // Add more content here if needed
             ],
           ),

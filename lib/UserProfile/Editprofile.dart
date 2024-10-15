@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 
 
 class EditProfile extends StatefulWidget {
+  const EditProfile({super.key});
+
   @override
   _EditProfileState createState() => _EditProfileState();
 }
@@ -112,7 +114,7 @@ class _EditProfileState extends State<EditProfile> {
         if (querySnapshot.size > 0) {
           var userDoc = querySnapshot.docs.first.reference;
           var nameParts = _nameController.text.split(' ');
-          var firstName = nameParts.length > 0 ? nameParts[0] : '';
+          var firstName = nameParts.isNotEmpty ? nameParts[0] : '';
           var lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
           await userDoc.update({
@@ -131,7 +133,7 @@ class _EditProfileState extends State<EditProfile> {
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Profile updated successfully!')),
+            const SnackBar(content: Text('Profile updated successfully!')),
           );
         } else {
           print('User data not found for email: ${user.email}');
@@ -139,7 +141,7 @@ class _EditProfileState extends State<EditProfile> {
       } catch (error) {
         print('Failed to update user data: $error');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update profile. Please try again.')),
+          const SnackBar(content: Text('Failed to update profile. Please try again.')),
         );
       }
     }
@@ -170,13 +172,13 @@ class _EditProfileState extends State<EditProfile> {
       children: [
         Text(
           labelText,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Container(
           width: 260,
           height: 55,
@@ -194,7 +196,7 @@ class _EditProfileState extends State<EditProfile> {
               ),
               enabled: enabled,
               textAlign: TextAlign.center, // Centering the text
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: InputBorder.none,
               ),
               readOnly: onTap != null, // Make the text field read-only if onTap is provided
@@ -217,11 +219,11 @@ class _EditProfileState extends State<EditProfile> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -244,7 +246,7 @@ class _EditProfileState extends State<EditProfile> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -267,13 +269,13 @@ class _EditProfileState extends State<EditProfile> {
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 10),
+                    const Expanded(
                       child: Text(
                         'Profile',
                         style: TextStyle(
@@ -287,7 +289,7 @@ class _EditProfileState extends State<EditProfile> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Center(
                 child: Container(
                   width: 300,
@@ -300,7 +302,7 @@ class _EditProfileState extends State<EditProfile> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 5,
                         blurRadius: 7,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
@@ -310,12 +312,12 @@ class _EditProfileState extends State<EditProfile> {
                         top: 20,
                         left: 20,
                         child: Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.all(10),
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.black,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.person,
                             color: Colors.white,
                             size: 55,
@@ -327,19 +329,19 @@ class _EditProfileState extends State<EditProfile> {
                         bottom: 490,
                         left: 70, // Adjust position to bottom right
                         child: Container(
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.black,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.camera_alt,
                             color: Colors.white,
                             size: 20,
                           ),
                         ),
                       ),
-                     Positioned(
+                     const Positioned(
                         top: 60, // Adjusted for better positioning
                         right: 60,
                         child: Text(
@@ -398,7 +400,7 @@ class _EditProfileState extends State<EditProfile> {
                             ElevatedButton(
                               onPressed: _toggleEdit,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF2C812A), // Green color
+                                backgroundColor: const Color(0xFF2C812A), // Green color
                                 foregroundColor: Colors.white, // White text color
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -410,13 +412,13 @@ class _EditProfileState extends State<EditProfile> {
                               ElevatedButton(
                                 onPressed: _saveChanges,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFF2C812A), // Green color
+                                  backgroundColor: const Color(0xFF2C812A), // Green color
                                   foregroundColor: Colors.white, // White text color
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                child: Text('Save'),
+                                child: const Text('Save'),
                               ),
                           ],
                         ),

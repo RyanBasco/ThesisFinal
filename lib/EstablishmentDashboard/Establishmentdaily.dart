@@ -7,12 +7,14 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 
 
 class EstablishmentDailyPage extends StatefulWidget {
+  const EstablishmentDailyPage({super.key});
+
   @override
   _EstablishmentDailyPageState createState() => _EstablishmentDailyPageState();
 }
 
 class _EstablishmentDailyPageState extends State<EstablishmentDailyPage> {
-  int _selectedIndex = 0;
+  final int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
     if (index == 0) { // Check if "Home" option is tapped
@@ -43,12 +45,12 @@ class _EstablishmentDailyPageState extends State<EstablishmentDailyPage> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(150.0),
+        preferredSize: const Size.fromHeight(150.0),
         child: Stack(
           fit: StackFit.expand,
           children: [
             Container(
-              color: Color(0xFFDEE77A),
+              color: const Color(0xFFDEE77A),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -67,7 +69,7 @@ class _EstablishmentDailyPageState extends State<EstablishmentDailyPage> {
                         ),
                         Builder(
                           builder: (context) => IconButton(
-                            icon: Icon(Icons.menu, color: Colors.black),
+                            icon: const Icon(Icons.menu, color: Colors.black),
                             onPressed: () {
                               Scaffold.of(context).openEndDrawer();
                             },
@@ -86,22 +88,22 @@ class _EstablishmentDailyPageState extends State<EstablishmentDailyPage> {
         child: Column(
           children: [
             Container(
-              color: Color(0xFFDEE77A),
-              padding: EdgeInsets.only(top: 40.0, bottom: 23, left: 27.0, right: 50.0),
-              child: Column(
+              color: const Color(0xFFDEE77A),
+              padding: const EdgeInsets.only(top: 40.0, bottom: 23, left: 27.0, right: 50.0),
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 30.0), // Adjust this value to move the circle avatar
+                        padding: EdgeInsets.only(top: 30.0), // Adjust this value to move the circle avatar
                         child: CircleAvatar(
                           radius: 40.0,
                           backgroundImage: AssetImage('lib/assets/Vector.png'), // Replace with your image asset
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(left: 20.0),
+                        padding: EdgeInsets.only(left: 20.0),
                         child: Text(
                           'Juan Dela Cruz',
                           style: TextStyle(
@@ -122,15 +124,15 @@ class _EstablishmentDailyPageState extends State<EstablishmentDailyPage> {
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Color(0xFFDEE77A),
+          canvasColor: const Color(0xFFDEE77A),
         ),
         child: BottomNavigationBar(
-          backgroundColor: Color(0xFFDEE77A),
+          backgroundColor: const Color(0xFFDEE77A),
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
-          unselectedItemColor: Color(0xFF2C812A),
-          items: [
+          selectedItemColor: const Color(0xFF2C812A),
+          unselectedItemColor: const Color(0xFF2C812A),
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -159,7 +161,7 @@ class _EstablishmentDailyPageState extends State<EstablishmentDailyPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Add a button to open the QR verification scanner
             ElevatedButton(
               onPressed: () {
@@ -168,10 +170,10 @@ class _EstablishmentDailyPageState extends State<EstablishmentDailyPage> {
                   MaterialPageRoute(builder: (context) => QRViewExample()),
                 );
               },
-              child: Text('QR Verification Scanner'),
+              child: const Text('QR Verification Scanner'),
             ),
             // Replace the content with your registration form or any other content for this page
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Add your registration form widgets or other content here
           ],
         ),

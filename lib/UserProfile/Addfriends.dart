@@ -7,18 +7,20 @@ import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart'; // Adjust the import path as necessary
 
 class FriendsPage extends StatefulWidget {
+  const FriendsPage({super.key});
+
   @override
   _FriendsPageState createState() => _FriendsPageState();
 }
 
 class _FriendsPageState extends State<FriendsPage> {
   int _selectedIndex = 3;
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  CollectionReference _usersCollection = FirebaseFirestore.instance.collection('Users');
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final CollectionReference _usersCollection = FirebaseFirestore.instance.collection('Users');
   late String _currentUserEmail;
   List<DocumentSnapshot> _allUsers = [];
   List<DocumentSnapshot> _filteredUsers = [];
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -117,10 +119,10 @@ class _FriendsPageState extends State<FriendsPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Friend request sent to $recipientEmail'),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('User details not found. Unable to send friend request.'),
         duration: Duration(seconds: 2),
       ));
@@ -132,7 +134,7 @@ class _FriendsPageState extends State<FriendsPage> {
       _filteredUsers.remove(user);
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('User removed from view.'),
       duration: Duration(seconds: 2),
     ));
@@ -144,7 +146,7 @@ class _FriendsPageState extends State<FriendsPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -166,18 +168,18 @@ class _FriendsPageState extends State<FriendsPage> {
                   Container(
                     width: 45,
                     height: 45,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white,
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.arrow_back, color: Colors.black, size: 20),
+                      icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
                       onPressed: () {
                         Navigator.pop(context);
                       },
                     ),
                   ),
-                  Text(
+                  const Text(
                     'Add Friends',
                     style: TextStyle(
                       fontSize: 24,
@@ -185,7 +187,7 @@ class _FriendsPageState extends State<FriendsPage> {
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(width: 35), // This is to keep the title centered
+                  const SizedBox(width: 35), // This is to keep the title centered
                 ],
               ),
             ),
@@ -200,12 +202,12 @@ class _FriendsPageState extends State<FriendsPage> {
                   ),
                   filled: true,
                   fillColor: Colors.white,
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 24.0, top: 8.0),
+            const Padding(
+              padding: EdgeInsets.only(left: 24.0, top: 8.0),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -220,7 +222,7 @@ class _FriendsPageState extends State<FriendsPage> {
             ),
             Expanded(
               child: _filteredUsers.isEmpty
-                  ? Center(child: Text('No users found.'))
+                  ? const Center(child: Text('No users found.'))
                   : ListView.builder(
                       itemCount: _filteredUsers.length,
                       itemBuilder: (context, index) {
@@ -232,7 +234,7 @@ class _FriendsPageState extends State<FriendsPage> {
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                           child: Container(
-                            padding: EdgeInsets.all(15),
+                            padding: const EdgeInsets.all(15),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
@@ -240,10 +242,10 @@ class _FriendsPageState extends State<FriendsPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('$firstName $lastName', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                SizedBox(height: 5),
-                                Text(email, style: TextStyle(fontSize: 16)),
-                                SizedBox(height: 10),
+                                Text('$firstName $lastName', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 5),
+                                Text(email, style: const TextStyle(fontSize: 16)),
+                                const SizedBox(height: 10),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
@@ -252,16 +254,16 @@ class _FriendsPageState extends State<FriendsPage> {
                                         _sendFriendRequest(email);
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Color(0xCC288F13), // 80% opacity color
+                                        backgroundColor: const Color(0xCC288F13), // 80% opacity color
                                       ),
-                                      child: Text('Add Friend', style: TextStyle(color: Colors.white)), // Change text color to white
+                                      child: const Text('Add Friend', style: TextStyle(color: Colors.white)), // Change text color to white
                                     ),
-                                    SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                     ElevatedButton(
                                       onPressed: () {
                                         _deleteUser(user);
                                       },
-                                      child: Text('Delete'),
+                                      child: const Text('Delete'),
                                     ),
                                   ],
                                 ),
@@ -283,11 +285,11 @@ class _FriendsPageState extends State<FriendsPage> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',

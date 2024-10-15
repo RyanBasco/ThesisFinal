@@ -6,6 +6,8 @@ import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class ChangePasswordPage extends StatefulWidget {
+  const ChangePasswordPage({super.key});
+
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
 }
@@ -44,9 +46,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
   }
 
-  TextEditingController _currentPasswordController = TextEditingController();
-  TextEditingController _newPasswordController = TextEditingController();
-  TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
@@ -72,7 +74,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     // Ensure new password and confirm password match
     if (_newPasswordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Passwords do not match.')),
+        const SnackBar(content: Text('Passwords do not match.')),
       );
       return;
     }
@@ -98,7 +100,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             .update({'password': _newPasswordController.text});
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password updated successfully.')),
+          const SnackBar(content: Text('Password updated successfully.')),
         );
 
         // Clear text fields
@@ -108,12 +110,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       } catch (error) {
         print('Failed to update password: $error');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update password. Please try again.')),
+          const SnackBar(content: Text('Failed to update password. Please try again.')),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User not found.')),
+        const SnackBar(content: Text('User not found.')),
       );
     }
   }
@@ -126,11 +128,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: Color(0xFF2C812A),
+        selectedItemColor: const Color(0xFF2C812A),
         unselectedItemColor: Colors.black,
         showSelectedLabels: true,
         showUnselectedLabels: true,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
@@ -152,7 +154,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -176,13 +178,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 10),
+                    const Expanded(
                       child: Text(
                         'Change Password',
                         style: TextStyle(
@@ -196,15 +198,15 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   ],
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Colors.black26,
                         blurRadius: 10,
@@ -215,7 +217,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
+                      const Text(
                         'Change Password',
                         style: TextStyle(
                           fontSize: 18,
@@ -224,7 +226,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       _buildInputField(
                         labelText: 'Current Password',
                         controller: _currentPasswordController,
@@ -233,7 +235,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           _togglePasswordVisibility('current');
                         },
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       _buildInputField(
                         labelText: 'New Password',
                         controller: _newPasswordController,
@@ -242,7 +244,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           _togglePasswordVisibility('new');
                         },
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       _buildInputField(
                         labelText: 'Confirm Password',
                         controller: _confirmPasswordController,
@@ -251,16 +253,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           _togglePasswordVisibility('confirm');
                         },
                       ),
-                      SizedBox(height: 30),
+                      const SizedBox(height: 30),
                       ElevatedButton(
                         onPressed: _changePassword,
-                        child: Text('Save Password'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
+                        child: Text('Save Password'),
                       ),
                     ],
                   ),
@@ -284,13 +286,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       children: [
         Text(
           labelText,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
             color: Colors.grey[200],
@@ -300,7 +302,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             controller: controller,
             obscureText: obscureText,
             decoration: InputDecoration(
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               border: InputBorder.none,
               suffixIcon: IconButton(
                 icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),

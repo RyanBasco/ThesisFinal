@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class TermsAndConditions extends StatefulWidget {
+  const TermsAndConditions({super.key});
+
   @override
   _TermsAndConditionsState createState() => _TermsAndConditionsState();
 }
@@ -23,7 +25,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -41,21 +43,21 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: Icon(
+                      child: const Icon(
                         Icons.arrow_back,
                         color: Color(0xFF114F3A),
                         size: 30,
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Text(
+                    const SizedBox(width: 10),
+                    const Text(
                       'Sign Up',
                       style: TextStyle(
                         color: Color(0xFF114F3A),
@@ -66,8 +68,8 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   'Privacy Policy',
                   style: TextStyle(
                     color: Colors.black,
@@ -76,8 +78,8 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                SizedBox(height: 10),
-                Text(
+                const SizedBox(height: 10),
+                const Text(
                   'We value your privacy and are committed to protecting your personal data. This Privacy Policy outlines how we collect, use, and protect your information when you use the [APP NAME].',
                   style: TextStyle(
                     color: Colors.black,
@@ -85,7 +87,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 buildExpandableSection(
                   title: 'Information We Collect',
                   isExpanded: _isInformationExpanded,
@@ -94,7 +96,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isInformationExpanded = !_isInformationExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -117,7 +119,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 7.5),
+                const SizedBox(height: 7.5),
                 buildExpandableSection(
                   title: 'How We Use Your Information',
                   isExpanded: _isUsageExpanded,
@@ -126,7 +128,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isUsageExpanded = !_isUsageExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -149,7 +151,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 7.5),
+                const SizedBox(height: 7.5),
                 buildExpandableSection(
                   title: 'Data Sharing and Disclosure',
                   isExpanded: _isDataSharingExpanded,
@@ -158,7 +160,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isDataSharingExpanded = !_isDataSharingExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -181,7 +183,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 7.5),
+                const SizedBox(height: 7.5),
                 buildExpandableSection(
                   title: 'Data Security',
                   isExpanded: _isSecurityExpanded,
@@ -190,7 +192,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isSecurityExpanded = !_isSecurityExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -213,7 +215,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 7.5),
+                const SizedBox(height: 7.5),
                 buildExpandableSection(
                   title: 'Your Rights',
                   isExpanded: _isRightsExpanded,
@@ -222,7 +224,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isRightsExpanded = !_isRightsExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -245,7 +247,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 7.5),
+                const SizedBox(height: 7.5),
                 buildExpandableSection(
                   title: 'Changes to This Privacy Policy',
                   isExpanded: _isChangesExpanded,
@@ -254,7 +256,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isChangesExpanded = !_isChangesExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -277,8 +279,8 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   'Terms and Conditions',
                   style: TextStyle(
                     color: Colors.black,
@@ -287,8 +289,8 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                SizedBox(height: 10),
-                Text(
+                const SizedBox(height: 10),
+                const Text(
                   'Welcome to the [APP NAME]. By accessing and using the app, you agree to comply with and be bound by these Terms and Conditions.',
                   style: TextStyle(
                     color: Colors.black,
@@ -296,7 +298,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 buildExpandableSection(
                   title: 'Use of the App',
                   isExpanded: _isUseAppExpanded,
@@ -305,7 +307,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isUseAppExpanded = !_isUseAppExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -328,7 +330,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 7.5),
+                const SizedBox(height: 7.5),
                 buildExpandableSection(
                   title: 'User Responsibilities',
                   isExpanded: _isUserResponsibilitiesExpanded,
@@ -337,7 +339,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isUserResponsibilitiesExpanded = !_isUserResponsibilitiesExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -360,7 +362,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 7.5),
+                const SizedBox(height: 7.5),
                 buildExpandableSection(
                   title: 'QR Code Use',
                   isExpanded: _isQRCodeUseExpanded,
@@ -369,7 +371,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isQRCodeUseExpanded = !_isQRCodeUseExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -392,7 +394,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 7.5),
+                const SizedBox(height: 7.5),
                 buildExpandableSection(
                   title: 'Intellectual Property',
                   isExpanded: _isIntellectualPropertyExpanded,
@@ -401,7 +403,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isIntellectualPropertyExpanded = !_isIntellectualPropertyExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -424,7 +426,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     ],
                   ),
                 ),
-                SizedBox(height: 7.5),
+                const SizedBox(height: 7.5),
                 buildExpandableSection(
                   title: 'No Warranty',
                   isExpanded: _isNoWarrantyExpanded,
@@ -433,7 +435,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isNoWarrantyExpanded = !_isNoWarrantyExpanded;
                     });
                   },
-                  content: Column(
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -470,17 +472,17 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           content,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 14.5,
             fontFamily: 'Poppins',
@@ -501,20 +503,20 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Container(
-          color: Color(0xFF288F13), // Bar color
+          color: const Color(0xFF288F13), // Bar color
           child: Column(
             children: [
               GestureDetector(
                 onTap: onPressed,
                 child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
                         child: Text(
                           title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -531,9 +533,9 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                 ),
               ),
               AnimatedContainer(
-                duration: Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 300),
                 height: isExpanded ? null : 0,
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: content,
               ),
             ],

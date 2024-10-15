@@ -4,6 +4,8 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class CategoriesPage extends StatefulWidget {
+  const CategoriesPage({super.key});
+
   @override
   _CategoriesPageState createState() => _CategoriesPageState();
 }
@@ -51,11 +53,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -78,7 +80,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -101,13 +103,13 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 10),
+                    const Expanded(
                       child: Text(
                         'Categories',
                         style: TextStyle(
@@ -121,9 +123,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
+              const SizedBox(height: 20),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -136,7 +138,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Column(
                 children: [
                   Container(
@@ -144,12 +146,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      border: Border.all(color: Color(0xFFA7A7A7)),
+                      border: Border.all(color: const Color(0xFFA7A7A7)),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          padding: EdgeInsets.symmetric(horizontal: 15),
                           child: CircleAvatar(
                             backgroundColor: Color(0xFFFB0000),
                             child: Icon(Icons.local_dining, color: Colors.white),
@@ -170,12 +172,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      border: Border.all(color: Color(0xFFA7A7A7)),
+                      border: Border.all(color: const Color(0xFFA7A7A7)),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          padding: EdgeInsets.symmetric(horizontal: 15),
                           child: CircleAvatar(
                             backgroundColor: Color(0xFF6FCBFF),
                             child: Icon(Icons.card_giftcard, color: Colors.white),
@@ -196,12 +198,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      border: Border.all(color: Color(0xFFA7A7A7)),
+                      border: Border.all(color: const Color(0xFFA7A7A7)),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          padding: EdgeInsets.symmetric(horizontal: 15),
                           child: CircleAvatar(
                             backgroundColor: Color(0xFFFFA51E),
                             child: Icon(Icons.business, color: Colors.white),

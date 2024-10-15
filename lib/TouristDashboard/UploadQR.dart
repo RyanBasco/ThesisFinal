@@ -7,6 +7,8 @@ import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'dart:io';
 
 class UploadQR extends StatefulWidget {
+  const UploadQR({super.key});
+
   @override
   _UploadQRState createState() => _UploadQRState();
 }
@@ -85,8 +87,8 @@ class _UploadQRState extends State<UploadQR> {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('QR Code is Not Valid'),
-        content: Text(
+        title: const Text('QR Code is Not Valid'),
+        content: const Text(
           'Uploaded image is not a valid QR code image. Please upload a valid QR code image.',
         ),
         actions: [
@@ -98,9 +100,9 @@ class _UploadQRState extends State<UploadQR> {
                   Navigator.of(context).pop(); // Close the dialog
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: Color(0xFF288F13), // Button background color
+                  backgroundColor: const Color(0xFF288F13), // Button background color
                 ),
-                child: Text(
+                child: const Text(
                   'Okay',
                   style: TextStyle(
                     color: Colors.white, // Text color
@@ -128,11 +130,11 @@ class _UploadQRState extends State<UploadQR> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -155,7 +157,7 @@ class _UploadQRState extends State<UploadQR> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -178,13 +180,13 @@ class _UploadQRState extends State<UploadQR> {
                     onTap: () {
                       Navigator.pop(context); // Navigate back
                     },
-                    child: CircleAvatar(
+                    child: const CircleAvatar(
                       backgroundColor: Colors.white,
                       child: Icon(Icons.arrow_back, color: Colors.black),
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Expanded(
+                  const SizedBox(width: 10),
+                  const Expanded(
                     child: Text(
                       'Upload QR',
                       style: TextStyle(
@@ -198,7 +200,7 @@ class _UploadQRState extends State<UploadQR> {
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: Center(
                 child: _buildUploadContainer(),
@@ -213,8 +215,8 @@ class _UploadQRState extends State<UploadQR> {
   Widget _buildUploadContainer() {
     return Container(
       width: 350,
-      padding: EdgeInsets.all(20),
-      margin: EdgeInsets.only(top: 10, bottom: 60), // Adjust top margin as needed
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(top: 10, bottom: 60), // Adjust top margin as needed
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -223,7 +225,7 @@ class _UploadQRState extends State<UploadQR> {
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 7),
+            offset: const Offset(0, 7),
           ),
         ],
       ),
@@ -231,7 +233,7 @@ class _UploadQRState extends State<UploadQR> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
+          const Text(
             'Upload your files',
             style: TextStyle(
               fontSize: 18,
@@ -240,7 +242,7 @@ class _UploadQRState extends State<UploadQR> {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Container(
             width: 310,
             height: 200,
@@ -256,7 +258,7 @@ class _UploadQRState extends State<UploadQR> {
               ),
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
             'Supported file types: PNG, JPG, GIF (Max 5MB)',
             style: TextStyle(
@@ -265,21 +267,21 @@ class _UploadQRState extends State<UploadQR> {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Center(
             child: SizedBox(
               width: 150, // Adjust the width as needed
               child: ElevatedButton(
                 onPressed: _pickFiles,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF288F13), // Button background color
+                  backgroundColor: const Color(0xFF288F13), // Button background color
                   foregroundColor: Colors.white, // Text color
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15), // Rounded corners
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 13),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 13),
                   child: Text(
                     'UPLOAD',
                     style: TextStyle(

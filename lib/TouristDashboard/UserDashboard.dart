@@ -9,6 +9,8 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 
 
 class UserdashboardPageState extends StatefulWidget {
+  const UserdashboardPageState({super.key});
+
   @override
   _UserdashboardPageState createState() => _UserdashboardPageState();
 }
@@ -17,10 +19,10 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   int _selectedIndex = 0;
   String _firstName = '';
   String _lastName = '';
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   int _selectedBarIndex = -1; // Track selected bar index, -1 for none
   int _selectedCategoryIndex = -1; // Track selected category index, -1 for none
-  List<bool> _isBookmarked = [false, false, false, false, false]; // Track bookmark states
+  final List<bool> _isBookmarked = [false, false, false, false, false]; // Track bookmark states
 
   @override
   void initState() {
@@ -173,11 +175,11 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -200,7 +202,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -217,7 +219,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -225,14 +227,14 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   children: [
                     Text(
                       'Welcome, $_firstName $_lastName',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.notifications, size: 30),
+                      icon: const Icon(Icons.notifications, size: 30),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -246,7 +248,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   height: 50,
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -256,18 +258,18 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.search, color: Colors.black),
-                      SizedBox(width: 10),
+                      const Icon(Icons.search, color: Colors.black),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: TextField(
                           controller: _searchController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'Search...',
                             hintStyle: TextStyle(color: Colors.grey),
                             border: InputBorder.none,
@@ -278,8 +280,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0, top: 10),
+              const Padding(
+                padding: EdgeInsets.only(left: 20.0, top: 10),
                 child: Text(
                   "Let's Explore",
                   style: TextStyle(
@@ -310,8 +312,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0, top: 10),
+              const Padding(
+                padding: EdgeInsets.only(left: 20.0, top: 10),
                 child: Text(
                   'Categories',
                   style: TextStyle(
@@ -343,11 +345,11 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 10), // Adjust spacing as needed
+                    const SizedBox(height: 10), // Adjust spacing as needed
                     // Souvenir Shop with reduced width
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0), // Adjust padding as needed
-                      child: Container(
+                      child: SizedBox(
                         width: 200, // Set a specific width for the Souvenir Shop container
                         child: _buildCategoryBar('Souvenir Shop', 2),
                       ),
@@ -356,9 +358,9 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                 ),
               ),
 
-             SizedBox(height: 20), // Added space before Search Results
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+             const SizedBox(height: 20), // Added space before Search Results
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     'Search Results',
                     style: TextStyle(
@@ -368,20 +370,20 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                     ),
                   ),
                 ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _buildResultBoxWithImage('JL Pension House', 'assets/Pension.png', true, 0),
                   _buildResultBoxWithImage('JM Backpackers Hotel', 'assets/windmill.png', false, 1),
-                  SizedBox(height: 10), // Added space
+                  const SizedBox(height: 10), // Added space
                 Column(
                   children: [
                     _buildResultBoxWithImage('Mancol Oasis Lodge', 'assets/Mancol.png', false, 2),
-                    SizedBox(height: 10), // Space between containers
+                    const SizedBox(height: 10), // Space between containers
                     _buildResultBoxWithImage('Sidewalkers Pension House', 'assets/Sidewalkers.png', false, 3),
-                    SizedBox(height: 10), // Space between containers
+                    const SizedBox(height: 10), // Space between containers
                     _buildResultBoxWithImage('Zemkamps Chalet', 'assets/Tree.png', false, 4),
                   ],
                 ),
-                SizedBox(height: 20), // Added space after the last container
+                const SizedBox(height: 20), // Added space after the last container
             ],
         ),
         )
@@ -393,16 +395,16 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   return GestureDetector(
     onTap: () => _onBarSelected(index),
     child: Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: _selectedBarIndex == index ? Color(0xFF288F13) : Colors.white,
+        color: _selectedBarIndex == index ? const Color(0xFF288F13) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -424,16 +426,16 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   return GestureDetector(
     onTap: () => _onCategorySelected(index),
     child: Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: _selectedCategoryIndex == index ? Color(0xFF288F13) : Colors.white,
+        color: _selectedCategoryIndex == index ? const Color(0xFF288F13) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -466,7 +468,7 @@ Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirs
                 color: Colors.grey.withOpacity(0.5),
                 spreadRadius: 2,
                 blurRadius: 5,
-                offset: Offset(0, 3),
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -476,7 +478,7 @@ Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirs
                 flex: 2,
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(20),
                       bottomLeft: Radius.circular(20),
                     ),
@@ -487,11 +489,11 @@ Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirs
                   ),
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 flex: 3,
                 child: Container(
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -504,7 +506,7 @@ Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirs
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: isFirstBox ? Color(0xFF288F13) : Colors.green,
+                                color: isFirstBox ? const Color(0xFF288F13) : Colors.green,
                               ),
                               maxLines: 2, // Allow text to wrap to the next line
                               overflow: TextOverflow.ellipsis, // Display ellipsis if text overflows
@@ -522,8 +524,8 @@ Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirs
                           ),
                         ],
                       ),
-                      SizedBox(height: 5),
-                      Row(
+                      const SizedBox(height: 5),
+                      const Row(
                         children: [
                           Icon(Icons.location_on, color: Colors.green),
                           SizedBox(width: 5),
@@ -559,14 +561,14 @@ Widget _buildResultBoxWithImage(String resultText, String imagePath, bool isFirs
               width: 30,
               height: 30,
               decoration: BoxDecoration(
-                border: Border.all(color: Color(0xFF2C812A), width: 2),
+                border: Border.all(color: const Color(0xFF2C812A), width: 2),
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(5),
               ),
               child: Center(
                 child: Transform.rotate(
                   angle: 330 * 3.14159 / 180, // Rotate 45 degrees
-                  child: Icon(
+                  child: const Icon(
                     Icons.arrow_forward,
                     color: Color(0xFF2C812A),
                     size: 20,

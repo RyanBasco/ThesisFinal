@@ -7,6 +7,8 @@ import 'package:testing/TouristDashboard/UploadQR.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class QRPage extends StatefulWidget {
+  const QRPage({super.key});
+
   @override
   _QRPageState createState() => _QRPageState();
 }
@@ -63,11 +65,11 @@ class _QRPageState extends State<QRPage> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -90,7 +92,7 @@ class _QRPageState extends State<QRPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -113,13 +115,13 @@ class _QRPageState extends State<QRPage> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 10),
+                    const Expanded(
                       child: Text(
                         'QR Reader',
                         style: TextStyle(
@@ -133,7 +135,7 @@ class _QRPageState extends State<QRPage> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _buildFirstInfoContainer(),
               _buildSecondInfoContainer(),
               _buildThirdInfoContainer(),
@@ -155,7 +157,7 @@ class _QRPageState extends State<QRPage> {
       child: Container(
         height: 250,
         width: 280,
-        margin: EdgeInsets.symmetric(vertical: 10),
+        margin: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(9), // Curved edges
@@ -164,7 +166,7 @@ class _QRPageState extends State<QRPage> {
               color: Colors.grey.withOpacity(0.5), // Shadow color
               spreadRadius: 2, // Spread radius
               blurRadius: 5, // Blur radius
-              offset: Offset(0, 7), // Shadow offset
+              offset: const Offset(0, 7), // Shadow offset
             ),
           ],
         ),
@@ -176,8 +178,8 @@ class _QRPageState extends State<QRPage> {
               width: 200, // Adjust size as needed
               height: 200,
             ),
-            SizedBox(height: 5),
-            Text(
+            const SizedBox(height: 5),
+            const Text(
               'Scan QR',
               style: TextStyle(
                 fontSize: 18,
@@ -202,7 +204,7 @@ class _QRPageState extends State<QRPage> {
     child: Container(
       height: 250,
       width: 280,
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(9), // Curved edges
@@ -211,7 +213,7 @@ class _QRPageState extends State<QRPage> {
             color: Colors.grey.withOpacity(0.5), // Shadow color
             spreadRadius: 2, // Spread radius
             blurRadius: 5, // Blur radius
-            offset: Offset(0, 7), // Shadow offset
+            offset: const Offset(0, 7), // Shadow offset
           ),
         ],
       ),
@@ -223,8 +225,8 @@ class _QRPageState extends State<QRPage> {
             width: 150, // Adjust size as needed
             height: 150,
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 10),
+          const Text(
             'Upload QR',
             style: TextStyle(
               fontSize: 18,
@@ -249,7 +251,7 @@ Widget _buildThirdInfoContainer() {
     child: Container(
       height: 250,
       width: 280,
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(9), // Curved edges
@@ -258,7 +260,7 @@ Widget _buildThirdInfoContainer() {
             color: Colors.grey.withOpacity(0.5), // Shadow color
             spreadRadius: 2, // Spread radius
             blurRadius: 5, // Blur radius
-            offset: Offset(0, 7), // Shadow offset
+            offset: const Offset(0, 7), // Shadow offset
           ),
         ],
       ),
@@ -270,8 +272,8 @@ Widget _buildThirdInfoContainer() {
             width: 150, // Adjust size as needed
             height: 150,
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 10),
+          const Text(
             'Generate QR',
             style: TextStyle(
               fontSize: 18,

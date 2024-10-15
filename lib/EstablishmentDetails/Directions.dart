@@ -7,6 +7,8 @@ import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/Wallet/Wallet.dart';
 
 class DirectionsPage extends StatefulWidget {
+  const DirectionsPage({super.key});
+
   @override
   _DirectionsPageState createState() => _DirectionsPageState();
 }
@@ -62,11 +64,11 @@ class _DirectionsPageState extends State<DirectionsPage> {
                 break;
             }
           },
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -89,7 +91,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -112,13 +114,13 @@ class _DirectionsPageState extends State<DirectionsPage> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 10),
+                    const Expanded(
                       child: Text(
                         'Directions',
                         style: TextStyle(

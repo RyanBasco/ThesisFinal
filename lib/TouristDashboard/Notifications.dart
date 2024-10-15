@@ -7,13 +7,15 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class Notifications extends StatefulWidget {
+  const Notifications({super.key});
+
   @override
   _NotificationsState createState() => _NotificationsState();
 }
 
 class _NotificationsState extends State<Notifications> {
   int _selectedIndex = 0;
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late String _currentUserEmail;
 
   @override
@@ -70,11 +72,11 @@ class _NotificationsState extends State<Notifications> {
         backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: Color(0xFF2C812A),
+        selectedItemColor: const Color(0xFF2C812A),
         unselectedItemColor: Colors.black,
         showSelectedLabels: true,
         showUnselectedLabels: true,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
@@ -96,7 +98,7 @@ class _NotificationsState extends State<Notifications> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -120,13 +122,13 @@ class _NotificationsState extends State<Notifications> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 10),
+                    const Expanded(
                       child: Text(
                         'Notifications',
                         style: TextStyle(
@@ -140,19 +142,19 @@ class _NotificationsState extends State<Notifications> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               StreamBuilder<QuerySnapshot>(
                 stream: _firestore.collection('FriendRequests').where('recipientEmail', isEqualTo: _currentUserEmail).snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   }
                   List<DocumentSnapshot> requests = snapshot.data?.docs ?? [];
                   if (requests.isEmpty) {
-                    return Center(child: Text('No friend requests.'));
+                    return const Center(child: Text('No friend requests.'));
                   }
 
                   return Column(
@@ -166,7 +168,7 @@ class _NotificationsState extends State<Notifications> {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                         child: Container(
-                          padding: EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(15),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
@@ -178,10 +180,10 @@ class _NotificationsState extends State<Notifications> {
                                 status == 'accepted'
                                     ? 'You accepted $senderFirstName $senderLastName\'s friend request'
                                     : '$senderFirstName $senderLastName sent you a friend request',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               if (status != 'accepted') ...[
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
@@ -189,14 +191,14 @@ class _NotificationsState extends State<Notifications> {
                                       onPressed: () {
                                         _acceptFriendRequest(requestId);
                                       },
-                                      child: Text('Accept'),
+                                      child: const Text('Accept'),
                                     ),
-                                    SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                     ElevatedButton(
                                       onPressed: () {
                                         _deleteFriendRequest(requestId);
                                       },
-                                      child: Text('Delete'),
+                                      child: const Text('Delete'),
                                     ),
                                   ],
                                 ),

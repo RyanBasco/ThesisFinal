@@ -15,6 +15,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class TouristprofilePage extends StatefulWidget {
+  const TouristprofilePage({super.key});
+
   @override
   _TouristprofilePageState createState() => _TouristprofilePageState();
 }
@@ -141,11 +143,11 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -168,7 +170,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -191,13 +193,13 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 10),
+                    const Expanded(
                       child: Text(
                         'Profile',
                         style: TextStyle(
@@ -211,7 +213,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Center(
                 child: Container(
                   width: 300,
@@ -224,7 +226,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 5,
                         blurRadius: 7,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
@@ -239,7 +241,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                             backgroundColor: Colors.black,
                             radius: 45,
                             child: _profileImage == null
-                                ? Icon(Icons.person, color: Colors.white, size: 55)
+                                ? const Icon(Icons.person, color: Colors.white, size: 55)
                                 : ClipOval(
                                     child: Image.file(
                                       _profileImage!,
@@ -258,12 +260,12 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         child: GestureDetector(
                           onTap: _pickImage,
                           child: Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.black,
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.camera_alt,
                               color: Colors.white,
                               size: 20,
@@ -279,16 +281,16 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                           children: [
                             Text(
                               '$_firstName $_lastName',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
                               'User ID: $_userId',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
                                 color: Colors.black,
                               ),
@@ -312,26 +314,26 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                               Container(
                                 width: 40,
                                 height: 40,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Color(0xFF2C812A),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.edit,
                                   color: Colors.white,
                                   size: 20,
                                 ),
                               ),
-                              SizedBox(width: 25),
-                              Text(
+                              const SizedBox(width: 25),
+                              const Text(
                                 'Edit Profile',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 92), // Add space between text and arrow
-                              Icon(
+                              const SizedBox(width: 92), // Add space between text and arrow
+                              const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
                                 color: Colors.black,
@@ -356,26 +358,26 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                               Container(
                                 width: 40,
                                 height: 40,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Color(0xFF2C812A),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.lock,
                                   color: Colors.white,
                                   size: 20,
                                 ),
                               ),
-                              SizedBox(width: 25),
-                              Text(
+                              const SizedBox(width: 25),
+                              const Text(
                                 'Change Password',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 40), // Add space between text and arrow
-                              Icon(
+                              const SizedBox(width: 40), // Add space between text and arrow
+                              const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
                                 color: Colors.black,
@@ -400,26 +402,26 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                               Container(
                                 width: 40,
                                 height: 40,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Color(0xFF2C812A),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.group_add,
                                   color: Colors.white,
                                   size: 20,
                                 ),
                               ),
-                              SizedBox(width: 25),
-                              Text(
+                              const SizedBox(width: 25),
+                              const Text(
                                 'Add Friends',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 85), // Add space between text and arrow
-                              Icon(
+                              const SizedBox(width: 85), // Add space between text and arrow
+                              const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
                                 color: Colors.black,
@@ -444,26 +446,26 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                               Container(
                                 width: 40,
                                 height: 40,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Color(0xFF2C812A),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.bookmark,
                                   color: Colors.white,
                                   size: 20,
                                 ),
                               ),
-                              SizedBox(width: 25),
-                              Text(
+                              const SizedBox(width: 25),
+                              const Text(
                                 'My Bookmarks',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 63), // Add space between text and arrow
-                              Icon(
+                              const SizedBox(width: 63), // Add space between text and arrow
+                              const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
                                 color: Colors.black,
@@ -488,26 +490,26 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                               Container(
                                 width: 40,
                                 height: 40,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Color(0xFF2C812A),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.help_outline,
                                   color: Colors.white,
                                   size: 20,
                                 ),
                               ),
-                              SizedBox(width: 25),
-                              Text(
+                              const SizedBox(width: 25),
+                              const Text(
                                 'Help Center',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 85), // Add space between text and arrow
-                              Icon(
+                              const SizedBox(width: 85), // Add space between text and arrow
+                              const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
                                 color: Colors.black,
@@ -531,26 +533,26 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                               Container(
                                 width: 40,
                                 height: 40,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.red,
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.logout,
                                   color: Colors.white,
                                   size: 20,
                                 ),
                               ),
-                              SizedBox(width: 25),
-                              Text(
+                              const SizedBox(width: 25),
+                              const Text(
                                 'Logout',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(width: 120), // Add space between text and arrow
-                              Icon(
+                              const SizedBox(width: 120), // Add space between text and arrow
+                              const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
                                 color: Colors.black,

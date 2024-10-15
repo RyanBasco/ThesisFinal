@@ -10,6 +10,8 @@ import 'package:testing/UserProfile/Tourguides.dart';
 import 'package:testing/UserProfile/TravelandTourAgencies.dart';
 
 class Helpcenter extends StatefulWidget {
+  const Helpcenter({super.key});
+
   @override
   _HelpcenterState createState() => _HelpcenterState();
 }
@@ -58,11 +60,11 @@ class _HelpcenterState extends State<Helpcenter> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -85,7 +87,7 @@ class _HelpcenterState extends State<Helpcenter> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -109,13 +111,13 @@ class _HelpcenterState extends State<Helpcenter> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 10),
+                    const Expanded(
                       child: Text(
                         'Help Center',
                         style: TextStyle(
@@ -134,7 +136,7 @@ class _HelpcenterState extends State<Helpcenter> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
+                    const Text(
                       'How can we',
                       style: TextStyle(
                         fontSize: 28,
@@ -142,7 +144,7 @@ class _HelpcenterState extends State<Helpcenter> {
                         color: Colors.black,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'help you',
                       style: TextStyle(
                         fontSize: 28,
@@ -151,14 +153,14 @@ class _HelpcenterState extends State<Helpcenter> {
                         decoration: TextDecoration.underline,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
                           children: [
                             Icon(Icons.search, color: Colors.grey),
@@ -176,8 +178,8 @@ class _HelpcenterState extends State<Helpcenter> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Text(
+                    const SizedBox(height: 20),
+                    const Text(
                       'or ',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -185,7 +187,7 @@ class _HelpcenterState extends State<Helpcenter> {
                         color: Colors.black,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'choose an option...',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -194,7 +196,7 @@ class _HelpcenterState extends State<Helpcenter> {
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -211,13 +213,13 @@ class _HelpcenterState extends State<Helpcenter> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 3,
-                              offset: Offset(0, 2), // changes position of shadow
+                              offset: const Offset(0, 2), // changes position of shadow
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(15),
-                        margin: EdgeInsets.only(bottom: 10),
-                        child: Row(
+                        padding: const EdgeInsets.all(15),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        child: const Row(
                           children: [
                             Icon(Icons.phone, color: Color(0xFF288F13)),
                             SizedBox(width: 10),
@@ -233,7 +235,7 @@ class _HelpcenterState extends State<Helpcenter> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -250,13 +252,13 @@ class _HelpcenterState extends State<Helpcenter> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 3,
-                              offset: Offset(0, 2), // changes position of shadow
+                              offset: const Offset(0, 2), // changes position of shadow
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(15),
-                        margin: EdgeInsets.only(bottom: 10),
-                        child: Row(
+                        padding: const EdgeInsets.all(15),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        child: const Row(
                           children: [
                             Icon(Icons.airplanemode_active, color: Color(0xFF288F13)),
                             SizedBox(width: 10),
@@ -272,7 +274,7 @@ class _HelpcenterState extends State<Helpcenter> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
                        Navigator.push(
@@ -289,13 +291,13 @@ class _HelpcenterState extends State<Helpcenter> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 3,
-                              offset: Offset(0, 2), // changes position of shadow
+                              offset: const Offset(0, 2), // changes position of shadow
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(15),
-                        margin: EdgeInsets.only(bottom: 10),
-                        child: Row(
+                        padding: const EdgeInsets.all(15),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        child: const Row(
                           children: [
                             Icon(Icons.person_outline, color: Color(0xFF288F13)),
                             SizedBox(width: 10),
@@ -311,7 +313,7 @@ class _HelpcenterState extends State<Helpcenter> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -328,13 +330,13 @@ class _HelpcenterState extends State<Helpcenter> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 3,
-                              offset: Offset(0, 2), // changes position of shadow
+                              offset: const Offset(0, 2), // changes position of shadow
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(15),
-                        margin: EdgeInsets.only(bottom: 10),
-                        child: Row(
+                        padding: const EdgeInsets.all(15),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        child: const Row(
                           children: [
                             Icon(Icons.eco, color: Color(0xFF288F13)),
                             SizedBox(width: 10),
@@ -350,7 +352,7 @@ class _HelpcenterState extends State<Helpcenter> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -367,13 +369,13 @@ class _HelpcenterState extends State<Helpcenter> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 3,
-                              offset: Offset(0, 2), // changes position of shadow
+                              offset: const Offset(0, 2), // changes position of shadow
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(15),
-                        margin: EdgeInsets.only(bottom: 10),
-                        child: Row(
+                        padding: const EdgeInsets.all(15),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        child: const Row(
                           children: [
                             Icon(Icons.question_answer, color: Color(0xFF288F13)),
                             SizedBox(width: 10),
@@ -389,7 +391,7 @@ class _HelpcenterState extends State<Helpcenter> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),

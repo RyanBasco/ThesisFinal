@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:testing/Authentication/TouristLogin.dart';
 
 class GetStartedPage extends StatefulWidget {
+  const GetStartedPage({super.key});
+
   @override
   _GetStartedPageState createState() => _GetStartedPageState();
 }
@@ -49,7 +51,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -69,53 +71,53 @@ class _GetStartedPageState extends State<GetStartedPage> {
               width: _currentIndex == 0 ? 450 : 300, // Increase width for the mountain image
               height: _currentIndex == 0 ? 300 : 300, // Increase height for the mountain image
             ),
-            SizedBox(height: 20), // Spacing between image and dots
+            const SizedBox(height: 20), // Spacing between image and dots
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(4, (index) {
                 return Container(
-                  margin: EdgeInsets.symmetric(horizontal: 5),
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: _currentIndex == index ? Color(0xFF2C812A) : Colors.white,
+                    color: _currentIndex == index ? const Color(0xFF2C812A) : Colors.white,
                     shape: BoxShape.circle,
                   ),
                 );
               }),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               _titles[_currentIndex],
-              style: TextStyle(
+              style: const TextStyle(
                 color: Color(0xFF2C812A),
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 30),
+              padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Text(
                 _descriptions[_currentIndex],
                 textAlign: TextAlign.left,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 16,
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             TextButton(
               style: TextButton.styleFrom(
-                backgroundColor: Color(0xFF3C721B),
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                shape: RoundedRectangleBorder(
+                backgroundColor: const Color(0xFF3C721B),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.zero,
                 ),
               ),
               onPressed: _nextPage,
-              child: Text(
+              child: const Text(
                 'Next >',
                 style: TextStyle(
                   color: Colors.white,

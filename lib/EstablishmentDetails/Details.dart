@@ -6,6 +6,8 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class DetailsPage extends StatefulWidget {
+  const DetailsPage({super.key});
+
   @override
   _DetailsPageState createState() => _DetailsPageState();
 }
@@ -71,11 +73,11 @@ class _DetailsPageState extends State<DetailsPage> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -98,7 +100,7 @@ class _DetailsPageState extends State<DetailsPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -121,13 +123,13 @@ class _DetailsPageState extends State<DetailsPage> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 10),
+                    const Expanded(
                       child: Text(
                         'Details',
                         style: TextStyle(
@@ -167,7 +169,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         child: Container(
                           width: 290,
                           height: 135,
-                          padding: EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(15),
@@ -176,14 +178,14 @@ class _DetailsPageState extends State<DetailsPage> {
                                 color: Colors.black.withOpacity(0.2),
                                 spreadRadius: 2,
                                 blurRadius: 5,
-                                offset: Offset(0, 3),
+                                offset: const Offset(0, 3),
                               ),
                             ],
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
+                              const Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
@@ -196,11 +198,11 @@ class _DetailsPageState extends State<DetailsPage> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Icon(Icons.location_on, color: Color(0xFF288F13), size: 20), // Change color here
-                                  SizedBox(width: 5),
+                                  const Icon(Icons.location_on, color: Color(0xFF288F13), size: 20), // Change color here
+                                  const SizedBox(width: 5),
                                   Text(
                                     'San Miguel, Jordan',
                                     style: TextStyle(
@@ -210,8 +212,8 @@ class _DetailsPageState extends State<DetailsPage> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 8),
-                              Row(
+                              const SizedBox(height: 8),
+                              const Row(
                                 children: [
                                   Icon(Icons.star, color: Colors.yellow, size: 20),
                                   Icon(Icons.star, color: Colors.yellow, size: 20),
@@ -239,7 +241,7 @@ class _DetailsPageState extends State<DetailsPage> {
                       child: Container(
                         width: 120,
                         height: 40,
-                        padding: EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
@@ -248,11 +250,11 @@ class _DetailsPageState extends State<DetailsPage> {
                               color: Colors.black.withOpacity(0.2),
                               spreadRadius: 2,
                               blurRadius: 5,
-                              offset: Offset(0, 3),
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.phone, color: Colors.black, size: 20),
@@ -274,7 +276,7 @@ class _DetailsPageState extends State<DetailsPage> {
                       child: Container(
                         width: 120,
                         height: 40,
-                        padding: EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
@@ -283,11 +285,11 @@ class _DetailsPageState extends State<DetailsPage> {
                               color: Colors.black.withOpacity(0.2),
                               spreadRadius: 2,
                               blurRadius: 5,
-                              offset: Offset(0, 3),
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.facebook, color: Colors.black, size: 20),
@@ -312,7 +314,7 @@ class _DetailsPageState extends State<DetailsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'About',
                       style: TextStyle(
                         fontSize: 20,
@@ -320,7 +322,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Container(
                       width: double.infinity,
                       height: 200,
@@ -332,12 +334,12 @@ class _DetailsPageState extends State<DetailsPage> {
                             color: Colors.black.withOpacity(0.2),
                             spreadRadius: 2,
                             blurRadius: 5,
-                            offset: Offset(0, 3),
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
+                      child: const Padding(
+                        padding: EdgeInsets.all(20),
                         child: Text(
                           'Detailed description about the place goes here...',
                           style: TextStyle(
@@ -347,19 +349,19 @@ class _DetailsPageState extends State<DetailsPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Center(
                       child: ElevatedButton.icon(
                         onPressed: _navigateToDirectionsPage, // Navigate to DirectionsPage
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF2C812A),
+                          backgroundColor: const Color(0xFF2C812A),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         ),
-                        icon: Icon(Icons.directions, color: Colors.white),
-                        label: Text(
+                        icon: const Icon(Icons.directions, color: Colors.white),
+                        label: const Text(
                           'Directions',
                           style: TextStyle(
                             fontSize: 16,

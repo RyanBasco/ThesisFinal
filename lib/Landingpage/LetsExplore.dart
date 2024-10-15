@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:testing/Landingpage/getstarted.dart';
 
 class ExplorePage extends StatelessWidget {
+  const ExplorePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -28,8 +30,8 @@ class ExplorePage extends StatelessWidget {
               width: 550,  // Set the desired width
               height: 350, // Set the desired height
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Let’s Explore Guimaras',
               style: TextStyle(
                 color: Color(0xFF2C812A),
@@ -38,11 +40,11 @@ class ExplorePage extends StatelessWidget {
                 fontFamily: 'CinzelDecorative',
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 40), // Add horizontal padding
+              padding: const EdgeInsets.symmetric(horizontal: 40), // Add horizontal padding
               alignment: Alignment.center,
-              child: Text(
+              child: const Text(
                 'Embark on an unforgettable journey\n'
                 'through the picturesque landscapes\n'
                 'and hidden gems of Guimaras, the\n'
@@ -55,11 +57,11 @@ class ExplorePage extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             TextButton(
               style: TextButton.styleFrom(
-                backgroundColor: Color(0xFF3C721B),
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                backgroundColor: const Color(0xFF3C721B),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),
@@ -70,7 +72,7 @@ class ExplorePage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => GetStartedPage()),
                 );
               },
-              child: Text(
+              child: const Text(
                 'Next >',
                 style: TextStyle(
                   color: Colors.white,

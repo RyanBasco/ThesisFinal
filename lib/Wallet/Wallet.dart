@@ -7,6 +7,8 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({super.key});
+
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
 }
@@ -54,11 +56,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -81,7 +83,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -104,13 +106,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 0),
-                    Expanded(
+                    const SizedBox(width: 0),
+                    const Expanded(
                       child: Text(
                         'My Wallet',
                         style: TextStyle(
@@ -130,13 +132,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   children: [
                     Container(
                       width: double.infinity, // This will make the box take up the full width available
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: Color(0xFF288F13)),
+                        border: Border.all(color: const Color(0xFF288F13)),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Column(
+                      child: const Column(
                         children: [
                           Text(
                             'Total Expenses',
@@ -158,18 +160,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Container(
                       width: double.infinity, // Full width
                       height: 420, // Increased height
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
                         children: [
-                          Align(
+                          const Align(
                             alignment: Alignment.topLeft,
                             child: Text(
                               'Expenses',
@@ -181,7 +183,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               textAlign: TextAlign.left,
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Center(
                             child: ElevatedButton(
                               onPressed: () {
@@ -191,13 +193,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF288F13),
+                                backgroundColor: const Color(0xFF288F13),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                               ),
-                              child: Text(
+                              child: const Text(
                                 'Categories',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -205,8 +207,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 16),
-                          Align(
+                          const SizedBox(height: 16),
+                          const Align(
                             alignment: Alignment.topLeft,
                             child: Text(
                               'THIS MONTH',
@@ -217,8 +219,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 16),
-                          Container(
+                          const SizedBox(height: 16),
+                          SizedBox(
                             width: 200,
                             height: 200,
                             child: Stack(
@@ -234,11 +236,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                   child: Container(
                                     width: 130,
                                     height: 130,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: Colors.white,
                                     ),
-                                    child: Center(
+                                    child: const Center(
                                       child: Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
@@ -269,15 +271,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: ElevatedButton.icon(
                         onPressed: () {
                           // Handle button press
                         },
-                        icon: Icon(Icons.insert_drive_file, color: Color(0xFF288F13)),
-                        label: Text(
+                        icon: const Icon(Icons.insert_drive_file, color: Color(0xFF288F13)),
+                        label: const Text(
                           'Records',
                           style: TextStyle(
                             color: Color(0xFF288F13),
@@ -285,11 +287,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          side: BorderSide(color: Color(0xFF288F13)),
+                          side: const BorderSide(color: Color(0xFF288F13)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                         ),
                       ),
                     ),

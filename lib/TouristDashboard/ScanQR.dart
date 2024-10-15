@@ -6,6 +6,8 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class ScanQR extends StatefulWidget {
+  const ScanQR({super.key});
+
   @override
   _ScanQRState createState() => _ScanQRState();
 }
@@ -61,11 +63,11 @@ class _ScanQRState extends State<ScanQR> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -88,7 +90,7 @@ class _ScanQRState extends State<ScanQR> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -110,13 +112,13 @@ class _ScanQRState extends State<ScanQR> {
                     onTap: () {
                       Navigator.pop(context); // Navigate back to the previous page
                     },
-                    child: CircleAvatar(
+                    child: const CircleAvatar(
                       backgroundColor: Colors.white,
                       child: Icon(Icons.arrow_back, color: Colors.black),
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Expanded(
+                  const SizedBox(width: 10),
+                  const Expanded(
                     child: Text(
                       'Scan QR',
                       style: TextStyle(
@@ -130,9 +132,9 @@ class _ScanQRState extends State<ScanQR> {
                 ],
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Container(
-              padding: EdgeInsets.all(20), // Added padding for better visual separation
+              padding: const EdgeInsets.all(20), // Added padding for better visual separation
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(9),
@@ -141,7 +143,7 @@ class _ScanQRState extends State<ScanQR> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: Offset(0, 7),
+                    offset: const Offset(0, 7),
                   ),
                 ],
               ),
@@ -164,8 +166,8 @@ class _ScanQRState extends State<ScanQR> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Align frame with QR Code',
               style: TextStyle(
                 fontSize: 16,

@@ -3,13 +3,15 @@ import 'package:testing/Landingpage/LetsExplore.dart';
 import 'package:testing/Landingpage/getstarted.dart';
 
 class NextPage extends StatelessWidget {
+  const NextPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -29,8 +31,8 @@ class NextPage extends StatelessWidget {
               width: 550,  // Set the desired width
               height: 350, // Set the desired height
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'WELCOME TO GUIMARAS!',
               style: TextStyle(
                 color: Color(0xFF2C812A),
@@ -39,8 +41,8 @@ class NextPage extends StatelessWidget {
                 fontFamily: 'CinzelDecorative',
               ),
             ),
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'Province of Guimaras',
               style: TextStyle(
                 color: Color(0xFF2C812A),
@@ -48,11 +50,11 @@ class NextPage extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 40), // Add horizontal padding
+              padding: const EdgeInsets.symmetric(horizontal: 40), // Add horizontal padding
               alignment: Alignment.center,
-              child: Text(
+              child: const Text(
                 'THE ISLAND THAT FITS YOUR TASTE',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -62,11 +64,11 @@ class NextPage extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             TextButton(
               style: TextButton.styleFrom(
-                backgroundColor: Color(0xFF3C721B),
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                backgroundColor: const Color(0xFF3C721B),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),
@@ -77,7 +79,7 @@ class NextPage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => ExplorePage()),
                 );
               },
-              child: Text(
+              child: const Text(
                 'Get Started',
                 style: TextStyle(
                   color: Colors.white,

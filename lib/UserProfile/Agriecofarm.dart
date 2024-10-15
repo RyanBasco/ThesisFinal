@@ -4,6 +4,8 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class Agriecofarm extends StatefulWidget {
+  const Agriecofarm({super.key});
+
   @override
   _AgriecofarmState createState() => _AgriecofarmState();
 }
@@ -51,11 +53,11 @@ class _AgriecofarmState extends State<Agriecofarm> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -78,7 +80,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -102,7 +104,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         radius: 24,
                         backgroundColor: Colors.white,
                         child: Icon(Icons.close, color: Colors.black, size: 30),
@@ -111,8 +113,8 @@ class _AgriecofarmState extends State<Agriecofarm> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 30),
+              const Padding(
+                padding: EdgeInsets.only(left: 30),
                 child: Text(
                   'Agri-Eco Farm\nSites',
                   style: TextStyle(
@@ -122,7 +124,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
@@ -131,8 +133,8 @@ class _AgriecofarmState extends State<Agriecofarm> {
                       children: [
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF83E6F4),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(15),
@@ -141,7 +143,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(0),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'ORACON SUR, NUEVA VALENCIA',
                                 style: TextStyle(
@@ -153,11 +155,11 @@ class _AgriecofarmState extends State<Agriecofarm> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 15), // Space between the boxes
+                        const SizedBox(width: 15), // Space between the boxes
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF83E6F4),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(15),
@@ -166,7 +168,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(0),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'SAN ENRIQUE, SAN LORENZO',
                                 style: TextStyle(
@@ -184,8 +186,8 @@ class _AgriecofarmState extends State<Agriecofarm> {
                       children: [
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF288F13),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(0),
@@ -194,7 +196,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(15),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Column(
                                 children: [
                                   Text(
@@ -219,11 +221,11 @@ class _AgriecofarmState extends State<Agriecofarm> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 15,), // Space between the boxes
+                        const SizedBox(width: 15,), // Space between the boxes
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 25.8, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 25.8, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF288F13),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(0),
@@ -232,7 +234,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(15),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Column(
                                 children: [
                                   Text(
@@ -259,13 +261,13 @@ class _AgriecofarmState extends State<Agriecofarm> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 15), // Adding some space between the boxes
+                    const SizedBox(height: 15), // Adding some space between the boxes
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 26.5, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 26.5, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF83E6F4),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(15),
@@ -274,7 +276,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(0),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'MILLIAN, SIBUNAG',
                                 style: TextStyle(
@@ -286,11 +288,11 @@ class _AgriecofarmState extends State<Agriecofarm> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 15), // Space between the boxes
+                        const SizedBox(width: 15), // Space between the boxes
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF83E6F4),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(15),
@@ -299,7 +301,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(0),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'OLD POBLACION, BUENAVISTA',
                                 style: TextStyle(
@@ -317,8 +319,8 @@ class _AgriecofarmState extends State<Agriecofarm> {
                       children: [
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 24, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF288F13),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(0),
@@ -327,7 +329,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(15),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Column(
                                 children: [
                                   Text(
@@ -352,11 +354,11 @@ class _AgriecofarmState extends State<Agriecofarm> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 15), // Space between the boxes
+                        const SizedBox(width: 15), // Space between the boxes
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 35, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 35, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF288F13),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(0),
@@ -365,7 +367,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(15),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Column(
                                 children: [
                                   Text(
@@ -392,13 +394,13 @@ class _AgriecofarmState extends State<Agriecofarm> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 15), // Adding some space between the boxes
+                    const SizedBox(height: 15), // Adding some space between the boxes
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF83E6F4),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(15),
@@ -407,7 +409,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(0),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'CONCORDIA NORTE, SIBUNAG',
                                 style: TextStyle(
@@ -419,11 +421,11 @@ class _AgriecofarmState extends State<Agriecofarm> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 15), // Space between the boxes
+                        const SizedBox(width: 15), // Space between the boxes
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF83E6F4),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(15),
@@ -432,7 +434,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(0),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'CABANO, SAN LORENZO',
                                 style: TextStyle(
@@ -450,8 +452,8 @@ class _AgriecofarmState extends State<Agriecofarm> {
                       children: [
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 33, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 33, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF288F13),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(0),
@@ -460,7 +462,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(15),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Column(
                                 children: [
                                   Text(
@@ -485,11 +487,11 @@ class _AgriecofarmState extends State<Agriecofarm> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 15), // Space between the boxes
+                        const SizedBox(width: 15), // Space between the boxes
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 25, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF288F13),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(0),
@@ -498,7 +500,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(15),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Column(
                                 children: [
                                   Text(
@@ -526,13 +528,13 @@ class _AgriecofarmState extends State<Agriecofarm> {
 
                       ],
                     ),
-                    SizedBox(height: 15,),
+                    const SizedBox(height: 15,),
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                            decoration: const BoxDecoration(
                               color: Color(0xFF83E6F4), // Color matching other boxes
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(15),
@@ -541,7 +543,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                                 bottomRight: Radius.circular(0),
                               ),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'ALAGUISOC, JORDAN',
                                 style: TextStyle(
@@ -559,8 +561,8 @@ class _AgriecofarmState extends State<Agriecofarm> {
                   children: [
                     Expanded(
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 25, horizontal: 10),
-                        decoration: BoxDecoration(
+                        padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 10),
+                        decoration: const BoxDecoration(
                           color: Color(0xFF288F13), // Green color matching other boxes
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(0),
@@ -569,7 +571,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                             bottomRight: Radius.circular(15),
                           ),
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Column(
                             children: [
                               Text(
@@ -600,7 +602,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                   ],
                 ),
               ),
-              SizedBox(height: 70,)
+              const SizedBox(height: 70,)
               // Add more content here if needed
             ],
           ),

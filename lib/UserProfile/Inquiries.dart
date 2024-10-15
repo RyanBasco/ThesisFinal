@@ -4,6 +4,8 @@ import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class Inquiries extends StatefulWidget {
+  const Inquiries({super.key});
+
   @override
   _InquiriesState createState() => _InquiriesState();
 }
@@ -52,11 +54,11 @@ class _InquiriesState extends State<Inquiries> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -79,7 +81,7 @@ class _InquiriesState extends State<Inquiries> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -103,7 +105,7 @@ class _InquiriesState extends State<Inquiries> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         radius: 24,
                         backgroundColor: Colors.white,
                         child: Icon(Icons.close, color: Colors.black, size: 30),
@@ -112,8 +114,8 @@ class _InquiriesState extends State<Inquiries> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 30, bottom: 10),
+              const Padding(
+                padding: EdgeInsets.only(left: 30, bottom: 10),
                 child: Text(
                   'Inquiries',
                   style: TextStyle(
@@ -123,14 +125,14 @@ class _InquiriesState extends State<Inquiries> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF83E6F4),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -139,7 +141,7 @@ class _InquiriesState extends State<Inquiries> {
                           bottomRight: Radius.circular(0),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'PROVINCIAL CAPITOL, SAN MIGUEL, JORDAN, GUIMARAS',
                           style: TextStyle(
@@ -151,8 +153,8 @@ class _InquiriesState extends State<Inquiries> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF288F13),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(0),
@@ -164,7 +166,7 @@ class _InquiriesState extends State<Inquiries> {
                       child: Center(
                         child: Column(
                           children: [
-                            Text(
+                            const Text(
                               'OFFICE OF THE GOVERNOR',
                               style: TextStyle(
                                 fontSize: 18.5,
@@ -172,7 +174,7 @@ class _InquiriesState extends State<Inquiries> {
                                 color: Colors.white,
                               ),
                             ),
-                            Padding(
+                            const Padding(
                               padding: EdgeInsets.only(left: 0), // Adjust padding as needed
                               child: Text(
                                 '880-1000 LOCAL 100',
@@ -183,8 +185,8 @@ class _InquiriesState extends State<Inquiries> {
                                 ),
                               ),
                             ),
-                           SizedBox(height: 5),
-                              Text(
+                           const SizedBox(height: 5),
+                              const Text(
                                 'public.information_guimaras@yahoo.com.ph',
                                 style: TextStyle(
                                   fontSize: 13.5,
@@ -192,9 +194,9 @@ class _InquiriesState extends State<Inquiries> {
                                   color: Colors.white,
                                 ),
                               ),
-                              SizedBox(height: 0),
+                              const SizedBox(height: 0),
                               RichText(
-                                text: TextSpan(
+                                text: const TextSpan(
                                   children: [
                                     TextSpan(
                                       text: 'Facebook Page: ',
@@ -219,10 +221,10 @@ class _InquiriesState extends State<Inquiries> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20), // Adding some space between the boxes
+                    const SizedBox(height: 20), // Adding some space between the boxes
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF83E6F4),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -231,7 +233,7 @@ class _InquiriesState extends State<Inquiries> {
                           bottomRight: Radius.circular(0),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'GTIC BLDG., SAN MIGUEL, JORDAN, GUIMARAS',
                           style: TextStyle(
@@ -243,8 +245,8 @@ class _InquiriesState extends State<Inquiries> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF288F13),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(0),
@@ -256,7 +258,7 @@ class _InquiriesState extends State<Inquiries> {
                       child: Center(
                         child: Column(
                           children: [
-                            Text(
+                            const Text(
                               'PROVINCIAL ECONOMIC ',
                               style: TextStyle(
                                 fontSize: 18.5,
@@ -264,8 +266,8 @@ class _InquiriesState extends State<Inquiries> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 0),
-                            Text(
+                            const SizedBox(height: 0),
+                            const Text(
                               'AND DEVELOPMENT OFFICE',
                               style: TextStyle(
                                 fontSize: 18.5,
@@ -273,8 +275,8 @@ class _InquiriesState extends State<Inquiries> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 5),
-                            Text(
+                            const SizedBox(height: 5),
+                            const Text(
                               'pedo@guimarasph.com',
                               style: TextStyle(
                                 fontSize: 13.5,
@@ -282,9 +284,9 @@ class _InquiriesState extends State<Inquiries> {
                                 color: Colors.white,
                               ),
                             ),
-                           SizedBox(height: 5),
+                           const SizedBox(height: 5),
                             RichText(
-                              text: TextSpan(
+                              text: const TextSpan(
                                 children: [
                                   TextSpan(
                                     text: 'Facebook Page: ',
@@ -309,10 +311,10 @@ class _InquiriesState extends State<Inquiries> {
                         ),
                       ),
                     ),
-                     SizedBox(height: 20), // Adding some space between the boxes
+                     const SizedBox(height: 20), // Adding some space between the boxes
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF83E6F4),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -321,7 +323,7 @@ class _InquiriesState extends State<Inquiries> {
                           bottomRight: Radius.circular(0),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'HOSKYN, JORDAN',
                           style: TextStyle(
@@ -333,8 +335,8 @@ class _InquiriesState extends State<Inquiries> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF288F13),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(0),
@@ -346,7 +348,7 @@ class _InquiriesState extends State<Inquiries> {
                       child: Center(
                         child: Column(
                           children: [
-                            Text(
+                            const Text(
                               'TOURISM SERVICES SECTION',
                               style: TextStyle(
                                 fontSize: 18.5,
@@ -354,8 +356,8 @@ class _InquiriesState extends State<Inquiries> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 0),
-                            Text(
+                            const SizedBox(height: 0),
+                            const Text(
                               'tourism@guimarasph.com',
                               style: TextStyle(
                                 fontSize: 13.5,
@@ -363,9 +365,9 @@ class _InquiriesState extends State<Inquiries> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 0),
+                            const SizedBox(height: 0),
                             RichText(
-                              text: TextSpan(
+                              text: const TextSpan(
                                 children: [
                                   TextSpan(
                                     text: 'Facebook Page: ',
@@ -393,7 +395,7 @@ class _InquiriesState extends State<Inquiries> {
                   ],
                 ),
               ),
-              SizedBox(height: 70),
+              const SizedBox(height: 70),
               // Add more content here if needed
             ],
           ),

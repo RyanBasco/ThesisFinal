@@ -4,6 +4,8 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class EmergencyHotline extends StatefulWidget {
+  const EmergencyHotline({super.key});
+
   @override
   _EmergencyHotlineState createState() => _EmergencyHotlineState();
 }
@@ -51,11 +53,11 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -78,7 +80,7 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFEEFFA9),
@@ -102,7 +104,7 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                       onTap: () {
                         Navigator.pop(context); // Navigate back to the previous page
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         radius: 24,
                         backgroundColor: Colors.white,
                         child: Icon(Icons.close, color: Colors.black, size: 30),
@@ -111,8 +113,8 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 30),
+              const Padding(
+                padding: EdgeInsets.only(left: 30),
                 child: Text(
                   'Emergency\nHotlines',
                   style: TextStyle(
@@ -122,14 +124,14 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF83E6F4),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -138,7 +140,7 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                           bottomRight: Radius.circular(0),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           '4K PDRRM RESCUE',
                           style: TextStyle(
@@ -150,8 +152,8 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF288F13),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(0),
@@ -160,7 +162,7 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                           bottomRight: Radius.circular(15),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Column(
                           children: [
                             Text(
@@ -184,10 +186,10 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 55), // Adding some space between the boxes
+                    const SizedBox(height: 55), // Adding some space between the boxes
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF83E6F4),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -196,7 +198,7 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                           bottomRight: Radius.circular(0),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'BUREAU OF FIRE PROTECTION',
                           style: TextStyle(
@@ -208,8 +210,8 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: const BoxDecoration(
                         color: Color(0xFF288F13),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(0),
@@ -218,7 +220,7 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                           bottomRight: Radius.circular(15),
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Column(
                           children: [
                             Text(

@@ -11,6 +11,8 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class GenerateQR extends StatefulWidget {
+  const GenerateQR({super.key});
+
   @override
   _GenerateQRState createState() => _GenerateQRState();
 }
@@ -77,11 +79,11 @@ class _GenerateQRState extends State<GenerateQR> {
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
+          selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -106,7 +108,7 @@ class _GenerateQRState extends State<GenerateQR> {
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
                   Color(0xFFEEFFA9),
@@ -129,13 +131,13 @@ class _GenerateQRState extends State<GenerateQR> {
                           onTap: () {
                             Navigator.pop(context); // Navigate back to the previous page
                           },
-                          child: CircleAvatar(
+                          child: const CircleAvatar(
                             backgroundColor: Colors.white,
                             child: Icon(Icons.arrow_back, color: Colors.black),
                           ),
                         ),
-                        SizedBox(width: 10),
-                        Expanded(
+                        const SizedBox(width: 10),
+                        const Expanded(
                           child: Text(
                             'Generate QR',
                             style: TextStyle(
@@ -150,7 +152,7 @@ class _GenerateQRState extends State<GenerateQR> {
                     ),
                   ),
                   _buildWhiteContainer(),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -159,7 +161,7 @@ class _GenerateQRState extends State<GenerateQR> {
             bottom: 140, // Adjusted to move the buttons higher
             left: 20,
             right: 20,
-            child: _buildButton('Save', Icons.save_alt, Color(0xFF288F13), _saveQRImage),
+            child: _buildButton('Save', Icons.save_alt, const Color(0xFF288F13), _saveQRImage),
           ),
         ],
       ),
@@ -168,7 +170,7 @@ class _GenerateQRState extends State<GenerateQR> {
 
   Widget _buildWhiteContainer() {
     if (userData == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     String firstName = userData!['first_name'] ?? '';
@@ -176,8 +178,8 @@ class _GenerateQRState extends State<GenerateQR> {
         userData!['last_name']?.toString().substring(0, 1).toUpperCase() ?? '';
 
     return Container(
-      margin: EdgeInsets.only(top: 100, left: 20, right: 20),
-      padding: EdgeInsets.all(20),
+      margin: const EdgeInsets.only(top: 100, left: 20, right: 20),
+      padding: const EdgeInsets.all(20),
       width: 280,
       height: 380,
       decoration: BoxDecoration(
@@ -188,7 +190,7 @@ class _GenerateQRState extends State<GenerateQR> {
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -202,10 +204,10 @@ class _GenerateQRState extends State<GenerateQR> {
               size: 200.0,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             '$firstName $lastNameInitial.',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black,
@@ -224,17 +226,17 @@ class _GenerateQRState extends State<GenerateQR> {
       icon: Icon(icon, color: Colors.white),
       label: Text(
         label,
-        style: TextStyle(color: Colors.white, fontSize: 16),
+        style: const TextStyle(color: Colors.white, fontSize: 16),
       ),
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(color),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        backgroundColor: WidgetStateProperty.all<Color>(color),
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-          EdgeInsets.symmetric(vertical: 14, horizontal: 16), // Adjust padding for icon and text spacing
+        padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+          const EdgeInsets.symmetric(vertical: 14, horizontal: 16), // Adjust padding for icon and text spacing
         ),
       ),
     ),
@@ -301,7 +303,7 @@ class _GenerateQRState extends State<GenerateQR> {
       await imageFile.writeAsBytes(bytes.buffer.asUint8List());
 
       // Show a snackbar or toast message that the image is saved locally
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('QR image saved to local files'),
       ));
     } else {

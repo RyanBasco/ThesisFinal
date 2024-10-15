@@ -1,10 +1,13 @@
+import 'dart:convert'; // For JSON decoding
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import for input formatters
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:testing/Authentication/TouristSignupcontinue.dart';
 
 class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
+
   @override
   _SignupPageState createState() => _SignupPageState();
 }
@@ -12,24 +15,61 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
+
+  // Removed controllers for province, city, and country
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nationalityController = TextEditingController();
-  final TextEditingController _provinceController = TextEditingController();
-  final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _countryController = TextEditingController();
+  final TextEditingController _contactNumberController = TextEditingController();
+
   DateTime? _selectedDate;
   String? _selectedSex;
   String? _selectedCivilStatus;
+  
+
+  // List to store the loaded nationalities
+  List<String> _nationalities = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Load the nationalities from JSON file
+    loadNationalities();
+  }
+
+  // Function to load nationalities.json file
+  Future<void> loadNationalities() async {
+    try {
+      String jsonString = await rootBundle.loadString('assets/nationalities.json');
+      final List<dynamic> jsonResponse = json.decode(jsonString);
+      setState(() {
+        _nationalities = jsonResponse.map((e) => e.toString()).toList();
+      });
+    } catch (e) {
+      print('Error loading nationalities.json: $e');
+      // Handle error, possibly set a default list or show a message
+    }
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers to free up resources
+    _lastNameController.dispose();
+    _firstNameController.dispose();
+    _emailController.dispose();
+    _nationalityController.dispose();
+    _contactNumberController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
                 Color(0xFFEEFFA9),
@@ -46,21 +86,21 @@ class _SignupPageState extends State<SignupPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 40),
+                const SizedBox(height: 40),
                 Row(
                   children: [
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: Icon(
+                      child: const Icon(
                         Icons.arrow_back,
                         color: Color(0xFF114F3A),
                         size: 30,
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Text(
+                    const SizedBox(width: 10),
+                    const Text(
                       'Sign Up',
                       style: TextStyle(
                         color: Color(0xFF114F3A),
@@ -70,19 +110,41 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
-                TextFormFieldWithIcon('Last Name', Icons.person, _lastNameController, validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter last name';
-                  }
-                  return null;
-                }),
-                TextFormFieldWithIcon('First Name', Icons.person, _firstNameController, validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter first name';
-                  }
-                  return null;
-                }),
+                const SizedBox(height: 10),
+                const Padding(
+                  padding: EdgeInsets.only(left: 10.0), // Adjust the value for more/less right padding
+                  child: Text(
+                    'Personal Information',
+                    style: TextStyle(
+                      color: Color(0xFF114F3A),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    )
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormFieldWithIcon(
+                  'Last Name',
+                  Icons.person,
+                  _lastNameController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter last name';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormFieldWithIcon(
+                  'First Name',
+                  Icons.person,
+                  _firstNameController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter first name';
+                    }
+                    return null;
+                  },
+                ),
                 GestureDetector(
                   onTap: () {
                     _selectDate(context);
@@ -92,31 +154,33 @@ class _SignupPageState extends State<SignupPage> {
                       'Birthday',
                       Icons.calendar_today,
                       TextEditingController(
-                        text: _selectedDate != null ? DateFormat.yMMMMd().format(_selectedDate!) : '',
+                        text: _selectedDate != null
+                            ? DateFormat.yMMMMd().format(_selectedDate!)
+                            : '',
                       ),
                       readOnly: true,
                     ),
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(vertical: 10),
-                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
-                    color: Color(0xFF5CA14E),
+                    color: const Color(0xFF5CA14E),
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.wc,
                         color: Colors.white,
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedSex,
-                          items: [
+                          items: const [
                             DropdownMenuItem(
                               value: 'Male',
                               child: Text('Male', style: TextStyle(color: Colors.white)),
@@ -131,13 +195,13 @@ class _SignupPageState extends State<SignupPage> {
                               _selectedSex = value;
                             });
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'Sex',
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
                           ),
-                          dropdownColor: Color(0xFF5CA14E),
-                          style: TextStyle(color: Colors.white),
+                          dropdownColor: const Color(0xFF5CA14E),
+                          style: const TextStyle(color: Colors.white),
                           iconEnabledColor: Colors.white,
                           validator: (value) {
                             if (value == null) {
@@ -151,24 +215,24 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(vertical: 10),
-                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
-                    color: Color(0xFF5CA14E),
+                    color: const Color(0xFF5CA14E),
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.family_restroom,
                         color: Colors.white,
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedCivilStatus,
-                          items: [
+                          items: const [
                             DropdownMenuItem(
                               value: 'Single',
                               child: Text('Single', style: TextStyle(color: Colors.white)),
@@ -191,13 +255,13 @@ class _SignupPageState extends State<SignupPage> {
                               _selectedCivilStatus = value;
                             });
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'Civil Status',
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
                           ),
-                          dropdownColor: Color(0xFF5CA14E),
-                          style: TextStyle(color: Colors.white),
+                          dropdownColor: const Color(0xFF5CA14E),
+                          style: const TextStyle(color: Colors.white),
                           iconEnabledColor: Colors.white,
                           validator: (value) {
                             if (value == null) {
@@ -210,38 +274,107 @@ class _SignupPageState extends State<SignupPage> {
                     ],
                   ),
                 ),
-                TextFormFieldWithIcon('Nationality', Icons.flag, _nationalityController, validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter nationality';
-                  }
-                  return null;
-                }),
-                TextFormFieldWithIcon('Province', Icons.location_city, _provinceController, validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter province';
-                  }
-                  return null;
-                }),
-                TextFormFieldWithIcon('City/Municipality', Icons.location_city, _cityController, validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter city/municipality';
-                  }
-                  return null;
-                }),
-                TextFormFieldWithIcon('Country of Residence', Icons.public, _countryController, validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter country of residence';
-                  }
-                  return null;
-                }),
-                SizedBox(height: 40), // Added space below the form fields
+                // Updated Nationality Field
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5CA14E),
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.flag,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _nationalityController.text.isNotEmpty ? _nationalityController.text : null,
+                          items: _nationalities.map((nationality) {
+                            return DropdownMenuItem<String>(
+                              value: nationality,
+                              child: Text(nationality, style: const TextStyle(color: Colors.white)),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _nationalityController.text = value ?? '';
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            hintText: 'Nationality',
+                            hintStyle: TextStyle(color: Colors.white),
+                            border: InputBorder.none,
+                          ),
+                          dropdownColor: const Color(0xFF5CA14E),
+                          style: const TextStyle(color: Colors.white),
+                          iconEnabledColor: Colors.white,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select nationality';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Removed Province, City/Municipality, and Country of Residence fields
+
+                // Added Contact Number field
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5CA14E),
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: TextFormField(
+                    controller: _contactNumberController,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(11),
+                    ],
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(
+                        Icons.phone,
+                        color: Colors.white,
+                      ),
+                      hintText: 'Contact Number',
+                      hintStyle: const TextStyle(color: Colors.white),
+                      filled: true,
+                      fillColor: const Color(0xFF5CA14E),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter contact number';
+                      }
+                      if (value.length < 11) {
+                        return 'Contact number must be 11 digits';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 60), // Space below the form fields
                 Center(
                   child: Container(
                     width: 200,
                     height: 50,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25), // Adding border radius to the button
-                      color: Color(0xFF2C812A), // Setting button color
+                      borderRadius: BorderRadius.circular(25), // Rounded button
+                      color: const Color(0xFF2C812A), // Button color
                     ),
                     child: TextButton(
                       onPressed: () {
@@ -249,32 +382,34 @@ class _SignupPageState extends State<SignupPage> {
                           // Form is validated, proceed to next screen
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => SignupContinue(
-                              lastName: _lastNameController.text,
-                              firstName: _firstNameController.text,
-                              email: _emailController.text,
-                              nationality: _nationalityController.text,
-                              province: _provinceController.text,
-                              city: _cityController.text,
-                              country: _countryController.text,
-                              birthday: _selectedDate != null ? DateFormat.yMMMMd().format(_selectedDate!) : '',
-                              sex: _selectedSex ?? '',
-                              civilStatus: _selectedCivilStatus ?? '',
-                            )),
+                            MaterialPageRoute(
+                              builder: (context) => SignupContinue(
+                                lastName: _lastNameController.text,
+                                firstName: _firstNameController.text,
+                                email: _emailController.text,
+                                selectedNationality: _nationalityController.text,
+                                contactNumber: _contactNumberController.text, // Added contact number
+                                birthday: _selectedDate != null
+                                    ? DateFormat.yMMMMd().format(_selectedDate!)
+                                    : '',
+                                sex: _selectedSex ?? '',
+                                civilStatus: _selectedCivilStatus ?? '',
+                              ),
+                            ),
                           );
                         }
                       },
-                      child: Text(
+                      child: const Text(
                         'Next',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 20,
                         ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 70), // Added more space under the button
+                const SizedBox(height: 70), // Space under the button
               ],
             ),
           ),
@@ -309,7 +444,7 @@ class TextFormFieldWithIcon extends StatelessWidget {
   const TextFormFieldWithIcon(
     this.hintText,
     this.iconData,
-    this.controller, {
+    this.controller, {super.key, 
     this.onIconPressed,
     this.validator,
     this.readOnly = false,
@@ -318,16 +453,16 @@ class TextFormFieldWithIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: Color(0xFF5CA14E),
+        color: const Color(0xFF5CA14E),
         border: Border.all(color: Colors.grey),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
           Padding(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             child: Icon(
               iconData,
               color: Colors.white,
@@ -336,14 +471,14 @@ class TextFormFieldWithIcon extends StatelessWidget {
           Expanded(
             child: TextFormField(
               controller: controller,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               readOnly: readOnly,
               validator: validator,
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: TextStyle(color: Colors.white),
+                hintStyle: const TextStyle(color: Colors.white),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 15),
+                contentPadding: const EdgeInsets.symmetric(vertical: 15),
               ),
             ),
           ),

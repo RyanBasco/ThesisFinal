@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:testing/Wallet/Wallet.dart';
 
 class EstablishmentdailyPage extends StatefulWidget {
+  const EstablishmentdailyPage({super.key});
+
   @override
   _EstablishmentdailyPageState createState() => _EstablishmentdailyPageState();
 }
@@ -20,12 +22,12 @@ class _EstablishmentdailyPageState extends State< EstablishmentdailyPage> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: PreferredSize( 
-        preferredSize: Size.fromHeight(150.0),
+        preferredSize: const Size.fromHeight(150.0),
         child: Stack(
           fit: StackFit.expand,
           children: [
             Container(
-              color: Color(0xFFDEE77A),
+              color: const Color(0xFFDEE77A),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -44,7 +46,7 @@ class _EstablishmentdailyPageState extends State< EstablishmentdailyPage> {
                         ),
                         Builder(
                           builder: (context) => IconButton(
-                            icon: Icon(Icons.menu, color: Colors.black),
+                            icon: const Icon(Icons.menu, color: Colors.black),
                             onPressed: () {
                               Scaffold.of(context).openEndDrawer();
                             },
@@ -63,22 +65,22 @@ class _EstablishmentdailyPageState extends State< EstablishmentdailyPage> {
         child: Column(
           children: [
             Container(
-              color: Color(0xFFDEE77A),
-              padding: EdgeInsets.only(top: 40.0, bottom: 23, left: 27.0, right: 50.0),
-              child: Column(
+              color: const Color(0xFFDEE77A),
+              padding: const EdgeInsets.only(top: 40.0, bottom: 23, left: 27.0, right: 50.0),
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 30.0), // Adjust this value to move the circle avatar
+                        padding: EdgeInsets.only(top: 30.0), // Adjust this value to move the circle avatar
                         child: CircleAvatar(
                           radius: 40.0,
                           backgroundImage: AssetImage('lib/assets/Vector.png'), // Replace with your image asset
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(left: 20.0),
+                        padding: EdgeInsets.only(left: 20.0),
                         child: Text(
                           'Juan Dela Cruz',
                           style: TextStyle(
@@ -99,15 +101,15 @@ class _EstablishmentdailyPageState extends State< EstablishmentdailyPage> {
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Color(0xFFDEE77A),
+          canvasColor: const Color(0xFFDEE77A),
         ),
         child: BottomNavigationBar(
-          backgroundColor: Color(0xFFDEE77A),
+          backgroundColor: const Color(0xFFDEE77A),
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Color(0xFF2C812A),
-          unselectedItemColor: Color(0xFF2C812A),
-          items: [
+          selectedItemColor: const Color(0xFF2C812A),
+          unselectedItemColor: const Color(0xFF2C812A),
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
@@ -131,8 +133,8 @@ class _EstablishmentdailyPageState extends State< EstablishmentdailyPage> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: const Padding(
+        padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

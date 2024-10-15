@@ -6,6 +6,8 @@ import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/Authentication/EstablishmentLogin.dart';
 
 class LoginPageScreen extends StatefulWidget {
+  const LoginPageScreen({super.key});
+
   @override
   _LoginPageScreenState createState() => _LoginPageScreenState();
 }
@@ -42,7 +44,7 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text("Failed to login: Invalid email or password."),
           ),
         );
@@ -65,7 +67,7 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
                   Color(0xFFEEFFA9),
@@ -81,11 +83,11 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           SingleChildScrollView(
             child: Container(
               width: double.infinity,
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 80),
+                  const SizedBox(height: 80),
                   SizedBox(
                     width: 250,
                     height: 250,
@@ -94,8 +96,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                       fit: BoxFit.contain,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Padding(
+                  const SizedBox(height: 20),
+                  const Padding(
                     padding: EdgeInsets.only(left: 10, bottom: 10),
                     child: Align(
                       alignment: Alignment.centerLeft,
@@ -114,25 +116,25 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                     child: Column(
                       children: [
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          margin: EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          margin: const EdgeInsets.symmetric(vertical: 15),
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Color(0xFF5CA14E),
+                            color: const Color(0xFF5CA14E),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.person,
                                 color: Colors.white,
                               ),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: TextFormField(
                                   controller: _emailController,
-                                  style: TextStyle(color: Colors.white),
-                                  decoration: InputDecoration(
+                                  style: const TextStyle(color: Colors.white),
+                                  decoration: const InputDecoration(
                                     hintText: 'Email',
                                     hintStyle: TextStyle(color: Colors.white),
                                     border: InputBorder.none,
@@ -149,26 +151,26 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                           ),
                         ),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          margin: EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          margin: const EdgeInsets.symmetric(vertical: 15),
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Color(0xFF5CA14E),
+                            color: const Color(0xFF5CA14E),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.lock,
                                 color: Colors.white,
                               ),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: TextFormField(
                                   controller: _passwordController,
-                                  style: TextStyle(color: Colors.white),
+                                  style: const TextStyle(color: Colors.white),
                                   obscureText: true,
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     hintText: 'Password',
                                     hintStyle: TextStyle(color: Colors.white),
                                     border: InputBorder.none,
@@ -187,8 +189,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Padding(
+                  const SizedBox(height: 10),
+                  const Padding(
                     padding: EdgeInsets.only(left: 20),
                     child: Align(
                       alignment: Alignment.centerLeft,
@@ -200,12 +202,12 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   Container(
                     width: 200,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: Color(0xFF2C812A),
+                      color: const Color(0xFF2C812A),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: TextButton(
@@ -213,9 +215,9 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                         _login(context);
                       },
                       style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Login',
                         style: TextStyle(
                           color: Colors.white,
@@ -224,7 +226,7 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                   Center(
                     child: GestureDetector(
                       onTap: () {
@@ -233,7 +235,7 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                           MaterialPageRoute(builder: (context) => SignupPage()),
                         );
                       },
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
@@ -266,8 +268,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                   MaterialPageRoute(builder: (context) => EstablishmentLoginPage()),
                 );
               },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Icon(
                   Icons.business,
                   color: Color(0xFF114F3A),
