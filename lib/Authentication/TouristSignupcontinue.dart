@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart'; // Import for TapGestureRecognizer
 import 'package:flutter/services.dart';
@@ -7,6 +8,12 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:testing/Authentication/TermsandConditions.dart';
 import 'package:testing/Authentication/TouristLogin.dart';
+import '../models/region.dart';
+import '../models/province.dart';
+import '../models/city.dart';
+import '../models/barangay.dart';
+// Import your data service
+import '../services/data_service.dart';
 
 class SignupContinue extends StatefulWidget {
  final String lastName;
@@ -38,7 +45,8 @@ class _SignupContinueState extends State<SignupContinue> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _contactNumberController = TextEditingController(); // New controller
+  final TextEditingController _contactNumberController = TextEditingController();
+  final TextEditingController _specifyController = TextEditingController(); // New controller
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -47,116 +55,229 @@ class _SignupContinueState extends State<SignupContinue> {
   String _confirmPasswordWarning = '';
   List<String> _countries = [];
   List<String> _purposeOptions = [];
+  
+  // Models Lists
+  List<Region> _allRegions = [];
+  List<Province> _allProvinces = [];
+  List<City> _allCities = [];
+  List<Barangay> _allBarangays = [];
+
+  // Filtered Lists
+  List<Province> _filteredProvinces = [];
+  List<City> _filteredCities = [];
+  List<Barangay> _filteredBarangays = [];
+
+  // Selected Values
   String? _selectedPurpose;
   String? _selectedCountry;
-  String? _otherPurpose;
+  String? _selectedRegionCode;
+  String? _selectedProvinceCode;
+  String? _selectedCityCode;
+  String? _selectedBarangayCode;
+
+  // Loading States
+  bool _isLoadingRegions = false;
+  bool _isLoadingProvinces = false;
+  bool _isLoadingCities = false;
+  bool _isLoadingBarangays = false;
 
   @override
   void initState() {
     super.initState();
     _emailController.text = widget.email;
-    _contactNumberController.text = ''; // Initialize contact number controller
-    loadCountries();
-    _loadPurposeOptions();
+    _contactNumberController.text = widget.contactNumber; // Initialize contact number controller
+    loadInitialData();
   }
 
-        Future<void> _loadPurposeOptions() async {
-    // Load the JSON file
-    final String response = await rootBundle.loadString('assets/purposeoftravel.json');
-    final data = await json.decode(response);
+  Future<void> loadInitialData() async {
+    await loadCountries();
+    await _loadPurposeOptions();
+    // Regions are loaded when 'Philippines' is selected
+  }
+
+  Future<void> _loadPurposeOptions() async {
+    try {
+      final String response = await rootBundle.loadString('assets/purposeoftravel.json');
+      final data = json.decode(response);
+      setState(() {
+        _purposeOptions = List<String>.from(data['purpose_of_travel']);
+      });
+    } catch (e) {
+      print('Error loading purposeoftravel.json: $e');
+      // Optionally, show an error message to the user
+    }
+  }
+
+  Future<void> loadCountries() async {
+    try {
+      String jsonString = await rootBundle.loadString('assets/countries.json');
+      final List<dynamic> jsonResponse = json.decode(jsonString);
+      setState(() {
+        _countries = jsonResponse.map((e) => e.toString()).toList();
+      });
+    } catch (e) {
+      print('Error loading countries.json: $e');
+      // Optionally, show an error message to the user
+    }
+  }
+
+  Future<void> _loadRegions() async {
+    if (_allRegions.isNotEmpty) return; // Avoid reloading
     setState(() {
-      _purposeOptions = List<String>.from(data['purpose_of_travel']);
+      _isLoadingRegions = true;
+    });
+    _allRegions = await DataService().loadRegions();
+    setState(() {
+      _isLoadingRegions = false;
     });
   }
-      Future<void> loadCountries() async {
-      try {
-        String jsonString = await rootBundle.loadString('assets/countries.json');
-        final List<dynamic> jsonResponse = json.decode(jsonString);
-        setState(() {
-          _countries = jsonResponse.map((e) => e.toString()).toList();
-        });
-      } catch (e) {
-        print('Error loading countries.json: $e');
-        // Handle error, possibly set a default list or show a message
-      }
-    }
 
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    resizeToAvoidBottomInset: false,
-    body: Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xFFEEFFA9),
-            Color(0xFFDBFF4C),
-            Color(0xFF51F643),
-          ],
-          stops: [0.15, 0.54, 1.0],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+  Future<void> _loadProvinces() async {
+    if (_selectedRegionCode == null) return;
+    setState(() {
+      _isLoadingProvinces = true;
+    });
+    _allProvinces = await DataService().loadProvinces();
+    _filterProvinces(_selectedRegionCode!);
+    setState(() {
+      _isLoadingProvinces = false;
+    });
+  }
+
+  Future<void> _loadCities() async {
+    if (_selectedProvinceCode == null) return;
+    setState(() {
+      _isLoadingCities = true;
+    });
+    _allCities = await DataService().loadCities();
+    _filterCities(_selectedProvinceCode!);
+    setState(() {
+      _isLoadingCities = false;
+    });
+  }
+
+  Future<void> _loadBarangays() async {
+    if (_selectedCityCode == null) return;
+    setState(() {
+      _isLoadingBarangays = true;
+    });
+    _allBarangays = await DataService().loadBarangays();
+    _filterBarangays(_selectedCityCode!);
+    setState(() {
+      _isLoadingBarangays = false;
+    });
+  }
+
+  void _filterProvinces(String regionCode) {
+    setState(() {
+      _filteredProvinces = _allProvinces
+          .where((province) => province.regionCode == regionCode)
+          .toList();
+      _selectedProvinceCode = null;
+      _filteredCities = [];
+      _selectedCityCode = null;
+      _filteredBarangays = [];
+      _selectedBarangayCode = null;
+    });
+  }
+
+  void _filterCities(String provinceCode) {
+    setState(() {
+      _filteredCities = _allCities
+          .where((city) => city.provinceCode == provinceCode)
+          .toList();
+      _selectedCityCode = null;
+      _filteredBarangays = [];
+      _selectedBarangayCode = null;
+    });
+  }
+
+  void _filterBarangays(String cityCode) {
+    setState(() {
+      _filteredBarangays = _allBarangays
+          .where((barangay) => barangay.cityCode == cityCode)
+          .toList();
+      _selectedBarangayCode = null;
+    });
+  }
+
+  
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFEEFFA9),
+              Color(0xFFDBFF4C),
+              Color(0xFF51F643),
+            ],
+            stops: [0.15, 0.54, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
         ),
-      ),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20), // Adjusted height for top spacing
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Color(0xFF114F3A),
-                      size: 30,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      color: Color(0xFF114F3A),
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-                  const Text(
-                    'Residence Information',
-                    style: TextStyle(
-                      color: Color(0xFF114F3A),
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                const SizedBox(height: 3),
-              const SizedBox(height: 3),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 0),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF5CA14E),
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20), // Adjusted height for top spacing
+                Row(
                   children: [
-                    const Icon(
-                      Icons.flag,
-                      color: Colors.white,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Color(0xFF114F3A),
+                        size: 30,
+                      ),
                     ),
                     const SizedBox(width: 10),
-                    Expanded(
-                      child: Transform.translate(
-                        offset: const Offset(0, -5), // Moves the text upward by 5 pixels
+                    const Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        color: Color(0xFF114F3A),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Residence Information',
+                  style: TextStyle(
+                    color: Color(0xFF114F3A),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Country Dropdown
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5CA14E),
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.flag,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedCountry,
                           items: _countries.map((country) {
@@ -165,10 +286,22 @@ Widget build(BuildContext context) {
                               child: Text(country, style: const TextStyle(color: Colors.white)),
                             );
                           }).toList(),
-                          onChanged: (value) {
+                          onChanged: (value) async {
                             setState(() {
                               _selectedCountry = value;
+                              // Reset dependent dropdowns
+                              _selectedRegionCode = null;
+                              _selectedProvinceCode = null;
+                              _selectedCityCode = null;
+                              _selectedBarangayCode = null;
+                              _filteredProvinces = [];
+                              _filteredCities = [];
+                              _filteredBarangays = [];
                             });
+
+                            if (value == 'Philippines') {
+                              await _loadRegions();
+                            }
                           },
                           decoration: const InputDecoration(
                             hintText: 'Country of Residence',
@@ -178,18 +311,256 @@ Widget build(BuildContext context) {
                           dropdownColor: const Color(0xFF5CA14E),
                           style: const TextStyle(color: Colors.white),
                           iconEnabledColor: Colors.white,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please select country of residence';
-                            }
-                            return null;
-                          },
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+
+                // Conditionally display region, province, and city if "Philippines" is selected
+                if (_selectedCountry == 'Philippines') ...[
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Local Address',
+                    style: TextStyle(
+                      color: Color(0xFF114F3A),
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Region Dropdown
+Container(
+  margin: const EdgeInsets.symmetric(vertical: 10),
+  padding: const EdgeInsets.symmetric(horizontal: 10),
+  decoration: BoxDecoration(
+    color: const Color(0xFF5CA14E),
+    border: Border.all(color: Colors.grey),
+    borderRadius: BorderRadius.circular(10),
+  ),
+  child: Row(
+    children: [
+      const Icon(
+        Icons.map,
+        color: Colors.white,
+      ),
+      const SizedBox(width: 10),
+      Expanded(
+        child: _isLoadingRegions
+            ? const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : DropdownButtonFormField<String>(
+                isExpanded: true, // Allows the dropdown to take up all available width
+                value: _selectedRegionCode,
+                items: _allRegions.map((region) {
+                  return DropdownMenuItem<String>(
+                    value: region.regionCode,
+                    child: Text(
+                      region.regionName,
+                      style: const TextStyle(color: Colors.white),
+                      overflow: TextOverflow.ellipsis, // Handles long text
+                      maxLines: 1,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) async {
+                  setState(() {
+                    _selectedRegionCode = value;
+                    _selectedProvinceCode = null;
+                    _selectedCityCode = null;
+                    _selectedBarangayCode = null;
+                    _filteredProvinces = [];
+                    _filteredCities = [];
+                    _filteredBarangays = [];
+                  });
+
+                  if (value != null) {
+                    await _loadProvinces();
+                  }
+                },
+                decoration: const InputDecoration(
+                  hintText: 'Region',
+                  hintStyle: TextStyle(color: Colors.white),
+                  border: InputBorder.none,
+                ),
+                dropdownColor: const Color(0xFF5CA14E),
+                style: const TextStyle(color: Colors.white),
+                iconEnabledColor: Colors.white,
               ),
+      ),
+    ],
+  ),
+),
+
+                  // Province Dropdown
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5CA14E),
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.location_city,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _isLoadingProvinces
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : DropdownButtonFormField<String>(
+                                  value: _selectedProvinceCode,
+                                  items: _filteredProvinces.map((province) {
+                                    return DropdownMenuItem<String>(
+                                      value: province.provinceCode,
+                                      child: Text(province.provinceName, style: const TextStyle(color: Colors.white)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      _selectedProvinceCode = value;
+                                      _selectedCityCode = null;
+                                      _selectedBarangayCode = null;
+                                      _filteredCities = [];
+                                      _filteredBarangays = [];
+                                    });
+
+                                    if (value != null) {
+                                      await _loadCities();
+                                    }
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'Province',
+                                    hintStyle: TextStyle(color: Colors.white),
+                                    border: InputBorder.none,
+                                  ),
+                                  dropdownColor: const Color(0xFF5CA14E),
+                                  style: const TextStyle(color: Colors.white),
+                                  iconEnabledColor: Colors.white,
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // City Dropdown
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5CA14E),
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _isLoadingCities
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : DropdownButtonFormField<String>(
+                                  value: _selectedCityCode,
+                                  items: _filteredCities.map((city) {
+                                    return DropdownMenuItem<String>(
+                                      value: city.cityCode,
+                                      child: Text(city.cityName, style: const TextStyle(color: Colors.white)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      _selectedCityCode = value;
+                                      _selectedBarangayCode = null;
+                                      _filteredBarangays = [];
+                                    });
+
+                                    if (value != null) {
+                                      await _loadBarangays();
+                                    }
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'City / Municipality',
+                                    hintStyle: TextStyle(color: Colors.white),
+                                    border: InputBorder.none,
+                                  ),
+                                  dropdownColor: const Color(0xFF5CA14E),
+                                  style: const TextStyle(color: Colors.white),
+                                  iconEnabledColor: Colors.white,
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Barangay Dropdown
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5CA14E),
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.home,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _isLoadingBarangays
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : DropdownButtonFormField<String>(
+                                  value: _selectedBarangayCode,
+                                  items: _filteredBarangays.map((barangay) {
+                                    return DropdownMenuItem<String>(
+                                      value: barangay.barangayCode,
+                                      child: Text(barangay.barangayName, style: const TextStyle(color: Colors.white)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedBarangayCode = value;
+                                    });
+                                    // No further loading needed
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'Barangay',
+                                    hintStyle: TextStyle(color: Colors.white),
+                                    border: InputBorder.none,
+                                  ),
+                                  dropdownColor: const Color(0xFF5CA14E),
+                                  style: const TextStyle(color: Colors.white),
+                                  iconEnabledColor: Colors.white,
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                const SizedBox(height: 10),
                   const Text(
                     'Additional Information',
@@ -199,9 +570,7 @@ Widget build(BuildContext context) {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-             Column(
-  children: [
-    const SizedBox(height: 3),
+           const SizedBox(height: 3),
 Container(
   margin: const EdgeInsets.symmetric(vertical: 0),
   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -210,78 +579,89 @@ Container(
     border: Border.all(color: Colors.grey),
     borderRadius: BorderRadius.circular(10),
   ),
-  child: Column(
+  child: Row(
     children: [
-      Row(
-        children: [
-          const Icon(
-            Icons.travel_explore_rounded,
-            color: Colors.white,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Transform.translate(
-              offset: const Offset(0, -5), // Moves the text upward by 5 pixels
-              child: DropdownButtonFormField<String>(
-                value: _selectedPurpose,
-                items: _purposeOptions.map((country) {
-                  return DropdownMenuItem<String>(
-                    value: country,
-                    child: Text(country, style: const TextStyle(color: Colors.white)),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedPurpose = value;
-                  });
-                },
-                decoration: const InputDecoration(
-                  hintText: 'Country of Residence',
-                  hintStyle: TextStyle(color: Colors.white),
-                  border: InputBorder.none,
-                ),
-                dropdownColor: const Color(0xFF5CA14E),
-                style: const TextStyle(color: Colors.white),
-                iconEnabledColor: Colors.white,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select country of residence';
-                  }
-                  return null;
-                },
-              ),
-            ),
-          ),
-        ],
+      const Icon(
+        Icons.travel_explore_rounded,
+        color: Colors.white,
       ),
-      if (_selectedPurpose == 'OTHERS') ...[
-                const SizedBox(height: 20), // Add space between the dropdown and the input field
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Please Specify',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      hintStyle: TextStyle(color: Colors.white),
-                    ),
-                    style: const TextStyle(color: Colors.white),
-                    onChanged: (value) {
-                      setState(() {
-                        _otherPurpose = value; // Store the input value
+      const SizedBox(width: 10),
+      Expanded(
+        child: Transform.translate(
+          offset: const Offset(0, -5), // Moves the text upward by 5 pixels
+          child: DropdownButtonFormField<String>(
+            value: _selectedPurpose,
+            items: _purposeOptions.map((country) { 
+              return DropdownMenuItem<String>(
+                value: country,
+                child: Text(country, style: const TextStyle(color: Colors.white)),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedPurpose = value;
               });
+            },
+            decoration: const InputDecoration(
+              hintText: 'Purpose of Travel',
+              hintStyle: TextStyle(color: Colors.white),
+              border: InputBorder.none,
+            ),
+            dropdownColor: const Color(0xFF5CA14E),
+            style: const TextStyle(color: Colors.white),
+            iconEnabledColor: Colors.white,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select country of residence';
+              }
+              return null;
             },
           ),
         ),
+      ),
     ],
-            ]),
+  ),
 ),
-
+// Conditionally show the "Please Specify" input field if "Others" is selected
+if (_selectedPurpose == 'OTHERS') ...[
+          const SizedBox(height: 10), // Add space between the dropdown and the new container
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 0),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF5CA14E),
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.edit, // You can change this icon to any other relevant one
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Transform.translate(
+                    offset: const Offset(0, -5), // Moves the text upward by 5 pixels
+                    child: TextFormField(
+                      controller: _specifyController,
+                      decoration: const InputDecoration(
+                        hintText: 'Please Specify',
+                        hintStyle: TextStyle(color: Colors.white),
+                        border: InputBorder.none,
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please specify your purpose';
+                        }
+                        return null;
+          },
+        ),
+            ))],
+    ),
+  ),
+],
                const SizedBox(height: 13),
                   const Text(
                     'Credentials',
@@ -567,9 +947,9 @@ Container(
                const SizedBox(height: 60),
             ],
           ),
-        ]),
+        ),
       ),)
-    ));
+    );
   }
   void _registerUser() async {
     try {
@@ -629,7 +1009,7 @@ Container(
   CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
 
   Map<String, dynamic> userData = {
-    'last_name': widget.lastName,
+     'last_name': widget.lastName,
     'first_name': widget.firstName,
     'email': _emailController.text,
     'nationality': widget.selectedNationality,
@@ -638,7 +1018,12 @@ Container(
     'password': _passwordController.text, // Store password securely (consider hashing in real apps)
     'civil_status': widget.civilStatus,
     'purpose_of_travel': _purposeController.text,
+    'otherPurpose': _selectedPurpose == 'OTHERS' ? _specifyController.text : null, // Save specified purpose if 'OTHERS'
     'contact_number': _contactNumberController.text, // Include contact number
+    'region': _selectedRegionCode != null ? _allRegions.firstWhere((region) => region.regionCode == _selectedRegionCode).regionName : '',
+    'province': _selectedProvinceCode != null ? _filteredProvinces.firstWhere((province) => province.provinceCode == _selectedProvinceCode).provinceName : '',
+    'city': _selectedCityCode != null ? _filteredCities.firstWhere((city) => city.cityCode == _selectedCityCode).cityName : '',
+    'barangay': _selectedBarangayCode != null ? _filteredBarangays.firstWhere((barangay) => barangay.barangayCode == _selectedBarangayCode).barangayName : '',
   };
 
   // Remove empty strings from the data before saving
