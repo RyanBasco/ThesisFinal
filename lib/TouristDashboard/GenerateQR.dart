@@ -29,44 +29,41 @@ class _GenerateQRState extends State<GenerateQR> {
   }
 
   void _fetchUserData() async {
-    String? userEmail = FirebaseAuth.instance.currentUser?.email;
+  String? userEmail = FirebaseAuth.instance.currentUser?.email;
 
-    if (userEmail != null) {
-      try {
-        var querySnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .where('email', isEqualTo: userEmail)
-            .get();
+  if (userEmail != null) {
+    try {
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('email', isEqualTo: userEmail)
+          .get();
 
-        if (querySnapshot.docs.isNotEmpty) {
-          userData = querySnapshot.docs.first.data();
+      if (querySnapshot.docs.isNotEmpty) {
+        var document = querySnapshot.docs.first;
+        userData = document.data();
+        String documentId = document.id; // Fetch the document ID
 
-          setState(() {
-            qrData = "First Name: ${userData!['first_name'] ?? ''}\n"
-                "Last Name: ${userData!['last_name'] ?? ''}\n"
-                "Email: $userEmail\n"
-                "Birthday: ${userData!['birthday'] ?? ''}\n"
-                "City: ${userData!['city'] ?? ''}\n"
-                "Civil Status: ${userData!['civil_status'] ?? ''}\n"
-                "Country: ${userData!['country'] ?? ''}\n"
-                "Nationality: ${userData!['nationality'] ?? ''}\n"
-                "Province: ${userData!['province'] ?? ''}\n"
-                "Purpose of Travel: ${userData!['purpose_of_travel'] ?? ''}\n"
-                "Sex: ${userData!['sex'] ?? ''}";
-          });
-        } else {
-          print('User data not found for email: $userEmail');
-          // Handle case where user data is not found
-        }
-      } catch (error) {
-        print('Failed to fetch user data: $error');
-        // Handle error as needed
+        // Fetch first and last name from userData
+        String firstName = userData?['first_name'] ?? '';
+        String lastName = userData?['last_name'] ?? '';
+
+        setState(() {
+          // Include first and last name along with the document ID in QR data
+          qrData = "$firstName $lastName, ID: $documentId"; // Updated line
+        });
+      } else {
+        print('User data not found for email: $userEmail');
       }
-    } else {
-      print('User email is null');
-      // Handle case where user email is null
+    } catch (error) {
+      print('Failed to fetch user data: $error');
     }
+  } else {
+    print('User email is null');
   }
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -157,12 +154,6 @@ class _GenerateQRState extends State<GenerateQR> {
               ),
             ),
           ),
-          Positioned(
-            bottom: 140, // Adjusted to move the buttons higher
-            left: 20,
-            right: 20,
-            child: _buildButton('Save', Icons.save_alt, const Color(0xFF288F13), _saveQRImage),
-          ),
         ],
       ),
     );
@@ -199,7 +190,7 @@ class _GenerateQRState extends State<GenerateQR> {
         children: [
           Center(
             child: QrImageView(
-              data: qrData,
+              data: qrData, // QR code with both email and document ID
               version: QrVersions.auto,
               size: 200.0,
             ),
@@ -218,31 +209,30 @@ class _GenerateQRState extends State<GenerateQR> {
     );
   }
 
- Widget _buildButton(String label, IconData icon, Color color, Function() onPressed) {
-  return SizedBox(
-    width: 120, // Adjust width as needed
-    child: ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: Colors.white),
-      label: Text(
-        label,
-        style: const TextStyle(color: Colors.white, fontSize: 16),
-      ),
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all<Color>(color),
-        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+  Widget _buildButton(String label, IconData icon, Color color, Function() onPressed) {
+    return SizedBox(
+      width: 120, // Adjust width as needed
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.white),
+        label: Text(
+          label,
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all<Color>(color),
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+            const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           ),
         ),
-        padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-          const EdgeInsets.symmetric(vertical: 14, horizontal: 16), // Adjust padding for icon and text spacing
-        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -252,28 +242,24 @@ class _GenerateQRState extends State<GenerateQR> {
     // Handle navigation based on bottom navigation bar index
     switch (index) {
       case 0:
-        // Check if "Home" option is tapped (handled in the same page)
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserdashboardPageState()),
         );
         break;
       case 1:
-        // Handle "My QR" or any custom functionality
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => QRPage()),
         );
         break;
       case 2:
-        // Check if "Wallet" option is tapped
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => RegistrationPage()),
         );
         break;
       case 3:
-        // Check if "Profile" option is tapped
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => TouristprofilePage()),
@@ -282,35 +268,31 @@ class _GenerateQRState extends State<GenerateQR> {
     }
   }
 
+  Future<void> _saveQRImage() async {
+    try {
+      final QrPainter painter = QrPainter(
+        data: qrData,
+        version: QrVersions.auto,
+        gapless: false,
+      );
 
- Future<void> _saveQRImage() async {
-  try {
-    final QrPainter painter = QrPainter(
-      data: qrData,
-      version: QrVersions.auto,
-      gapless: false,
-    );
+      final ByteData? bytes = await painter.toImageData(200.0);
 
-    final ByteData? bytes = await painter.toImageData(200.0);
+      if (bytes != null) {
+        final directory = await getApplicationDocumentsDirectory();
+        final imagePath = '${directory.path}/qr_image.png';
 
-    if (bytes != null) {
-      // Get the local directory path using path_provider
-      final directory = await getApplicationDocumentsDirectory();
-      final imagePath = '${directory.path}/qr_image.png';
+        final File imageFile = File(imagePath);
+        await imageFile.writeAsBytes(bytes.buffer.asUint8List());
 
-      // Write the image to the local file
-      final File imageFile = File(imagePath);
-      await imageFile.writeAsBytes(bytes.buffer.asUint8List());
-
-      // Show a snackbar or toast message that the image is saved locally
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('QR image saved to local files'),
-      ));
-    } else {
-      print('Failed to generate QR image data');
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('QR image saved to local files'),
+        ));
+      } else {
+        print('Failed to generate QR image data');
+      }
+    } catch (e) {
+      print('Failed to save QR image: $e');
     }
-  } catch (e) {
-    print('Failed to save QR image: $e');
   }
-}
 }

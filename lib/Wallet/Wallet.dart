@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Wallet/Categories.dart';
+import 'package:testing/Wallet/Records.dart';
 import 'package:testing/Wallet/Tomatoredarc.dart';
 import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -276,7 +277,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       alignment: Alignment.centerLeft,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          // Handle button press
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => RecordsPage()),
+                          );
                         },
                         icon: const Icon(Icons.insert_drive_file, color: Color(0xFF288F13)),
                         label: const Text(

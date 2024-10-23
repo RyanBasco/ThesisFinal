@@ -12,11 +12,10 @@ import '../models/region.dart';
 import '../models/province.dart';
 import '../models/city.dart';
 import '../models/barangay.dart';
-// Import your data service
 import '../services/data_service.dart';
 
 class SignupContinue extends StatefulWidget {
- final String lastName;
+  final String lastName;
   final String firstName;
   final String email;
   final String selectedNationality;
@@ -951,7 +950,7 @@ if (_selectedPurpose == 'OTHERS') ...[
       ),)
     );
   }
-  void _registerUser() async {
+ void _registerUser() async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text,

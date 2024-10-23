@@ -20,12 +20,12 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _nationalityController = TextEditingController();
   final TextEditingController _contactNumberController = TextEditingController();
 
   DateTime? _selectedDate;
   String? _selectedSex;
   String? _selectedCivilStatus;
+  String? _selectedNationality;
   
 
   // List to store the loaded nationalities
@@ -58,7 +58,6 @@ class _SignupPageState extends State<SignupPage> {
     _lastNameController.dispose();
     _firstNameController.dispose();
     _emailController.dispose();
-    _nationalityController.dispose();
     _contactNumberController.dispose();
     super.dispose();
   }
@@ -275,7 +274,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 // Updated Nationality Field
-                Container(
+              Container(
                   margin: const EdgeInsets.symmetric(vertical: 15),
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
@@ -292,7 +291,7 @@ class _SignupPageState extends State<SignupPage> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _nationalityController.text.isNotEmpty ? _nationalityController.text : null,
+                          value: _selectedNationality, // Use the variable here
                           items: _nationalities.map((nationality) {
                             return DropdownMenuItem<String>(
                               value: nationality,
@@ -301,7 +300,7 @@ class _SignupPageState extends State<SignupPage> {
                           }).toList(),
                           onChanged: (value) {
                             setState(() {
-                              _nationalityController.text = value ?? '';
+                              _selectedNationality = value; // Set the selected nationality
                             });
                           },
                           decoration: const InputDecoration(
@@ -381,22 +380,22 @@ class _SignupPageState extends State<SignupPage> {
                         if (_formKey.currentState!.validate()) {
                           // Form is validated, proceed to next screen
                           Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SignupContinue(
-                                lastName: _lastNameController.text,
-                                firstName: _firstNameController.text,
-                                email: _emailController.text,
-                                selectedNationality: _nationalityController.text,
-                                contactNumber: _contactNumberController.text, // Added contact number
-                                birthday: _selectedDate != null
-                                    ? DateFormat.yMMMMd().format(_selectedDate!)
-                                    : '',
-                                sex: _selectedSex ?? '',
-                                civilStatus: _selectedCivilStatus ?? '',
-                              ),
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SignupContinue(
+                              lastName: _lastNameController.text,
+                              firstName: _firstNameController.text,
+                              email: _emailController.text,
+                              selectedNationality: _selectedNationality ?? '', // Use the selected variable
+                              contactNumber: _contactNumberController.text,
+                              birthday: _selectedDate != null
+                                  ? DateFormat.yMMMMd().format(_selectedDate!)
+                                  : '',
+                              sex: _selectedSex ?? '',
+                              civilStatus: _selectedCivilStatus ?? '',
                             ),
-                          );
+                          ),
+                        );
                         }
                       },
                       child: const Text(
