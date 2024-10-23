@@ -13,9 +13,9 @@ class BookmarkPage extends StatefulWidget {
 }
 
 class _BookmarkPageState extends State<BookmarkPage> {
-  List<Map<String, dynamic>> _bookmarkedItems = []; // Store bookmarked items
-  int _selectedIndex = 3; // Track the selected index for bottom navigation
-  String _selectedCategory = ""; // Track the selected category
+  List<Map<String, dynamic>> _bookmarkedItems = [];
+  int _selectedIndex = 3;
+  String _selectedCategory = "";
 
   @override
   void initState() {
@@ -36,14 +36,13 @@ class _BookmarkPageState extends State<BookmarkPage> {
         setState(() {
           _bookmarkedItems = querySnapshot.docs
               .map((doc) => {
-                    'id': doc.id, // Include document ID for deletion
+                    'id': doc.id,
                     ...doc.data(),
                   })
               .toList();
         });
       } catch (error) {
         print('Failed to fetch bookmarked items: $error');
-        // Handle error as needed
       }
     }
   }
@@ -58,14 +57,14 @@ class _BookmarkPageState extends State<BookmarkPage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                _removeBookmarkedItem(docId); // Proceed with removal
+                Navigator.of(context).pop();
+                _removeBookmarkedItem(docId);
               },
               child: const Text('Confirm'),
             ),
@@ -91,7 +90,6 @@ class _BookmarkPageState extends State<BookmarkPage> {
         });
       } catch (error) {
         print('Failed to delete bookmarked item: $error');
-        // Handle error as needed
       }
     }
   }
@@ -137,7 +135,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
       child: GestureDetector(
         onTap: () => _onCategoryTap(category),
         child: Container(
-          margin: const EdgeInsets.only(right: 15), // Increased space between boxes
+          margin: const EdgeInsets.only(right: 15),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFF2C812A) : Colors.white,
@@ -167,78 +165,97 @@ class _BookmarkPageState extends State<BookmarkPage> {
   }
 
   Widget _buildBookmarkedItem(Map<String, dynamic> item) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: Container(
-        height: 120,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    bottomLeft: Radius.circular(20),
-                  ),
-                  image: DecorationImage(
-                    image: AssetImage(item['imagePath']),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              flex: 3,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item['title'],
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
+  // Get the image path, default to null if not present
+  String? imagePath = item['imagePath'];
+  String title = item['title'] ?? 'No Title';
+  String location = item['location'] ?? 'No Location';
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+    child: Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: imagePath != null && imagePath.isNotEmpty
+                ? Container(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        bottomLeft: Radius.circular(20),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      image: DecorationImage(
+                        image: AssetImage(imagePath),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      item['location'],
-                      style: const TextStyle(
-                        fontSize: 14,
+                  )
+                : CircleAvatar(
+                    radius: 55, // Adjust size as needed
+                    backgroundColor: Colors.grey.shade300,
+                    child: Text(
+                      title.isNotEmpty ? title[0].toUpperCase() : '?', // Use the first letter of the title
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 3,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    location,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _showConfirmationDialog(item['id']),
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _showConfirmationDialog(item['id']),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -299,7 +316,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context); // Navigate back to the previous page
+                      Navigator.pop(context);
                     },
                     child: const CircleAvatar(
                       backgroundColor: Colors.white,
@@ -339,9 +356,9 @@ class _BookmarkPageState extends State<BookmarkPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   _buildCategoryBox('Places'),
-                  const SizedBox(width: 5), // Added space between boxes
+                  const SizedBox(width: 5),
                   _buildCategoryBox('Food'),
-                  const SizedBox(width: 5), // Added space between boxes
+                  const SizedBox(width: 5),
                   _buildCategoryBox('Other'),
                 ],
               ),
