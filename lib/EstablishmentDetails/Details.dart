@@ -6,7 +6,9 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class DetailsPage extends StatefulWidget {
-  const DetailsPage({super.key});
+  final String establishmentName; // Add this line to accept establishment name
+
+  const DetailsPage({super.key, required this.establishmentName}); // Update constructor
 
   @override
   _DetailsPageState createState() => _DetailsPageState();
@@ -143,7 +145,6 @@ class _DetailsPageState extends State<DetailsPage> {
                   ],
                 ),
               ),
-              // Use Align and FractionallySizedBox to adjust the width of the image
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Stack(
@@ -151,19 +152,19 @@ class _DetailsPageState extends State<DetailsPage> {
                     Align(
                       alignment: Alignment.center,
                       child: FractionallySizedBox(
-                        widthFactor: 0.9, // Adjust the width factor to reduce the image width
+                        widthFactor: 0.9,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.asset(
                             'assets/Pension.png', // Replace with your image path
-                            fit: BoxFit.cover, // Ensures the image fills the box
-                            height: 400, // Adjust the height as needed
+                            fit: BoxFit.cover,
+                            height: 400,
                           ),
                         ),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 18, top: 315), // Adjust the padding values as needed
+                      padding: const EdgeInsets.only(left: 18, top: 315),
                       child: Align(
                         alignment: Alignment.bottomLeft,
                         child: Container(
@@ -185,15 +186,15 @@ class _DetailsPageState extends State<DetailsPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Row(
+                              Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'JL Pension House', // Replace with your content
-                                    style: TextStyle(
+                                    widget.establishmentName, // Use the passed establishment name
+                                    style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF288F13), // Text color
+                                      color: Color(0xFF288F13),
                                     ),
                                   ),
                                 ],
@@ -201,13 +202,13 @@ class _DetailsPageState extends State<DetailsPage> {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  const Icon(Icons.location_on, color: Color(0xFF288F13), size: 20), // Change color here
+                                  const Icon(Icons.location_on, color: Color(0xFF288F13), size: 20),
                                   const SizedBox(width: 5),
                                   Text(
                                     'San Miguel, Jordan',
                                     style: TextStyle(
                                       fontSize: 16,
-                                      color: Colors.grey[500], // Change color here
+                                      color: Colors.grey[500],
                                     ),
                                   ),
                                 ],
@@ -232,12 +233,12 @@ class _DetailsPageState extends State<DetailsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20), // Adjust the padding values as needed
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 20), // Adjust padding to separate the boxes
+                      padding: const EdgeInsets.only(left: 20),
                       child: Container(
                         width: 120,
                         height: 40,
@@ -272,7 +273,7 @@ class _DetailsPageState extends State<DetailsPage> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(right: 80), // Adjust padding to separate the boxes
+                      padding: const EdgeInsets.only(right: 80),
                       child: Container(
                         width: 120,
                         height: 40,
@@ -352,7 +353,7 @@ class _DetailsPageState extends State<DetailsPage> {
                     const SizedBox(height: 20),
                     Center(
                       child: ElevatedButton.icon(
-                        onPressed: _navigateToDirectionsPage, // Navigate to DirectionsPage
+                        onPressed: _navigateToDirectionsPage,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2C812A),
                           shape: RoundedRectangleBorder(
@@ -374,7 +375,6 @@ class _DetailsPageState extends State<DetailsPage> {
                   ],
                 ),
               ),
-              // Add more widgets or content here
             ],
           ),
         ),

@@ -1,11 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
-import 'package:intl/intl.dart';
-
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -19,11 +21,13 @@ class _EditProfileState extends State<EditProfile> {
   String _lastName = '';
   String _birthday = '';
   String _email = '';
-  String _contactNumber = ''; // New field for storing contact number
+  String _contactNumber = '';
+  String? _profileImageUrl;
+  File? _profileImage;
 
-  int _selectedIndex = 3; // Set default index to 3 for Profile
-
-  bool _isEditing = false; // Toggle for editing mode
+  int _selectedIndex = 3;
+  bool _isEditing = false;
+  bool _showCancelButton = false;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _birthdayController = TextEditingController();
@@ -39,31 +43,82 @@ class _EditProfileState extends State<EditProfile> {
   void _fetchUserData() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      print('Authenticated user UID: ${user.uid}'); // Debugging log
       try {
-        var querySnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .where('email', isEqualTo: user.email)
-            .get();
+        var querySnapshot = await FirebaseFirestore.instance.collection('Users').get();
 
-        if (querySnapshot.size > 0) {
-          var userData = querySnapshot.docs.first.data();
-          setState(() {
-            _firstName = userData['first_name'] ?? '';
-            _lastName = userData['last_name'] ?? '';
-            _birthday = userData['birthday'] ?? '';
-            _email = user.email ?? '';
-            _contactNumber = userData['contact_number'] ?? '';
+        for (var document in querySnapshot.docs) {
+          String emailFromFirestore = document.data()['email'] ?? '';
 
-            _nameController.text = '$_firstName $_lastName';
-            _birthdayController.text = _birthday;
-            _emailController.text = _email;
-            _contactNumberController.text = _contactNumber;
-          });
-        } else {
-          print('User data not found for email: ${user.email}');
+          // Compare with lowercase email
+          if (emailFromFirestore.toLowerCase() == user.email!.toLowerCase()) {
+            var userData = document.data();
+            setState(() {
+              _firstName = userData['first_name'] ?? '';
+              _lastName = userData['last_name'] ?? '';
+              _birthday = userData['birthday'] ?? '';
+              _email = userData['email'] ?? '';
+              _contactNumber = userData['contact_number'] ?? '';
+              _profileImageUrl = userData['profile_image_url'];
+
+              // Set the controllers
+              _nameController.text = '$_firstName $_lastName';
+              _birthdayController.text = _birthday;
+              _emailController.text = _email; // Set the fetched email
+              _contactNumberController.text = _contactNumber;
+            });
+            return; // Exit the loop once a match is found
+          }
         }
+
+        print('User data not found for email: ${user.email}');
       } catch (error) {
         print('Failed to fetch user data: $error');
+      }
+    } else {
+      print('No authenticated user found.');
+    }
+  }
+
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _profileImage = File(image.path);
+      });
+      await _uploadImageToFirebase(image);
+    }
+  }
+
+  Future<void> _uploadImageToFirebase(XFile image) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        String fileName = '${user.uid}/profile_image/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        Reference ref = FirebaseStorage.instance.ref().child(fileName);
+        await ref.putFile(File(image.path));
+
+        String downloadUrl = await ref.getDownloadURL();
+
+        await FirebaseFirestore.instance.collection('Users').doc(user.uid).update({
+          'profile_image_url': downloadUrl,
+        });
+
+        setState(() {
+          _profileImageUrl = downloadUrl;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Image uploaded successfully!')),
+        );
+      } catch (error) {
+        print('Failed to upload image: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to upload image. Please try again.')),
+        );
       }
     }
   }
@@ -92,31 +147,48 @@ class _EditProfileState extends State<EditProfile> {
           MaterialPageRoute(builder: (context) => RegistrationPage()),
         );
         break;
-      // case 3: // No need to navigate to the same page (Profile)
     }
   }
 
   void _toggleEdit() {
     setState(() {
       _isEditing = !_isEditing;
+      _showCancelButton = _isEditing; // Show cancel button if editing
+    });
+  }
+
+  void _cancelEditing() {
+    setState(() {
+      _isEditing = false;
+      _showCancelButton = false; // Hide cancel button
+      // Reset the controllers to the original values
+      _nameController.text = '$_firstName $_lastName';
+      _birthdayController.text = _birthday;
+      _contactNumberController.text = _contactNumber;
     });
   }
 
   void _saveChanges() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        var querySnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .where('email', isEqualTo: user.email)
-            .get();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('email', isEqualTo: user.email)
+          .get();
 
-        if (querySnapshot.size > 0) {
-          var userDoc = querySnapshot.docs.first.reference;
-          var nameParts = _nameController.text.split(' ');
-          var firstName = nameParts.isNotEmpty ? nameParts[0] : '';
-          var lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+      if (querySnapshot.size > 0) {
+        var userDoc = querySnapshot.docs.first.reference;
+        var nameParts = _nameController.text.split(' ');
 
+        String firstName = nameParts.length > 1 ? nameParts.sublist(0, nameParts.length - 1).join(' ') : nameParts.isNotEmpty ? nameParts[0] : '';
+        String lastName = nameParts.isNotEmpty ? nameParts.last : '';
+
+        // Check if first name or last name has changed
+        bool firstNameChanged = firstName != _firstName;
+        bool lastNameChanged = lastName != _lastName;
+
+        if (firstNameChanged || lastNameChanged) {
           await userDoc.update({
             'first_name': firstName,
             'last_name': lastName,
@@ -130,36 +202,41 @@ class _EditProfileState extends State<EditProfile> {
             _birthday = _birthdayController.text;
             _contactNumber = _contactNumberController.text;
             _isEditing = false;
+            _showCancelButton = false; // Hide cancel button after saving
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Profile updated successfully!')),
           );
         } else {
-          print('User data not found for email: ${user.email}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No changes detected.')),
+          );
         }
-      } catch (error) {
-        print('Failed to update user data: $error');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update profile. Please try again.')),
-        );
       }
+    } catch (error) {
+      print('Failed to update user data: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to update profile. Please try again.')),
+      );
     }
   }
+}
+
 
   Future<void> _selectDate(BuildContext context) async {
-  DateTime? picked = await showDatePicker(
-    context: context,
-    initialDate: DateTime.now(),
-    firstDate: DateTime(1900),
-    lastDate: DateTime(2101),
-  );
-  if (picked != null && picked != DateTime.now()) {
-    setState(() {
-      _birthdayController.text = DateFormat('MMMM d, yyyy').format(picked);
-    });
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != DateTime.now()) {
+      setState(() {
+        _birthdayController.text = DateFormat('MMMM d, yyyy').format(picked);
+      });
+    }
   }
-}
 
   Widget _buildTextField({
     required String labelText,
@@ -183,7 +260,7 @@ class _EditProfileState extends State<EditProfile> {
           width: 260,
           height: 55,
           decoration: BoxDecoration(
-            color: Colors.grey[200], // Light grey background
+            color: Colors.grey[200],
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Padding(
@@ -191,15 +268,15 @@ class _EditProfileState extends State<EditProfile> {
             child: TextField(
               controller: controller,
               style: TextStyle(
-                color: Colors.grey[700], // Grey [600] text color
+                color: Colors.grey[700],
                 fontSize: 18,
               ),
               enabled: enabled,
-              textAlign: TextAlign.center, // Centering the text
+              textAlign: TextAlign.center,
               decoration: const InputDecoration(
                 border: InputBorder.none,
               ),
-              readOnly: onTap != null, // Make the text field read-only if onTap is provided
+              readOnly: onTap != null,
               onTap: onTap,
             ),
           ),
@@ -209,228 +286,217 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: Colors.white,
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: const Color(0xFF2C812A),
-          unselectedItemColor: Colors.black,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code),
-              label: 'My QR',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet),
-              label: 'Wallet',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    bottomNavigationBar: Theme(
+      data: Theme.of(context).copyWith(
+        canvasColor: Colors.white,
+      ),
+      child: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: const Color(0xFF2C812A),
+        unselectedItemColor: Colors.black,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code),
+            label: 'My QR',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_balance_wallet),
+            label: 'Wallet',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    ),
+    body: Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFFEEFFA9),
+            Color(0xFFDBFF4C),
+            Color(0xFF51F643),
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFEEFFA9),
-              Color(0xFFDBFF4C),
-              Color(0xFF51F643),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.15, 0.54, 1.0],
-          ),
-        ),
-        child: SingleChildScrollView(
+      child: SingleChildScrollView(
+        child: Center(
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                padding: const EdgeInsets.only(top: 40.0, left: 20.0),
                 child: Row(
                   children: [
                     GestureDetector(
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.pop(context); // Go back to the previous page
                       },
-                      child: const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.arrow_back, color: Colors.black),
+                      child: Container(
+                        padding: const EdgeInsets.all(10.0), // Add padding for the circle size
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white, // Circle color
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 10.0,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.black,
+                          size: 24, // Size of the back icon
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Profile',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                        textAlign: TextAlign.center,
+                    const SizedBox(width: 80), // Space between the icon and text
+                    const Text(
+                      'Edit Profile',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
-              Center(
-                child: Container(
-                  width: 300,
-                  height: 640, // Increased height to accommodate new items
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 20,
-                        left: 20,
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.black,
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 55,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 10, // Adjusted to align with the profile icon
-                        bottom: 490,
-                        left: 70, // Adjust position to bottom right
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.black,
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                     const Positioned(
-                        top: 60, // Adjusted for better positioning
-                        right: 60,
-                        child: Text(
-                          'Upload Image',
-                          style: TextStyle(
-                            color: Color(0xFF2C812A), // Set color to 2C812A
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 120,
-                        left: 20,
-                        child: _buildTextField(
-                          labelText: 'Name',
-                          controller: _nameController,
-                          enabled: _isEditing,
-                        ),
-                      ),
-                      Positioned(
-                        top: 220,
-                        left: 20,
-                        child: _buildTextField(
-                          labelText: 'Birthday',
-                          controller: _birthdayController,
-                          enabled: _isEditing,
-                          onTap: () => _selectDate(context), // Show calendar picker
-                        ),
-                      ),
-                      Positioned(
-                        top: 320,
-                        left: 20,
-                        child: _buildTextField(
-                          labelText: 'Email',
-                          controller: _emailController,
-                          enabled: _isEditing,
-                        ),
-                      ),
-                      Positioned(
-                        top: 420,
-                        left: 20,
-                        child: _buildTextField(
-                          labelText: 'Contact Number',
-                          controller: _contactNumberController,
-                          enabled: _isEditing,
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 20,
-                        left: 20,
-                        right: 20,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton(
-                              onPressed: _toggleEdit,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2C812A), // Green color
-                                foregroundColor: Colors.white, // White text color
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: Text(_isEditing ? 'Cancel' : 'Edit'),
+              Container(
+                width: 300,
+                height: 660,
+                padding: const EdgeInsets.all(16.0),
+                margin: const EdgeInsets.only(top: 10.0, bottom: 20.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10.0,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      height: 150,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: 20,
+                            left: 20,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.black,
+                              radius: 55,
+                              backgroundImage: _profileImageUrl != null
+                                  ? NetworkImage(_profileImageUrl!)
+                                  : null,
+                              child: _profileImageUrl == null
+                                  ? const Icon(Icons.person, color: Colors.white, size: 65)
+                                  : null,
                             ),
-                            if (_isEditing)
-                              ElevatedButton(
-                                onPressed: _saveChanges,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2C812A), // Green color
-                                  foregroundColor: Colors.white, // White text color
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
+                          ),
+                          Positioned(
+                            top: 80,
+                            left: 110, // Move icon a bit to the right
+                            child: GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                padding: const EdgeInsets.all(12.0), // Add padding for the circle size
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey[400], // Circle color
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 10.0,
+                                      offset: Offset(0, 5),
+                                    ),
+                                  ],
                                 ),
-                                child: const Text('Save'),
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.black,
+                                  size: 30, // Size of the camera icon
+                                ),
                               ),
-                          ],
-                        ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildTextField(
+                      labelText: 'Full Name',
+                      controller: _nameController,
+                      enabled: _isEditing,
+                    ),
+                    const SizedBox(height: 10),
+                    _buildTextField(
+                      labelText: 'Birthday',
+                      controller: _birthdayController,
+                      enabled: _isEditing,
+                      onTap: () => _selectDate(context),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildTextField(
+                      labelText: 'Email',
+                      controller: _emailController,
+                      enabled: false, // Email is not editable
+                    ),
+                    const SizedBox(height: 10),
+                    _buildTextField(
+                      labelText: 'Contact Number',
+                      controller: _contactNumberController,
+                      enabled: _isEditing,
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (_showCancelButton) // Show cancel button if editing
+                          ElevatedButton(
+                            onPressed: _cancelEditing,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF288F13), // Cancel button color
+                            ),
+                            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+                          ),
+                        ElevatedButton(
+                          onPressed: _isEditing ? _saveChanges : _toggleEdit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF288F13), // Save button color
+                          ),
+                          child: Text(_isEditing ? 'Save Changes' : 'Edit Profile', style: const TextStyle(color: Colors.white)),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
       ),
-    );
+    ));
   }
 }

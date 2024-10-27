@@ -62,28 +62,34 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
   }
 
   void _fetchUserData() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        var querySnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .where('email', isEqualTo: user.email)
-            .get();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      // Fetch all users and find a match
+      var querySnapshot = await FirebaseFirestore.instance.collection('Users').get();
 
-        if (querySnapshot.size > 0) {
-          var userData = querySnapshot.docs.first.data();
+      // Look for a user with a matching email (case insensitive)
+      for (var document in querySnapshot.docs) {
+        String emailFromFirestore = document.data()['email'] ?? '';
+
+        // Compare with lowercase email
+        if (emailFromFirestore.toLowerCase() == user.email!.toLowerCase()) {
+          var userData = document.data();
           setState(() {
             _firstName = userData['first_name'] ?? '';
             _lastName = userData['last_name'] ?? '';
           });
-        } else {
-          print('User data not found for email: ${user.email}');
+          return; // Exit the loop once a match is found
         }
-      } catch (error) {
-        print('Failed to fetch user data: $error');
       }
+
+      print('User data not found for email: ${user.email}');
+    } catch (error) {
+      print('Failed to fetch user data: $error');
     }
   }
+}
+
 
   void _generateUserId() {
   User? user = FirebaseAuth.instance.currentUser;
@@ -233,10 +239,8 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                   child: Stack(
                     children: [
                       Positioned(
-                        top: 20,
-                        left: 20,
-                        child: GestureDetector(
-                          onTap: _pickImage,
+                          top: 20,
+                          left: 20,
                           child: CircleAvatar(
                             backgroundColor: Colors.black,
                             radius: 45,
@@ -252,27 +256,6 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        top: 10,
-                        bottom: 470,
-                        left: 80,
-                        child: GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.black,
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
                       Positioned(
                         top: 30,
                         left: 120,

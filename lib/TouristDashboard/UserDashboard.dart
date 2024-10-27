@@ -30,48 +30,56 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   void _fetchUserData() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        var userQuerySnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .where('email', isEqualTo: user.email)
-            .get();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      // Fetch all users and find a match
+      var userQuerySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .get();
 
-        if (userQuerySnapshot.size > 0) {
-          var userData = userQuerySnapshot.docs.first.data();
+      // Look for a user with a matching email (case insensitive)
+      for (var doc in userQuerySnapshot.docs) {
+        var userData = doc.data();
+        String emailFromFirestore = userData['email'] ?? '';
+        
+        // Compare with lowercase email
+        if (emailFromFirestore.toLowerCase() == user.email!.toLowerCase()) {
           setState(() {
             _firstName = userData['first_name'] ?? '';
             _lastName = userData['last_name'] ?? '';
           });
+          break; // Exit loop once a match is found
         }
-
-        // Fetch bookmarks
-        var bookmarksSnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('Bookmarks')
-            .get();
-
-        // Update _isBookmarked based on bookmarks
-        _isBookmarked.clear();
-        for (var _ in _establishments) {
-          _isBookmarked.add(false); // Default to not bookmarked
-        }
-        for (var doc in bookmarksSnapshot.docs) {
-          String bookmarkId = doc.id;
-          int index = int.tryParse(bookmarkId.split('_')[1] ?? '') ?? -1;
-          if (index >= 0 && index < _isBookmarked.length) {
-            _isBookmarked[index] = true; // Mark as bookmarked
-          }
-        }
-
-        setState(() {}); // Refresh UI
-      } catch (error) {
-        print('Failed to fetch user data: $error');
       }
+
+      // Fetch bookmarks
+      var bookmarksSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .collection('Bookmarks')
+          .get();
+
+      // Update _isBookmarked based on bookmarks
+      _isBookmarked.clear();
+      for (var _ in _establishments) {
+        _isBookmarked.add(false); // Default to not bookmarked
+      }
+      for (var doc in bookmarksSnapshot.docs) {
+        String bookmarkId = doc.id;
+        int index = int.tryParse(bookmarkId.split('_')[1] ?? '') ?? -1;
+        if (index >= 0 && index < _isBookmarked.length) {
+          _isBookmarked[index] = true; // Mark as bookmarked
+        }
+      }
+
+      setState(() {}); // Refresh UI
+    } catch (error) {
+      print('Failed to fetch user data: $error');
     }
   }
+}
+
 
   void _fetchEstablishments() async {
     try {
@@ -304,141 +312,142 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     );
   }
 
-  Widget _buildResultBoxWithInitial(String resultText, bool isFirstBox, int index) {
-    String firstInitial = resultText.isNotEmpty ? resultText[0].toUpperCase() : '';
+ Widget _buildResultBoxWithInitial(String resultText, bool isFirstBox, int index) {
+  String firstInitial = resultText.isNotEmpty ? resultText[0].toUpperCase() : '';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: Stack(
-        children: [
-          Container(
-            height: 120,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        bottomLeft: Radius.circular(20),
-                      ),
-                    ),
-                    child: Text(
-                      firstInitial,
-                      style: const TextStyle(
-                        fontSize: 60,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                resultText,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: isFirstBox ? const Color(0xFF288F13) : Colors.green,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                _toggleBookmark(index);
-                              },
-                              child: Icon(
-                                Icons.bookmark,
-                                color: _isBookmarked.length > index && _isBookmarked[index] ? Colors.yellow : Colors.grey,
-                                size: 30,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        const Row(
-                          children: [
-                            Icon(Icons.location_on, color: Colors.green),
-                            SizedBox(width: 5),
-                            Text(
-                              'San Miguel, Jordan',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+    child: Stack(
+      children: [
+        Container(
+          height: 120,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
-          Positioned(
-            right: 10,
-            bottom: 10,
-            child: GestureDetector(
-              onTap: () {
-                if (isFirstBox) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => DetailsPage()),
-                  );
-                }
-              },
-              child: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF2C812A), width: 2),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Center(
-                  child: Transform.rotate(
-                    angle: 330 * 3.14159 / 180,
-                    child: const Icon(
-                      Icons.arrow_forward,
-                      color: Color(0xFF2C812A),
-                      size: 20,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      bottomLeft: Radius.circular(20),
                     ),
+                  ),
+                  child: Text(
+                    firstInitial,
+                    style: const TextStyle(
+                      fontSize: 60,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 3,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              resultText,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isFirstBox ? const Color(0xFF288F13) : Colors.green,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              _toggleBookmark(index);
+                            },
+                            child: Icon(
+                              Icons.bookmark,
+                              color: _isBookmarked.length > index && _isBookmarked[index] ? Colors.yellow : Colors.grey,
+                              size: 30,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      const Row(
+                        children: [
+                          Icon(Icons.location_on, color: Colors.green),
+                          SizedBox(width: 5),
+                          Text(
+                            'San Miguel, Jordan',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+                Positioned(
+          right: 10,
+          bottom: 10,
+          child: GestureDetector(
+            onTap: () {
+              // Navigate to DetailsPage when the arrow is clicked
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DetailsPage(establishmentName: resultText), // Pass the name here
+                ),
+              );
+            },
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFF2C812A), width: 2),
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Center(
+                child: Transform.rotate(
+                  angle: 330 * 3.14159 / 180, // Angle for the arrow icon
+                  child: const Icon(
+                    Icons.arrow_forward,
+                    color: Color(0xFF2C812A),
+                    size: 20,
                   ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 }

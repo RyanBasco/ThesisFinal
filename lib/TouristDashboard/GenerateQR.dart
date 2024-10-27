@@ -33,27 +33,25 @@ class _GenerateQRState extends State<GenerateQR> {
 
   if (userEmail != null) {
     try {
-      var querySnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .where('email', isEqualTo: userEmail)
-          .get();
+      // Fetch all users and find a match
+      var querySnapshot = await FirebaseFirestore.instance.collection('Users').get();
 
-      if (querySnapshot.docs.isNotEmpty) {
-        var document = querySnapshot.docs.first;
-        userData = document.data();
-        String documentId = document.id; // Fetch the document ID
+      for (var document in querySnapshot.docs) {
+        String emailFromFirestore = document.data()['email'] ?? '';
+        
+        // Compare with lowercase email
+        if (emailFromFirestore.toLowerCase() == userEmail.toLowerCase()) {
+          userData = document.data();
+          String documentId = document.id; // Fetch the document ID
 
-        // Fetch first and last name from userData
-        String firstName = userData?['first_name'] ?? '';
-        String lastName = userData?['last_name'] ?? '';
-
-        setState(() {
-          // Include first and last name along with the document ID in QR data
-          qrData = "$firstName $lastName, ID: $documentId"; // Updated line
-        });
-      } else {
-        print('User data not found for email: $userEmail');
+          // Only set the QR data to the document ID
+          setState(() {
+            qrData = documentId; // Only include document ID
+          });
+          return; // Exit the loop once a match is found
+        }
       }
+      print('User data not found for email: $userEmail');
     } catch (error) {
       print('Failed to fetch user data: $error');
     }
