@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:math';
 import 'package:testing/Authentication/TouristLogin.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
@@ -25,6 +26,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
   String _firstName = '';
   String _lastName = '';
   String _userId = '';
+  String? _profileImageUrl;
   int _selectedIndex = 3; // Set initial index to 'Profile'
   File? _profileImage;
   final ImagePicker _picker = ImagePicker();
@@ -36,59 +38,67 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
     _generateUserId();
   }
 
-  Future<void> _pickImage() async {
+ Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _profileImage = File(pickedFile.path);
-        _saveProfileImage(pickedFile.path);
       });
+      _uploadProfileImage(pickedFile); // Upload image to Firebase
     }
   }
 
-  Future<void> _saveProfileImage(String imagePath) async {
-    // Save the selected image path to Firestore
+   Future<void> _uploadProfileImage(XFile imageFile) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
+        // Use the specified path
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('User Profile/${user.email}/profile_image');
+
+        await ref.putFile(File(imageFile.path));
+
+        String downloadUrl = await ref.getDownloadURL();
+
         await FirebaseFirestore.instance
             .collection('Users')
             .doc(user.uid)
-            .update({'profile_image': imagePath});
+            .update({'profile_image': downloadUrl});
+
+        setState(() {
+          _profileImageUrl = downloadUrl;
+        });
       } catch (error) {
-        print('Failed to save profile image: $error');
+        print('Failed to upload profile image: $error');
       }
     }
   }
 
   void _fetchUserData() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      // Fetch all users and find a match
-      var querySnapshot = await FirebaseFirestore.instance.collection('Users').get();
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        var userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
 
-      // Look for a user with a matching email (case insensitive)
-      for (var document in querySnapshot.docs) {
-        String emailFromFirestore = document.data()['email'] ?? '';
-
-        // Compare with lowercase email
-        if (emailFromFirestore.toLowerCase() == user.email!.toLowerCase()) {
-          var userData = document.data();
+        if (userDoc.exists) {
+          var userData = userDoc.data();
           setState(() {
-            _firstName = userData['first_name'] ?? '';
-            _lastName = userData['last_name'] ?? '';
+            _firstName = userData?['first_name'] ?? '';
+            _lastName = userData?['last_name'] ?? '';
+            _profileImageUrl = userData?['profile_image']; // Get image URL
           });
-          return; // Exit the loop once a match is found
+        } else {
+          print('User data not found for UID: ${user.uid}');
         }
+      } catch (error) {
+        print('Failed to fetch user data: $error');
       }
-
-      print('User data not found for email: ${user.email}');
-    } catch (error) {
-      print('Failed to fetch user data: $error');
     }
   }
-}
 
 
   void _generateUserId() {
@@ -242,20 +252,20 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                           top: 20,
                           left: 20,
                           child: CircleAvatar(
-                            backgroundColor: Colors.black,
-                            radius: 45,
-                            child: _profileImage == null
-                                ? const Icon(Icons.person, color: Colors.white, size: 55)
-                                : ClipOval(
-                                    child: Image.file(
-                                      _profileImage!,
-                                      fit: BoxFit.cover,
-                                      width: 110,
-                                      height: 110,
-                                    ),
+                          backgroundColor: Colors.black,
+                          radius: 45,
+                          child: _profileImageUrl == null
+                              ? const Icon(Icons.person, color: Colors.white, size: 55)
+                              : ClipOval(
+                                  child: Image.network(
+                                    _profileImageUrl!,
+                                    fit: BoxFit.cover,
+                                    width: 110,
+                                    height: 110,
                                   ),
-                          ),
+                                ),
                         ),
+                      ),
                       Positioned(
                         top: 30,
                         left: 120,

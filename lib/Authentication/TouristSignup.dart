@@ -161,58 +161,60 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ),
                 ),
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 15),
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF5CA14E),
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.wc,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedSex,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'Male',
-                              child: Text('Male', style: TextStyle(color: Colors.white)),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Female',
-                              child: Text('Female', style: TextStyle(color: Colors.white)),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedSex = value;
-                            });
-                          },
-                          decoration: const InputDecoration(
-                            hintText: 'Sex',
-                            hintStyle: TextStyle(color: Colors.white),
-                            border: InputBorder.none,
-                          ),
-                          dropdownColor: const Color(0xFF5CA14E),
-                          style: const TextStyle(color: Colors.white),
-                          iconEnabledColor: Colors.white,
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select sex';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+               Container(
+  margin: const EdgeInsets.symmetric(vertical: 10),
+  padding: const EdgeInsets.symmetric(horizontal: 10),
+  decoration: BoxDecoration(
+    color: const Color(0xFF5CA14E),
+    border: Border.all(color: Colors.grey),
+    borderRadius: BorderRadius.circular(10),
+  ),
+  child: Row(
+    children: [
+      const Icon(
+        Icons.wc,
+        color: Colors.white,
+      ),
+      const SizedBox(width: 10),
+      Expanded(
+        child: DropdownButtonFormField<String>(
+          isExpanded: true,
+          value: _selectedSex,
+          items: const [
+            DropdownMenuItem(
+              value: 'Male',
+              child: Text('Male', style: TextStyle(color: Colors.white)),
+            ),
+            DropdownMenuItem(
+              value: 'Female',
+              child: Text('Female', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+          onChanged: (value) {
+            setState(() {
+              _selectedSex = value;
+            });
+          },
+          decoration: const InputDecoration(
+  hintText: 'Sex',
+  hintStyle: TextStyle(color: Colors.white),
+  border: InputBorder.none,
+  contentPadding: EdgeInsets.only(bottom: 8,top: 3.8), // Adjust to move text up slightly
+),
+          dropdownColor: const Color(0xFF5CA14E),
+          style: const TextStyle(color: Colors.white, fontSize: 16), // Adjust font size for clarity
+          iconEnabledColor: Colors.white,
+          validator: (value) {
+            if (value == null) {
+              return 'Please select sex';
+            }
+            return null;
+          },
+        ),
+      ),
+    ],
+  ),
+),
                 Container(
                   margin: const EdgeInsets.symmetric(vertical: 10),
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -258,6 +260,7 @@ class _SignupPageState extends State<SignupPage> {
                             hintText: 'Civil Status',
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
+                            contentPadding: EdgeInsets.only(bottom: 8,top: 3.8),
                           ),
                           dropdownColor: const Color(0xFF5CA14E),
                           style: const TextStyle(color: Colors.white),
@@ -307,6 +310,7 @@ class _SignupPageState extends State<SignupPage> {
                             hintText: 'Nationality',
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
+                            contentPadding: EdgeInsets.only(bottom: 8,top: 3.8),
                           ),
                           dropdownColor: const Color(0xFF5CA14E),
                           style: const TextStyle(color: Colors.white),
@@ -326,7 +330,7 @@ class _SignupPageState extends State<SignupPage> {
 
                 // Added Contact Number field
                 Container(
-                  margin: const EdgeInsets.symmetric(vertical: 15),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
                     color: const Color(0xFF5CA14E),
                     border: Border.all(color: Colors.grey),

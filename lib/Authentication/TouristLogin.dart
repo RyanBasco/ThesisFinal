@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/Authentication/TouristSignup.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -13,70 +13,79 @@ class LoginPageScreen extends StatefulWidget {
 
 class _LoginPageScreenState extends State<LoginPageScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final DatabaseReference _database = FirebaseDatabase.instance.ref();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool _obscurePassword = true; // Added to toggle password visibility
+  bool _isLoading = false; // Added to indicate loading state
 
   Future<void> _login(BuildContext context) async {
-  if (!_formKey.currentState!.validate()) {
-    return;
-  }
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-  String email = _emailController.text.trim();
-  String password = _passwordController.text.trim();
+    setState(() {
+      _isLoading = true; // Set loading to true
+    });
 
-  try {
-    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-    if (userCredential.user != null) {
-      print("User authenticated successfully.");
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(userCredential.user!.uid).get();
+      if (userCredential.user != null) {
+        print("User authenticated successfully.");
 
-      if (userDoc.exists) {
-        if (mounted) { // Check if the widget is still mounted
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-          );
+        DatabaseReference userRef = _database.child('Users').child(userCredential.user!.uid);
+        DatabaseEvent userEvent = await userRef.once();
+
+        if (userEvent.snapshot.exists) {
+          if (mounted) { // Check if the widget is still mounted
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => UserdashboardPageState()),
+            );
+          }
+        } else {
+          await _auth.signOut();
+          if (mounted) { // Check if the widget is still mounted
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Login failed: Invalid email or password."),
+              ),
+            );
+          }
         }
       } else {
-        await _auth.signOut();
         if (mounted) { // Check if the widget is still mounted
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Login failed: Invalid email or password."),
+              content: Text("Failed to login: Invalid email or password."),
             ),
           );
         }
       }
-    } else {
+    } catch (e) {
+      print("Failed to login: $e");
       if (mounted) { // Check if the widget is still mounted
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Failed to login: Invalid email or password."),
+          SnackBar(
+            content: Text("Failed to login: $e"),
           ),
         );
       }
-    }
-  } catch (e) {
-    print("Failed to login: $e");
-    if (mounted) { // Check if the widget is still mounted
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to login: $e"),
-        ),
-      );
+    } finally {
+      setState(() {
+        _isLoading = false; // Set loading to false
+      });
     }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -221,21 +230,27 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                         color: const Color(0xFF2C812A),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: TextButton(
-                        onPressed: () {
-                          _login(context);
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : TextButton(
+                              onPressed: () {
+                                _login(context);
+                              },
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                              ),
+                              child: const Text(
+                                'Login',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 20),

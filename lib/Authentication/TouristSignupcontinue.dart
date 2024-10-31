@@ -303,10 +303,11 @@ class _SignupContinueState extends State<SignupContinue> {
                             }
                           },
                           decoration: const InputDecoration(
-                            hintText: 'Country of Residence',
-                            hintStyle: TextStyle(color: Colors.white),
-                            border: InputBorder.none,
-                          ),
+                          hintText: 'Country of Residence',
+                          hintStyle: TextStyle(color: Colors.white),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.only(bottom: 8,), // Adjust top and bottom padding
+                        ),
                           dropdownColor: const Color(0xFF5CA14E),
                           style: const TextStyle(color: Colors.white),
                           iconEnabledColor: Colors.white,
@@ -385,6 +386,7 @@ Container(
                   hintText: 'Region',
                   hintStyle: TextStyle(color: Colors.white),
                   border: InputBorder.none,
+                  contentPadding: EdgeInsets.only(bottom: 9, top: 3.5),
                 ),
                 dropdownColor: const Color(0xFF5CA14E),
                 style: const TextStyle(color: Colors.white),
@@ -394,7 +396,6 @@ Container(
     ],
   ),
 ),
-
                   // Province Dropdown
                   Container(
                     margin: const EdgeInsets.symmetric(vertical: 10),
@@ -443,6 +444,7 @@ Container(
                                     hintText: 'Province',
                                     hintStyle: TextStyle(color: Colors.white),
                                     border: InputBorder.none,
+                                    contentPadding: EdgeInsets.only(bottom: 9, top: 3.5),
                                   ),
                                   dropdownColor: const Color(0xFF5CA14E),
                                   style: const TextStyle(color: Colors.white),
@@ -499,6 +501,7 @@ Container(
                                     hintText: 'City / Municipality',
                                     hintStyle: TextStyle(color: Colors.white),
                                     border: InputBorder.none,
+                                    contentPadding: EdgeInsets.only(bottom: 9, top: 2.5),
                                   ),
                                   dropdownColor: const Color(0xFF5CA14E),
                                   style: const TextStyle(color: Colors.white),
@@ -550,6 +553,7 @@ Container(
                                     hintText: 'Barangay',
                                     hintStyle: TextStyle(color: Colors.white),
                                     border: InputBorder.none,
+                                    contentPadding: EdgeInsets.only(bottom: 9, top: 3.3),
                                   ),
                                   dropdownColor: const Color(0xFF5CA14E),
                                   style: const TextStyle(color: Colors.white),
@@ -605,6 +609,7 @@ Container(
               hintText: 'Purpose of Travel',
               hintStyle: TextStyle(color: Colors.white),
               border: InputBorder.none,
+              contentPadding: EdgeInsets.only(bottom: 8, top: 12),
             ),
             dropdownColor: const Color(0xFF5CA14E),
             style: const TextStyle(color: Colors.white),
@@ -648,6 +653,7 @@ if (_selectedPurpose == 'OTHERS') ...[
                         hintText: 'Please Specify',
                         hintStyle: TextStyle(color: Colors.white),
                         border: InputBorder.none,
+                        contentPadding: EdgeInsets.only(top: 10,),
                       ),
                       style: const TextStyle(color: Colors.white),
                       validator: (value) {

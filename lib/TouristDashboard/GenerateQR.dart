@@ -158,54 +158,54 @@ class _GenerateQRState extends State<GenerateQR> {
   }
 
   Widget _buildWhiteContainer() {
-    if (userData == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    String firstName = userData!['first_name'] ?? '';
-    String lastNameInitial =
-        userData!['last_name']?.toString().substring(0, 1).toUpperCase() ?? '';
-
-    return Container(
-      margin: const EdgeInsets.only(top: 100, left: 20, right: 20),
-      padding: const EdgeInsets.all(20),
-      width: 280,
-      height: 380,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(
-            child: QrImageView(
-              data: qrData, // QR code with both email and document ID
-              version: QrVersions.auto,
-              size: 200.0,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            '$firstName $lastNameInitial.',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
+  if (userData == null) {
+    return const Center(child: CircularProgressIndicator());
   }
+
+  String firstName = userData!['first_name'] ?? '';
+  String lastName = userData!['last_name'] ?? ''; // Get the full last name
+
+  return Container(
+    margin: const EdgeInsets.only(top: 100, left: 20, right: 20),
+    padding: const EdgeInsets.all(20),
+    width: 280,
+    height: 380,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.5),
+          spreadRadius: 2,
+          blurRadius: 5,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Center(
+          child: QrImageView(
+            data: qrData, // QR code with the document ID
+            version: QrVersions.auto,
+            size: 200.0,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          '$firstName $lastName', // Display the full name
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildButton(String label, IconData icon, Color color, Function() onPressed) {
     return SizedBox(

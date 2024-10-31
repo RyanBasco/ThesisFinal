@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/EstablishmentDetails/Details.dart';
 import 'package:testing/TouristDashboard/Notifications.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
@@ -30,65 +30,62 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   void _fetchUserData() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      // Fetch all users and find a match
-      var userQuerySnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .get();
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('Users');
+        DataSnapshot snapshot = await usersRef.get();
 
-      // Look for a user with a matching email (case insensitive)
-      for (var doc in userQuerySnapshot.docs) {
-        var userData = doc.data();
-        String emailFromFirestore = userData['email'] ?? '';
-        
-        // Compare with lowercase email
-        if (emailFromFirestore.toLowerCase() == user.email!.toLowerCase()) {
-          setState(() {
-            _firstName = userData['first_name'] ?? '';
-            _lastName = userData['last_name'] ?? '';
-          });
-          break; // Exit loop once a match is found
+        // Look for a user with a matching email (case insensitive)
+        for (var userSnapshot in snapshot.children) {
+          Map<dynamic, dynamic>? userData = userSnapshot.value as Map<dynamic, dynamic>?;
+          String emailFromDatabase = userData?['email'] ?? '';
+
+          if (emailFromDatabase.toLowerCase() == user.email!.toLowerCase()) {
+            setState(() {
+              _firstName = userData?['first_name'] ?? '';
+              _lastName = userData?['last_name'] ?? '';
+            });
+            break;
+          }
         }
-      }
 
-      // Fetch bookmarks
-      var bookmarksSnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .collection('Bookmarks')
-          .get();
+        // Fetch bookmarks
+        DatabaseReference bookmarksRef = FirebaseDatabase.instance.ref().child('Users').child(user.uid).child('Bookmarks');
+        DataSnapshot bookmarksSnapshot = await bookmarksRef.get();
 
-      // Update _isBookmarked based on bookmarks
-      _isBookmarked.clear();
-      for (var _ in _establishments) {
-        _isBookmarked.add(false); // Default to not bookmarked
-      }
-      for (var doc in bookmarksSnapshot.docs) {
-        String bookmarkId = doc.id;
-        int index = int.tryParse(bookmarkId.split('_')[1] ?? '') ?? -1;
-        if (index >= 0 && index < _isBookmarked.length) {
-          _isBookmarked[index] = true; // Mark as bookmarked
+        _isBookmarked.clear();
+        for (var _ in _establishments) {
+          _isBookmarked.add(false); // Default to not bookmarked
         }
-      }
+        for (var bookmark in bookmarksSnapshot.children) {
+          String bookmarkKey = bookmark.key ?? '';
+          int index = int.tryParse(bookmarkKey.split('_')[1] ?? '') ?? -1;
+          if (index >= 0 && index < _isBookmarked.length) {
+            _isBookmarked[index] = true; // Mark as bookmarked
+          }
+        }
 
-      setState(() {}); // Refresh UI
-    } catch (error) {
-      print('Failed to fetch user data: $error');
+        setState(() {}); // Refresh UI
+      } catch (error) {
+        print('Failed to fetch user data: $error');
+      }
     }
   }
-}
-
 
   void _fetchEstablishments() async {
     try {
-      var querySnapshot = await FirebaseFirestore.instance
-          .collection('establishments')
-          .get();
+      DatabaseReference establishmentsRef = FirebaseDatabase.instance.ref().child('establishments');
+      DataSnapshot snapshot = await establishmentsRef.get();
 
       setState(() {
-        _establishments = querySnapshot.docs.map((doc) => doc.data()).toList();
+        _establishments = [];
+        for (var establishmentSnapshot in snapshot.children) {
+          Map<dynamic, dynamic>? establishmentData = establishmentSnapshot.value as Map<dynamic, dynamic>?;
+          if (establishmentData != null) {
+            _establishments.add(Map<String, dynamic>.from(establishmentData));
+          }
+        }
         _isBookmarked.addAll(List.filled(_establishments.length, false));
       });
     } catch (error) {
@@ -133,14 +130,11 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        var bookmarkRef = FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('Bookmarks')
-            .doc('bookmark_$index');
+        DatabaseReference bookmarkRef = FirebaseDatabase.instance.ref()
+            .child('Users').child(user.uid).child('Bookmarks').child('bookmark_$index');
 
         if (_isBookmarked[index]) {
-          await bookmarkRef.delete();
+          await bookmarkRef.remove();
         } else {
           String title = _establishments[index]['establishmentName'] ?? 'Unknown';
           await bookmarkRef.set({
@@ -312,142 +306,142 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     );
   }
 
- Widget _buildResultBoxWithInitial(String resultText, bool isFirstBox, int index) {
-  String firstInitial = resultText.isNotEmpty ? resultText[0].toUpperCase() : '';
+  Widget _buildResultBoxWithInitial(String resultText, bool isFirstBox, int index) {
+    String firstInitial = resultText.isNotEmpty ? resultText[0].toUpperCase() : '';
 
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-    child: Stack(
-      children: [
-        Container(
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      bottomLeft: Radius.circular(20),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Stack(
+        children: [
+          Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        bottomLeft: Radius.circular(20),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    firstInitial,
-                    style: const TextStyle(
-                      fontSize: 60,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                    child: Text(
+                      firstInitial,
+                      style: const TextStyle(
+                        fontSize: 60,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 3,
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              resultText,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: isFirstBox ? const Color(0xFF288F13) : Colors.green,
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                resultText,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: isFirstBox ? const Color(0xFF288F13) : Colors.green,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              _toggleBookmark(index);
-                            },
-                            child: Icon(
-                              Icons.bookmark,
-                              color: _isBookmarked.length > index && _isBookmarked[index] ? Colors.yellow : Colors.grey,
-                              size: 30,
+                            GestureDetector(
+                              onTap: () {
+                                _toggleBookmark(index);
+                              },
+                              child: Icon(
+                                Icons.bookmark,
+                                color: _isBookmarked.length > index && _isBookmarked[index] ? Colors.yellow : Colors.grey,
+                                size: 30,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      const Row(
-                        children: [
-                          Icon(Icons.location_on, color: Colors.green),
-                          SizedBox(width: 5),
-                          Text(
-                            'San Miguel, Jordan',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black,
+                          ],
+                        ),
+                        const SizedBox(height: 5),
+                        const Row(
+                          children: [
+                            Icon(Icons.location_on, color: Colors.green),
+                            SizedBox(width: 5),
+                            Text(
+                              'San Miguel, Jordan',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-                Positioned(
-          right: 10,
-          bottom: 10,
-          child: GestureDetector(
-            onTap: () {
-              // Navigate to DetailsPage when the arrow is clicked
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DetailsPage(establishmentName: resultText), // Pass the name here
+          Positioned(
+            right: 10,
+            bottom: 10,
+            child: GestureDetector(
+              onTap: () {
+                // Navigate to DetailsPage when the arrow is clicked
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailsPage(establishmentName: resultText), // Pass the name here
+                  ),
+                );
+              },
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFF2C812A), width: 2),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(5),
                 ),
-              );
-            },
-            child: Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF2C812A), width: 2),
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Center(
-                child: Transform.rotate(
-                  angle: 330 * 3.14159 / 180, // Angle for the arrow icon
-                  child: const Icon(
-                    Icons.arrow_forward,
-                    color: Color(0xFF2C812A),
-                    size: 20,
+                child: Center(
+                  child: Transform.rotate(
+                    angle: 330 * 3.14159 / 180, // Angle for the arrow icon
+                    child: const Icon(
+                      Icons.arrow_forward,
+                      color: Color(0xFF2C812A),
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }

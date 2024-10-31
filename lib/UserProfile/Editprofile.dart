@@ -41,44 +41,65 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   void _fetchUserData() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      print('Authenticated user UID: ${user.uid}'); // Debugging log
-      try {
-        var querySnapshot = await FirebaseFirestore.instance.collection('Users').get();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      // First try to get user data based on email
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('email', isEqualTo: user.email)
+          .get();
 
-        for (var document in querySnapshot.docs) {
-          String emailFromFirestore = document.data()['email'] ?? '';
+      if (querySnapshot.docs.isNotEmpty) {
+        var userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
 
-          // Compare with lowercase email
-          if (emailFromFirestore.toLowerCase() == user.email!.toLowerCase()) {
-            var userData = document.data();
-            setState(() {
-              _firstName = userData['first_name'] ?? '';
-              _lastName = userData['last_name'] ?? '';
-              _birthday = userData['birthday'] ?? '';
-              _email = userData['email'] ?? '';
-              _contactNumber = userData['contact_number'] ?? '';
-              _profileImageUrl = userData['profile_image_url'];
+        setState(() {
+          _firstName = userData['first_name'] ?? '';
+          _lastName = userData['last_name'] ?? '';
+          _birthday = userData['birthday'] ?? '';
+          _email = user.email ?? '';
+          _contactNumber = userData['contact_number'] ?? '';
+          _profileImageUrl = userData['profile_image_url'];
 
-              // Set the controllers
-              _nameController.text = '$_firstName $_lastName';
-              _birthdayController.text = _birthday;
-              _emailController.text = _email; // Set the fetched email
-              _contactNumberController.text = _contactNumber;
-            });
-            return; // Exit the loop once a match is found
-          }
+          // Set the controllers
+          _nameController.text = '$_firstName $_lastName';
+          _birthdayController.text = _birthday;
+          _emailController.text = _email;
+          _contactNumberController.text = _contactNumber;
+        });
+      } else {
+        // If no user data found by email, try to get by UID
+        var userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+        
+        if (userDoc.exists) {
+          var userData = userDoc.data() as Map<String, dynamic>;
+
+          setState(() {
+            _firstName = userData['first_name'] ?? '';
+            _lastName = userData['last_name'] ?? '';
+            _birthday = userData['birthday'] ?? '';
+            _email = userData['email'] ?? ''; // Assuming email is stored in the document
+            _contactNumber = userData['contact_number'] ?? '';
+            _profileImageUrl = userData['profile_image_url'];
+
+            // Set the controllers
+            _nameController.text = '$_firstName $_lastName';
+            _birthdayController.text = _birthday;
+            _emailController.text = _email;
+            _contactNumberController.text = _contactNumber;
+          });
+        } else {
+          print('User data not found for UID: ${user.uid}');
         }
-
-        print('User data not found for email: ${user.email}');
-      } catch (error) {
-        print('Failed to fetch user data: $error');
       }
-    } else {
-      print('No authenticated user found.');
+    } catch (error) {
+      print('Failed to fetch user data: $error');
     }
+  } else {
+    print('No authenticated user found.');
   }
+}
+
 
 
   Future<void> _pickImage() async {
@@ -93,62 +114,47 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  Future<void> _uploadImageToFirebase(XFile image) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        String fileName = '${user.uid}/profile_image/${DateTime.now().millisecondsSinceEpoch}.jpg';
-        Reference ref = FirebaseStorage.instance.ref().child(fileName);
-        await ref.putFile(File(image.path));
+ Future<void> _uploadImageToFirebase(XFile image) async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      // Use the user's email (or document ID) to create a unique file name
+      String email = user.email?.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_') ?? 'unknown_user';
+      String fileName = 'User Profile/$email/profile_image/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      Reference ref = FirebaseStorage.instance.ref().child(fileName);
+      await ref.putFile(File(image.path));
 
-        String downloadUrl = await ref.getDownloadURL();
+      String downloadUrl = await ref.getDownloadURL();
 
-        await FirebaseFirestore.instance.collection('Users').doc(user.uid).update({
-          'profile_image_url': downloadUrl,
-        });
+      // Update Firestore with the new image URL
+      await FirebaseFirestore.instance.collection('Users').doc(user.uid).update({
+        'profile_image_url': downloadUrl,
+      });
 
-        setState(() {
-          _profileImageUrl = downloadUrl;
-        });
+      setState(() {
+        _profileImageUrl = downloadUrl;
+      });
 
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Image uploaded successfully!')),
         );
-      } catch (error) {
-        print('Failed to upload image: $error');
+      }
+    } catch (error) {
+      print('Failed to upload image: $error');
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to upload image. Please try again.')),
         );
       }
     }
+  } else {
+    print('No authenticated user found.');
   }
+}
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
 
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-        );
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => QRPage()),
-        );
-        break;
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
-        );
-        break;
-    }
-  }
+
 
   void _toggleEdit() {
     setState(() {
@@ -169,26 +175,21 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   void _saveChanges() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      var querySnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .where('email', isEqualTo: user.email)
-          .get();
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        var querySnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .where('email', isEqualTo: user.email)
+            .get();
 
-      if (querySnapshot.size > 0) {
-        var userDoc = querySnapshot.docs.first.reference;
-        var nameParts = _nameController.text.split(' ');
+        if (querySnapshot.size > 0) {
+          var userDoc = querySnapshot.docs.first.reference;
+          var nameParts = _nameController.text.split(' ');
 
-        String firstName = nameParts.length > 1 ? nameParts.sublist(0, nameParts.length - 1).join(' ') : nameParts.isNotEmpty ? nameParts[0] : '';
-        String lastName = nameParts.isNotEmpty ? nameParts.last : '';
+          String firstName = nameParts.length > 1 ? nameParts.sublist(0, nameParts.length - 1).join(' ') : nameParts.isNotEmpty ? nameParts[0] : '';
+          String lastName = nameParts.isNotEmpty ? nameParts.last : '';
 
-        // Check if first name or last name has changed
-        bool firstNameChanged = firstName != _firstName;
-        bool lastNameChanged = lastName != _lastName;
-
-        if (firstNameChanged || lastNameChanged) {
           await userDoc.update({
             'first_name': firstName,
             'last_name': lastName,
@@ -208,21 +209,15 @@ class _EditProfileState extends State<EditProfile> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Profile updated successfully!')),
           );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No changes detected.')),
-          );
         }
+      } catch (error) {
+        print('Failed to update user data: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update profile. Please try again.')),
+        );
       }
-    } catch (error) {
-      print('Failed to update user data: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update profile. Please try again.')),
-      );
     }
   }
-}
-
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
@@ -231,272 +226,299 @@ class _EditProfileState extends State<EditProfile> {
       firstDate: DateTime(1900),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != DateTime.now()) {
+    if (picked != null) {
       setState(() {
         _birthdayController.text = DateFormat('MMMM d, yyyy').format(picked);
       });
     }
   }
 
-  Widget _buildTextField({
-    required String labelText,
-    required TextEditingController controller,
-    bool enabled = false,
-    VoidCallback? onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          labelText,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+ Widget _buildTextField({
+  required String labelText,
+  required TextEditingController controller,
+  bool enabled = false,
+  VoidCallback? onTap,
+  TextStyle? textStyle, // New parameter
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        labelText,
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
         ),
-        const SizedBox(height: 10),
-        Container(
-          width: 260,
-          height: 55,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 18),
-            child: TextField(
-              controller: controller,
-              style: TextStyle(
-                color: Colors.grey[700],
-                fontSize: 18,
-              ),
-              enabled: enabled,
-              textAlign: TextAlign.center,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-              ),
-              readOnly: onTap != null,
-              onTap: onTap,
+      ),
+      const SizedBox(height: 10),
+      Container(
+        width: 260,
+        height: 55,
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 18),
+          child: TextField(
+            controller: controller,
+            style: textStyle ?? TextStyle(
+              color: Colors.grey[700],
+              fontSize: 18,
             ),
+            enabled: enabled,
+            textAlign: TextAlign.center,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+            ),
+            readOnly: onTap != null,
+            onTap: onTap,
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    bottomNavigationBar: Theme(
-      data: Theme.of(context).copyWith(
-        canvasColor: Colors.white,
-      ),
-      child: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: const Color(0xFF2C812A),
-        unselectedItemColor: Colors.black,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code),
-            label: 'My QR',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    ),
-    body: Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xFFEEFFA9),
-            Color(0xFFDBFF4C),
-            Color(0xFF51F643),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Colors.white,
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+            switch (index) {
+              case 0:
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserdashboardPageState()),
+                );
+                break;
+              case 1:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => QRPage()),
+                );
+                break;
+              case 2:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegistrationPage()), // Update with your Wallet page
+                );
+                break;
+            }
+          },
+          selectedItemColor: const Color(0xFF2C812A),
+          unselectedItemColor: Colors.black,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.qr_code),
+              label: 'My QR',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_balance_wallet),
+              label: 'Wallet',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
       ),
-      child: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 40.0, left: 20.0),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context); // Go back to the previous page
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(10.0), // Add padding for the circle size
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white, // Circle color
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 10.0,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.black,
-                          size: 24, // Size of the back icon
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 80), // Space between the icon and text
-                    const Text(
-                      'Edit Profile',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                width: 300,
-                height: 660,
-                padding: const EdgeInsets.all(16.0),
-                margin: const EdgeInsets.only(top: 10.0, bottom: 20.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10.0,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      height: 150,
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 20,
-                            left: 20,
-                            child: CircleAvatar(
-                              backgroundColor: Colors.black,
-                              radius: 55,
-                              backgroundImage: _profileImageUrl != null
-                                  ? NetworkImage(_profileImageUrl!)
-                                  : null,
-                              child: _profileImageUrl == null
-                                  ? const Icon(Icons.person, color: Colors.white, size: 65)
-                                  : null,
-                            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFEEFFA9),
+              Color(0xFFDBFF4C),
+              Color(0xFF51F643),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 40.0, left: 20.0),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context); // Go back to the previous page
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 10.0,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
                           ),
-                          Positioned(
-                            top: 80,
-                            left: 110, // Move icon a bit to the right
-                            child: GestureDetector(
-                              onTap: _pickImage,
-                              child: Container(
-                                padding: const EdgeInsets.all(12.0), // Add padding for the circle size
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.grey[400], // Circle color
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 10.0,
-                                      offset: Offset(0, 5),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.black,
-                                  size: 30, // Size of the camera icon
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.black,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 80),
+                      const Text(
+                        'Edit Profile',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 300,
+                  height: 660,
+                  padding: const EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.only(top: 10.0, bottom: 20.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10.0,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        height: 150,
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              top: 20,
+                              left: 20,
+                              child: CircleAvatar(
+                                backgroundColor: Colors.black,
+                                radius: 55,
+                                backgroundImage: _profileImageUrl != null
+                                    ? NetworkImage(_profileImageUrl!)
+                                    : null,
+                                child: _profileImageUrl == null
+                                    ? const Icon(Icons.person, color: Colors.white, size: 65)
+                                    : null,
+                              ),
+                            ),
+                            Positioned(
+                              top: 80,
+                              left: 110,
+                              child: GestureDetector(
+                                onTap: _pickImage,
+                                child: Container(
+                                  padding: const EdgeInsets.all(12.0),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey[400],
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 10.0,
+                                        offset: Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.black,
+                                    size: 30,
+                                  ),
                                 ),
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildTextField(
+                        labelText: 'Full Name',
+                        controller: _nameController,
+                        enabled: _isEditing,
+                      ),
+                      const SizedBox(height: 10),
+                      _buildTextField(
+                        labelText: 'Birthday',
+                        controller: _birthdayController,
+                        enabled: _isEditing,
+                        onTap: () => _selectDate(context),
+                      ),
+                     const SizedBox(height: 10),
+                      _buildTextField(
+                        labelText: 'Email',
+                        controller: _emailController,
+                        enabled: false, // Email is not editable
+                        textStyle: const TextStyle(fontSize: 14), // Reduced font size
+                      ),
+                      const SizedBox(height: 10),
+                      _buildTextField(
+                        labelText: 'Contact Number',
+                        controller: _contactNumberController,
+                        enabled: _isEditing,
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (_showCancelButton)
+                            ElevatedButton(
+                              onPressed: _cancelEditing,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF288F13),
+                              ),
+                              child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+                            ),
+                          ElevatedButton(
+                            onPressed: _isEditing ? _saveChanges : _toggleEdit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF288F13),
+                            ),
+                            child: Text(_isEditing ? 'Save Changes' : 'Edit Profile', style: const TextStyle(color: Colors.white)),
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTextField(
-                      labelText: 'Full Name',
-                      controller: _nameController,
-                      enabled: _isEditing,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTextField(
-                      labelText: 'Birthday',
-                      controller: _birthdayController,
-                      enabled: _isEditing,
-                      onTap: () => _selectDate(context),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTextField(
-                      labelText: 'Email',
-                      controller: _emailController,
-                      enabled: false, // Email is not editable
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTextField(
-                      labelText: 'Contact Number',
-                      controller: _contactNumberController,
-                      enabled: _isEditing,
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (_showCancelButton) // Show cancel button if editing
-                          ElevatedButton(
-                            onPressed: _cancelEditing,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF288F13), // Cancel button color
-                            ),
-                            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
-                          ),
-                        ElevatedButton(
-                          onPressed: _isEditing ? _saveChanges : _toggleEdit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF288F13), // Save button color
-                          ),
-                          child: Text(_isEditing ? 'Save Changes' : 'Edit Profile', style: const TextStyle(color: Colors.white)),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 }
