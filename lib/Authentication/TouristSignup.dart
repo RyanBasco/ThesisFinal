@@ -16,7 +16,6 @@ class _SignupPageState extends State<SignupPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
 
-  // Removed controllers for province, city, and country
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -26,35 +25,49 @@ class _SignupPageState extends State<SignupPage> {
   String? _selectedSex;
   String? _selectedCivilStatus;
   String? _selectedNationality;
-  
 
-  // List to store the loaded nationalities
-  List<String> _nationalities = [];
-
-  @override
-  void initState() {
-    super.initState();
-    // Load the nationalities from JSON file
-    loadNationalities();
-  }
-
-  // Function to load nationalities.json file
-  Future<void> loadNationalities() async {
-    try {
-      String jsonString = await rootBundle.loadString('assets/nationalities.json');
-      final List<dynamic> jsonResponse = json.decode(jsonString);
-      setState(() {
-        _nationalities = jsonResponse.map((e) => e.toString()).toList();
-      });
-    } catch (e) {
-      print('Error loading nationalities.json: $e');
-      // Handle error, possibly set a default list or show a message
-    }
-  }
+  // Directly populated list of nationalities
+  final List<String> _nationalities = [
+    "Afghan", "Albanian", "Algerian", "Andorran", "Angolan", "Antiguan", 
+    "Argentine", "Armenian", "Australian", "Austrian", "Azerbaijani", 
+    "Bahaman", "Bahraini", "Bangladeshi", "Barbadian", "Belarusian", 
+    "Belgian", "Belizean", "Beninese", "Bhutanese", "Bolivian", "Bosnian", 
+    "Botswanan", "Brazilian", "Bruneian", "Bulgarian", "Burkinabe", 
+    "Burundian", "Cabo Verdean", "Cambodian", "Cameroonian", "Canadian", 
+    "Central African", "Chadian", "Chilean", "Chinese", "Colombian", 
+    "Comoran", "Congolese", "Costa Rican", "Croatian", "Cuban", "Cypriot", 
+    "Czech", "Danish", "Djiboutian", "Dominican", "Ecuadorian", "Egyptian", 
+    "Emirati", "Equatorial Guinean", "Eritrean", "Estonian", "Eswatini", 
+    "Ethiopian", "Fijian", "Filipino", "Finnish", "French", "Gabonese", 
+    "Gambian", "Georgian", "German", "Ghanaian", "Greek", "Grenadian", 
+    "Guatemalan", "Guinean", "Guinean-Bissauan", "Guyanese", "Haitian", 
+    "Honduran", "Hungarian", "Icelander", "Indian", "Indonesian", "Iranian", 
+    "Iraqi", "Irish", "Israeli", "Italian", "Jamaican", "Japanese", 
+    "Jordanian", "Kazakhstani", "Kenyan", "Kiribati", "North Korean", 
+    "South Korean", "Kuwaiti", "Kyrgyz", "Laotian", "Latvian", "Lebanese", 
+    "Lesotho", "Liberian", "Libyan", "Liechtensteiner", "Lithuanian", 
+    "Luxembourger", "Madagascan", "Malawian", "Malaysian", "Maldivian", 
+    "Malian", "Maltese", "Marshallese", "Mauritanian", "Mauritian", 
+    "Mexican", "Micronesian", "Moldovan", "Monacan", "Mongolian", 
+    "Montenegrin", "Moroccan", "Mozambican", "Myanmarian", "Namibian", 
+    "Nauruan", "Nepalese", "Dutch", "New Zealander", "Nicaraguan", 
+    "Nigerien", "Nigerian", "North Macedonian", "Norwegian", "Omani", 
+    "Pakistani", "Palauan", "Panamanian", "Papua New Guinean", 
+    "Paraguayan", "Peruvian", "Polish", "Portuguese", "Qatari", "Romanian", 
+    "Russian", "Rwandan", "Saint Kitts and Nevisian", "Saint Lucian", 
+    "Saint Vincentian", "Samoan", "San Marinese", "Sao Tomean", 
+    "Saudi Arabian", "Senegalese", "Serbian", "Seychellois", "Sierra Leonean", 
+    "Singaporean", "Slovak", "Slovenian", "Solomon Islander", "Somali", 
+    "South African", "South Sudanese", "Spanish", "Sri Lankan", "Sudanese", 
+    "Surinamese", "Swedish", "Swiss", "Syrian", "Taiwanese", "Tajikistani", 
+    "Tanzanian", "Thai", "Timorese", "Togolese", "Tongan", "Trinidadian", 
+    "Tunisian", "Turkish", "Turkmen", "Tuvaluan", "Ugandan", "Ukrainian", 
+    "Uruguayan", "Uzbek", "Vanuatuan", "Vatican", "Venezuelan", 
+    "Vietnamese", "Yemeni", "Zambian", "Zimbabwean"
+  ];
 
   @override
   void dispose() {
-    // Dispose controllers to free up resources
     _lastNameController.dispose();
     _firstNameController.dispose();
     _emailController.dispose();
@@ -111,28 +124,19 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 const SizedBox(height: 10),
                 const Padding(
-                  padding: EdgeInsets.only(left: 10.0), // Adjust the value for more/less right padding
+                  padding: EdgeInsets.only(left: 10.0),
                   child: Text(
                     'Personal Information',
                     style: TextStyle(
                       color: Color(0xFF114F3A),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                    )
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                TextFormFieldWithIcon(
-                  'Last Name',
-                  Icons.person,
-                  _lastNameController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter last name';
-                    }
-                    return null;
-                  },
-                ),
+
+                // First Name and Last Name Fields
                 TextFormFieldWithIcon(
                   'First Name',
                   Icons.person,
@@ -140,6 +144,17 @@ class _SignupPageState extends State<SignupPage> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter first name';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormFieldWithIcon(
+                  'Last Name',
+                  Icons.person,
+                  _lastNameController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter last name';
                     }
                     return null;
                   },
@@ -153,68 +168,13 @@ class _SignupPageState extends State<SignupPage> {
                       'Birthday',
                       Icons.calendar_today,
                       TextEditingController(
-                        text: _selectedDate != null
-                            ? DateFormat.yMMMMd().format(_selectedDate!)
-                            : '',
+                        text: _selectedDate != null ? DateFormat.yMMMMd().format(_selectedDate!) : '',
                       ),
                       readOnly: true,
                     ),
                   ),
                 ),
-               Container(
-  margin: const EdgeInsets.symmetric(vertical: 10),
-  padding: const EdgeInsets.symmetric(horizontal: 10),
-  decoration: BoxDecoration(
-    color: const Color(0xFF5CA14E),
-    border: Border.all(color: Colors.grey),
-    borderRadius: BorderRadius.circular(10),
-  ),
-  child: Row(
-    children: [
-      const Icon(
-        Icons.wc,
-        color: Colors.white,
-      ),
-      const SizedBox(width: 10),
-      Expanded(
-        child: DropdownButtonFormField<String>(
-          isExpanded: true,
-          value: _selectedSex,
-          items: const [
-            DropdownMenuItem(
-              value: 'Male',
-              child: Text('Male', style: TextStyle(color: Colors.white)),
-            ),
-            DropdownMenuItem(
-              value: 'Female',
-              child: Text('Female', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-          onChanged: (value) {
-            setState(() {
-              _selectedSex = value;
-            });
-          },
-          decoration: const InputDecoration(
-  hintText: 'Sex',
-  hintStyle: TextStyle(color: Colors.white),
-  border: InputBorder.none,
-  contentPadding: EdgeInsets.only(bottom: 8,top: 3.8), // Adjust to move text up slightly
-),
-          dropdownColor: const Color(0xFF5CA14E),
-          style: const TextStyle(color: Colors.white, fontSize: 16), // Adjust font size for clarity
-          iconEnabledColor: Colors.white,
-          validator: (value) {
-            if (value == null) {
-              return 'Please select sex';
-            }
-            return null;
-          },
-        ),
-      ),
-    ],
-  ),
-),
+                // Sex Dropdown
                 Container(
                   margin: const EdgeInsets.symmetric(vertical: 10),
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -225,10 +185,59 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.family_restroom,
-                        color: Colors.white,
+                      const Icon(Icons.wc, color: Colors.white),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          value: _selectedSex,
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'Male',
+                              child: Text('Male', style: TextStyle(color: Colors.white)),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Female',
+                              child: Text('Female', style: TextStyle(color: Colors.white)),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedSex = value;
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            hintText: 'Sex',
+                            hintStyle: TextStyle(color: Colors.white),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.only(bottom: 8, top: 3.8),
+                          ),
+                          dropdownColor: const Color(0xFF5CA14E),
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          iconEnabledColor: Colors.white,
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Please select sex';
+                            }
+                            return null;
+                          },
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+                // Civil Status Dropdown
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5CA14E),
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.family_restroom, color: Colors.white),
                       const SizedBox(width: 10),
                       Expanded(
                         child: DropdownButtonFormField<String>(
@@ -260,7 +269,7 @@ class _SignupPageState extends State<SignupPage> {
                             hintText: 'Civil Status',
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.only(bottom: 8,top: 3.8),
+                            contentPadding: EdgeInsets.only(bottom: 8, top: 3.8),
                           ),
                           dropdownColor: const Color(0xFF5CA14E),
                           style: const TextStyle(color: Colors.white),
@@ -276,8 +285,8 @@ class _SignupPageState extends State<SignupPage> {
                     ],
                   ),
                 ),
-                // Updated Nationality Field
-              Container(
+                // Nationality Dropdown
+                Container(
                   margin: const EdgeInsets.symmetric(vertical: 15),
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
@@ -287,14 +296,11 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.flag,
-                        color: Colors.white,
-                      ),
+                      const Icon(Icons.flag, color: Colors.white),
                       const SizedBox(width: 10),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedNationality, // Use the variable here
+                          value: _selectedNationality,
                           items: _nationalities.map((nationality) {
                             return DropdownMenuItem<String>(
                               value: nationality,
@@ -303,14 +309,14 @@ class _SignupPageState extends State<SignupPage> {
                           }).toList(),
                           onChanged: (value) {
                             setState(() {
-                              _selectedNationality = value; // Set the selected nationality
+                              _selectedNationality = value;
                             });
                           },
                           decoration: const InputDecoration(
                             hintText: 'Nationality',
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.only(bottom: 8,top: 3.8),
+                            contentPadding: EdgeInsets.only(bottom: 8, top: 3.8),
                           ),
                           dropdownColor: const Color(0xFF5CA14E),
                           style: const TextStyle(color: Colors.white),
@@ -326,9 +332,7 @@ class _SignupPageState extends State<SignupPage> {
                     ],
                   ),
                 ),
-                // Removed Province, City/Municipality, and Country of Residence fields
-
-                // Added Contact Number field
+                // Contact Number Field
                 Container(
                   margin: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
@@ -345,10 +349,7 @@ class _SignupPageState extends State<SignupPage> {
                     ],
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(
-                        Icons.phone,
-                        color: Colors.white,
-                      ),
+                      prefixIcon: const Icon(Icons.phone, color: Colors.white),
                       hintText: 'Contact Number',
                       hintStyle: const TextStyle(color: Colors.white),
                       filled: true,
@@ -369,37 +370,33 @@ class _SignupPageState extends State<SignupPage> {
                     },
                   ),
                 ),
-
-                const SizedBox(height: 60), // Space below the form fields
+                const SizedBox(height: 60),
                 Center(
                   child: Container(
                     width: 200,
                     height: 50,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25), // Rounded button
-                      color: const Color(0xFF2C812A), // Button color
+                      borderRadius: BorderRadius.circular(25),
+                      color: const Color(0xFF2C812A),
                     ),
                     child: TextButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          // Form is validated, proceed to next screen
                           Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SignupContinue(
-                              lastName: _lastNameController.text,
-                              firstName: _firstNameController.text,
-                              email: _emailController.text,
-                              selectedNationality: _selectedNationality ?? '', // Use the selected variable
-                              contactNumber: _contactNumberController.text,
-                              birthday: _selectedDate != null
-                                  ? DateFormat.yMMMMd().format(_selectedDate!)
-                                  : '',
-                              sex: _selectedSex ?? '',
-                              civilStatus: _selectedCivilStatus ?? '',
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SignupContinue(
+                                lastName: _lastNameController.text,
+                                firstName: _firstNameController.text,
+                                email: _emailController.text,
+                                selectedNationality: _selectedNationality ?? '',
+                                contactNumber: _contactNumberController.text,
+                                birthday: _selectedDate != null ? DateFormat.yMMMMd().format(_selectedDate!) : '',
+                                sex: _selectedSex ?? '',
+                                civilStatus: _selectedCivilStatus ?? '',
+                              ),
                             ),
-                          ),
-                        );
+                          );
                         }
                       },
                       child: const Text(
@@ -412,7 +409,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 70), // Space under the button
+                const SizedBox(height: 70),
               ],
             ),
           ),
@@ -436,6 +433,7 @@ class _SignupPageState extends State<SignupPage> {
   }
 }
 
+// Custom widget for text fields with icons
 class TextFormFieldWithIcon extends StatelessWidget {
   final String hintText;
   final IconData iconData;
@@ -447,7 +445,8 @@ class TextFormFieldWithIcon extends StatelessWidget {
   const TextFormFieldWithIcon(
     this.hintText,
     this.iconData,
-    this.controller, {super.key, 
+    this.controller, {
+    super.key,
     this.onIconPressed,
     this.validator,
     this.readOnly = false,

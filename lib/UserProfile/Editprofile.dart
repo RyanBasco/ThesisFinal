@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -44,35 +45,44 @@ class _EditProfileState extends State<EditProfile> {
   User? user = FirebaseAuth.instance.currentUser;
   if (user != null) {
     try {
-      // First try to get user data based on email
-      var querySnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .where('email', isEqualTo: user.email)
-          .get();
+      final DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('Users');
 
-      if (querySnapshot.docs.isNotEmpty) {
-        var userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
+      // Step 1: Try to fetch user data by email
+      final snapshot = await usersRef.get();
+      bool userFound = false;
 
-        setState(() {
-          _firstName = userData['first_name'] ?? '';
-          _lastName = userData['last_name'] ?? '';
-          _birthday = userData['birthday'] ?? '';
-          _email = user.email ?? '';
-          _contactNumber = userData['contact_number'] ?? '';
-          _profileImageUrl = userData['profile_image_url'];
+      if (snapshot.exists) {
+        for (var entry in (snapshot.value as Map).entries) {
+          final userData = Map<String, dynamic>.from(entry.value);
+          String emailFromDatabase = userData['email'] ?? '';
 
-          // Set the controllers
-          _nameController.text = '$_firstName $_lastName';
-          _birthdayController.text = _birthday;
-          _emailController.text = _email;
-          _contactNumberController.text = _contactNumber;
-        });
-      } else {
-        // If no user data found by email, try to get by UID
-        var userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
-        
-        if (userDoc.exists) {
-          var userData = userDoc.data() as Map<String, dynamic>;
+          // Check if email matches (case-insensitive)
+          if (emailFromDatabase.toLowerCase() == user.email!.toLowerCase()) {
+            userFound = true;
+            setState(() {
+              _firstName = userData['first_name'] ?? '';
+              _lastName = userData['last_name'] ?? '';
+              _birthday = userData['birthday'] ?? '';
+              _email = user.email ?? '';
+              _contactNumber = userData['contact_number'] ?? '';
+              _profileImageUrl = userData['profile_image_url'];
+
+              // Set the controllers
+              _nameController.text = '$_firstName $_lastName';
+              _birthdayController.text = _birthday;
+              _emailController.text = _email;
+              _contactNumberController.text = _contactNumber;
+            });
+            break;
+          }
+        }
+      }
+
+      // Step 2: If no user data found by email, try to fetch by UID
+      if (!userFound) {
+        final uidSnapshot = await usersRef.child(user.uid).get();
+        if (uidSnapshot.exists) {
+          final userData = Map<String, dynamic>.from(uidSnapshot.value as Map);
 
           setState(() {
             _firstName = userData['first_name'] ?? '';
@@ -99,6 +109,7 @@ class _EditProfileState extends State<EditProfile> {
     print('No authenticated user found.');
   }
 }
+
 
 
 
@@ -159,15 +170,14 @@ class _EditProfileState extends State<EditProfile> {
   void _toggleEdit() {
     setState(() {
       _isEditing = !_isEditing;
-      _showCancelButton = _isEditing; // Show cancel button if editing
+      _showCancelButton = _isEditing;
     });
   }
 
   void _cancelEditing() {
     setState(() {
       _isEditing = false;
-      _showCancelButton = false; // Hide cancel button
-      // Reset the controllers to the original values
+      _showCancelButton = false;
       _nameController.text = '$_firstName $_lastName';
       _birthdayController.text = _birthday;
       _contactNumberController.text = _contactNumber;
@@ -178,38 +188,31 @@ class _EditProfileState extends State<EditProfile> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        var querySnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .where('email', isEqualTo: user.email)
-            .get();
+        final ref = FirebaseDatabase.instance.ref().child('Users').child(user.uid);
 
-        if (querySnapshot.size > 0) {
-          var userDoc = querySnapshot.docs.first.reference;
-          var nameParts = _nameController.text.split(' ');
+        var nameParts = _nameController.text.split(' ');
+        String firstName = nameParts.length > 1 ? nameParts.sublist(0, nameParts.length - 1).join(' ') : nameParts.isNotEmpty ? nameParts[0] : '';
+        String lastName = nameParts.isNotEmpty ? nameParts.last : '';
 
-          String firstName = nameParts.length > 1 ? nameParts.sublist(0, nameParts.length - 1).join(' ') : nameParts.isNotEmpty ? nameParts[0] : '';
-          String lastName = nameParts.isNotEmpty ? nameParts.last : '';
+        await ref.update({
+          'first_name': firstName,
+          'last_name': lastName,
+          'birthday': _birthdayController.text,
+          'contact_number': _contactNumberController.text,
+        });
 
-          await userDoc.update({
-            'first_name': firstName,
-            'last_name': lastName,
-            'birthday': _birthdayController.text,
-            'contact_number': _contactNumberController.text,
-          });
+        setState(() {
+          _firstName = firstName;
+          _lastName = lastName;
+          _birthday = _birthdayController.text;
+          _contactNumber = _contactNumberController.text;
+          _isEditing = false;
+          _showCancelButton = false;
+        });
 
-          setState(() {
-            _firstName = firstName;
-            _lastName = lastName;
-            _birthday = _birthdayController.text;
-            _contactNumber = _contactNumberController.text;
-            _isEditing = false;
-            _showCancelButton = false; // Hide cancel button after saving
-          });
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile updated successfully!')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
       } catch (error) {
         print('Failed to update user data: $error');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -330,8 +333,8 @@ class _EditProfileState extends State<EditProfile> {
               label: 'My QR',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet),
-              label: 'Wallet',
+              icon: Icon(Icons.attach_money),
+              label: 'Expense Tracker',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),

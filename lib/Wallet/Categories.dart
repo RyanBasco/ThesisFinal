@@ -13,6 +13,60 @@ class CategoriesPage extends StatefulWidget {
 class _CategoriesPageState extends State<CategoriesPage> {
   int _selectedIndex = 2;
 
+  // Define the list of categories with icons and colors
+  final List<Map<String, dynamic>> categories = [
+    {
+      'name': 'Accommodation',
+      'icon': Icons.hotel,
+      'color': Colors.orangeAccent,
+    },
+    {
+      'name': 'Food and Beverages',
+      'icon': Icons.restaurant_menu,
+      'color': Colors.redAccent,
+    },
+    {
+      'name': 'Transportation',
+      'icon': Icons.directions_car,
+      'color': Colors.blueAccent,
+    },
+    {
+      'name': 'Attractions and Activities',
+      'icon': Icons.local_activity,
+      'color': Colors.purpleAccent,
+    },
+    {
+      'name': 'Shopping',
+      'icon': Icons.shopping_bag,
+      'color': Colors.greenAccent,
+    },
+    {
+      'name': 'Entertainment',
+      'icon': Icons.theater_comedy,
+      'color': Colors.pinkAccent,
+    },
+    {
+      'name': 'Wellness and Spa Services',
+      'icon': Icons.spa,
+      'color': Colors.teal,
+    },
+    {
+      'name': 'Adventure and Outdoor Activities',
+      'icon': Icons.terrain,
+      'color': Colors.brown,
+    },
+    {
+      'name': 'Travel Insurance',
+      'icon': Icons.shield,
+      'color': Colors.indigoAccent,
+    },
+    {
+      'name': 'Local Tours and Guides',
+      'icon': Icons.tour,
+      'color': Colors.cyan,
+    },
+  ];
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -30,9 +84,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
           context,
           MaterialPageRoute(builder: (context) => QRPage()),
         );
-        break; // Current page
-      case 2:
         break;
+      case 2:
+        break; // Current page
       case 3:
         Navigator.push(
           context,
@@ -67,8 +121,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
               label: 'My QR',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet),
-              label: 'Wallet',
+               icon: Icon(Icons.attach_money),
+               label: 'Expense Tracker',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
@@ -140,88 +194,37 @@ class _CategoriesPageState extends State<CategoriesPage> {
               ),
               const SizedBox(height: 20),
               Column(
-                children: [
-                  Container(
+                children: categories.map((category) {
+                  return Container(
                     height: 80,
                     width: MediaQuery.of(context).size.width,
+                    margin: const EdgeInsets.symmetric(vertical: 0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: const Color(0xFFA7A7A7)),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: CircleAvatar(
-                            backgroundColor: Color(0xFFFB0000),
-                            child: Icon(Icons.local_dining, color: Colors.white),
+                            backgroundColor: category['color'],
+                            child: Icon(category['icon'], color: Colors.white),
                           ),
                         ),
                         Text(
-                          'Food & Drinks',
-                          style: TextStyle(
+                          category['name'],
+                          style: const TextStyle(
                             fontSize: 16,
                             color: Colors.black,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  Container(
-                    height: 80,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: const Color(0xFFA7A7A7)),
-                    ),
-                    child: const Row(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          child: CircleAvatar(
-                            backgroundColor: Color(0xFF6FCBFF),
-                            child: Icon(Icons.card_giftcard, color: Colors.white),
-                          ),
-                        ),
-                        Text(
-                          'Souvenir Shop',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: 80,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: const Color(0xFFA7A7A7)),
-                    ),
-                    child: const Row(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          child: CircleAvatar(
-                            backgroundColor: Color(0xFFFFA51E),
-                            child: Icon(Icons.business, color: Colors.white),
-                          ),
-                        ),
-                        Text(
-                          'Accomodation',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
-              // Add more content here if needed
+            SizedBox( height: 50,)
             ],
           ),
         ),

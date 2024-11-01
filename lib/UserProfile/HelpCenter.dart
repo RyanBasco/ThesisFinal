@@ -74,8 +74,8 @@ class _HelpcenterState extends State<Helpcenter> {
               label: 'My QR',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet),
-              label: 'Wallet',
+             icon: Icon(Icons.attach_money),
+             label: 'Expense Tracker',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),

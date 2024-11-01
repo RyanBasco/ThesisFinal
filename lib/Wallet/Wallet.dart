@@ -3,7 +3,6 @@ import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Wallet/Categories.dart';
 import 'package:testing/Wallet/Records.dart';
 import 'package:testing/Wallet/Tomatoredarc.dart';
-import 'package:testing/Wallet/Wallet.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -71,8 +70,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
               label: 'My QR',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet),
-              label: 'Wallet',
+              icon: Icon(Icons.attach_money),
+              label: 'Expense Tracker',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
@@ -115,7 +114,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     const SizedBox(width: 0),
                     const Expanded(
                       child: Text(
-                        'My Wallet',
+                        'Expense Tracker',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -131,34 +130,30 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Container(
-                      width: double.infinity, // This will make the box take up the full width available
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: const Color(0xFF288F13)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Column(
-                        children: [
-                          Text(
-                            'Total Expenses',
-                            style: TextStyle(
-                              color: Color(0xFF288F13),
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    // Moved Categories button to the top
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => CategoriesPage()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF288F13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          SizedBox(height: 8),
-                          Text(
-                            '₱ 4,745.00',
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 0, 0, 0),
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                        ),
+                        child: const Text(
+                          'Categories',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -182,30 +177,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                               textAlign: TextAlign.left,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => CategoriesPage()),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF288F13),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                              ),
-                              child: const Text(
-                                'Categories',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
