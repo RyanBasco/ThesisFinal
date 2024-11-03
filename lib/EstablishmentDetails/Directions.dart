@@ -1,93 +1,58 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:testing/TouristDashboard/TouristProfile.dart';
-import 'package:testing/TouristDashboard/UserDashboard.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 
-class DirectionsPage extends StatefulWidget {
-  const DirectionsPage({super.key});
-
-  @override
-  _DirectionsPageState createState() => _DirectionsPageState();
+void main() {
+  runApp(TouristServiceApp());
 }
 
-class _DirectionsPageState extends State<DirectionsPage> {
-  File? _selectedImage;
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 100,
+class TouristServiceApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: TouristServiceSelection(),
     );
+  }
+}
 
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
+class TouristServiceSelection extends StatefulWidget {
+  @override
+  _TouristServiceSelectionState createState() => _TouristServiceSelectionState();
+}
+
+class _TouristServiceSelectionState extends State<TouristServiceSelection> {
+  int _currentScreen = 0; // 0 = Welcome, 1 = Selection, 2 = Review, 3 = Confirmation
+  List<String> _selectedServices = [];
+
+  // Services list
+  final List<String> _services = [
+    "Accommodation",
+    "Food and Beverages",
+    "Transportation",
+    "Attractions and Activities",
+    "Shopping",
+    "Entertainment",
+    "Wellness and Spa Services",
+    "Adventure and Outdoor Activities",
+    "Travel Insurance",
+    "Local Tours and Guides"
+  ];
+
+  // Navigate to a specific screen
+  void _showScreen(int screenIndex) {
+    setState(() {
+      _currentScreen = screenIndex;
+    });
+  }
+
+  // Update selected services for review
+  void _updateSelectedServices(List<String> selected) {
+    setState(() {
+      _selectedServices = selected;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: Colors.white,
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          currentIndex: 1,
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-                );
-                break;
-              case 1:
-                break; // Current page
-              case 2:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegistrationPage()),
-                );
-                break;
-              case 3:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TouristprofilePage()),
-                );
-                break;
-            }
-          },
-          selectedItemColor: const Color(0xFF2C812A),
-          unselectedItemColor: Colors.black,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code),
-              label: 'My QR',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet),
-              label: 'Wallet',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-        ),
-      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -103,68 +68,142 @@ class _DirectionsPageState extends State<DirectionsPage> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context); // Navigate back to the previous page
-                      },
-                      child: const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.arrow_back, color: Colors.black),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Directions',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Circle icon in the middle
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  margin: const EdgeInsets.all(20),
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey[300],
-                    image: _selectedImage != null
-                        ? DecorationImage(
-                            image: FileImage(_selectedImage!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
-                  child: _selectedImage == null
-                      ? Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Colors.grey[700],
-                        )
-                      : null,
-                ),
-              ),
-              // Add your content here
-            ],
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: _buildCurrentScreen(),
           ),
         ),
       ),
+    );
+  }
+
+  // Build the appropriate screen based on _currentScreen
+  Widget _buildCurrentScreen() {
+    switch (_currentScreen) {
+      case 0:
+        return _buildWelcomeScreen();
+      case 1:
+        return _buildSelectionScreen();
+      case 2:
+        return _buildReviewScreen();
+      case 3:
+        return _buildConfirmationScreen();
+      default:
+        return _buildWelcomeScreen();
+    }
+  }
+
+  Widget _buildWelcomeScreen() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          "Select Offers for Your Tourists",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () => _showScreen(1),
+          child: const Text("Choose Services for Tourists"),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSelectionScreen() {
+    return Column(
+      children: [
+        const Text(
+          "Select Your Services for Tourists",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        const Text("Choose the services you offer that will enhance tourists' experiences."),
+        const SizedBox(height: 20),
+        Expanded(
+          child: ListView(
+            children: _services.map((service) {
+              return CheckboxListTile(
+                title: Text(service),
+                value: _selectedServices.contains(service),
+                onChanged: (bool? value) {
+                  setState(() {
+                    if (value == true) {
+                      _selectedServices.add(service);
+                    } else {
+                      _selectedServices.remove(service);
+                    }
+                  });
+                },
+              );
+            }).toList(),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _updateSelectedServices(_selectedServices);
+            _showScreen(2);
+          },
+          child: const Text("Next"),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewScreen() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          "Review Tourist Services",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        const Text("Review the services selected for tourists. Click 'Save' to confirm or 'Back' to make changes."),
+        const SizedBox(height: 20),
+        Expanded(
+          child: ListView(
+            children: _selectedServices.map((service) {
+              return ListTile(
+                title: Text(service),
+              );
+            }).toList(),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ElevatedButton(
+              onPressed: () => _showScreen(1),
+              child: const Text("Back"),
+            ),
+            ElevatedButton(
+              onPressed: () => _showScreen(3),
+              child: const Text("Save"),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConfirmationScreen() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          "Success!",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        const Text("Your services for tourists have been successfully saved!"),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () => _showScreen(0),
+          child: const Text("Go to Dashboard"),
+        ),
+      ],
     );
   }
 }

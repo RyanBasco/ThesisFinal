@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -24,28 +24,35 @@ class _BookmarkPageState extends State<BookmarkPage> {
   }
 
   void _fetchBookmarkedItems() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        var querySnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('Bookmarks')
-            .get();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      DatabaseReference bookmarksRef = FirebaseDatabase.instance.ref()
+          .child('Users')
+          .child(user.uid)
+          .child('Bookmarks');
+      
+      DataSnapshot snapshot = await bookmarksRef.get();
 
-        setState(() {
-          _bookmarkedItems = querySnapshot.docs
-              .map((doc) => {
-                    'id': doc.id,
-                    ...doc.data(),
-                  })
-              .toList();
-        });
-      } catch (error) {
-        print('Failed to fetch bookmarked items: $error');
-      }
+      setState(() {
+        _bookmarkedItems = [];
+        for (var bookmark in snapshot.children) {
+          Map<dynamic, dynamic>? bookmarkData = bookmark.value as Map<dynamic, dynamic>?;
+          if (bookmarkData != null) {
+            _bookmarkedItems.add({
+              'id': bookmark.key, // Use key as ID
+              ...Map<String, dynamic>.from(bookmarkData),
+            });
+          }
+        }
+      });
+    } catch (error) {
+      print('Failed to fetch bookmarked items: $error');
     }
   }
+}
+
+
 
   void _showConfirmationDialog(String docId) {
     showDialog(
@@ -75,24 +82,26 @@ class _BookmarkPageState extends State<BookmarkPage> {
   }
 
   void _removeBookmarkedItem(String docId) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('Bookmarks')
-            .doc(docId)
-            .delete();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      await FirebaseDatabase.instance
+          .ref()
+          .child('Users')
+          .child(user.uid)
+          .child('Bookmarks')
+          .child(docId)
+          .remove();
 
-        setState(() {
-          _bookmarkedItems.removeWhere((item) => item['id'] == docId);
-        });
-      } catch (error) {
-        print('Failed to delete bookmarked item: $error');
-      }
+      setState(() {
+        _bookmarkedItems.removeWhere((item) => item['id'] == docId);
+      });
+    } catch (error) {
+      print('Failed to delete bookmarked item: $error');
     }
   }
+}
+
 
   void _onItemTapped(int index) {
     setState(() {

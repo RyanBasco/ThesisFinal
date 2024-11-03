@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:testing/EstablishmentDetails/Directions.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
@@ -6,9 +8,16 @@ import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class DetailsPage extends StatefulWidget {
-  final String establishmentName; // Add this line to accept establishment name
+  final String establishmentName;
+  final String barangay;
+  final String city;
 
-  const DetailsPage({super.key, required this.establishmentName}); // Update constructor
+  const DetailsPage({
+    super.key,
+    required this.establishmentName,
+    required this.barangay,
+    required this.city,
+  });
 
   @override
   _DetailsPageState createState() => _DetailsPageState();
@@ -17,6 +26,52 @@ class DetailsPage extends StatefulWidget {
 class _DetailsPageState extends State<DetailsPage> {
   int _selectedIndex = 0;
   bool _isBookmarked = false;
+  String? barangayName;
+  String? cityName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocationNames();
+  }
+
+ Future<void> _loadLocationNames() async {
+  // Load barangay and city JSON data
+  final String barangayData = await rootBundle.loadString('assets/barangay.json');
+  final String cityData = await rootBundle.loadString('assets/city.json');
+
+  // Decode JSON data
+  final List<dynamic> barangays = json.decode(barangayData);
+  final List<dynamic> cities = json.decode(cityData);
+
+  // Find the names matching the provided codes
+  final barangay = barangays.firstWhere(
+    (b) => b['brgy_code'].toString() == widget.barangay, // Adjusted to 'brgy_code'
+    orElse: () {
+      print('No matching barangay found for code: ${widget.barangay}');
+      return null;
+    },
+  );
+
+  final city = cities.firstWhere(
+    (c) => c['city_code'].toString() == widget.city, // Ensure code is a String
+    orElse: () {
+      print('No matching city found for code: ${widget.city}');
+      return null;
+    },
+  );
+
+  // Update the state with the names
+  setState(() {
+    barangayName = barangay?['brgy_name']; // Adjusted to use 'brgy_name'
+    cityName = city?['city_name'];
+  });
+
+  // Print debug information
+  print('Barangay name loaded: $barangayName');
+  print('City name loaded: $cityName');
+}
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -60,7 +115,7 @@ class _DetailsPageState extends State<DetailsPage> {
   void _navigateToDirectionsPage() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => DirectionsPage()),
+      MaterialPageRoute(builder: (context) => TouristServiceApp()),
     );
   }
 
@@ -123,7 +178,7 @@ class _DetailsPageState extends State<DetailsPage> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        Navigator.pop(context); // Navigate back to the previous page
+                        Navigator.pop(context);
                       },
                       child: const CircleAvatar(
                         backgroundColor: Colors.white,
@@ -156,7 +211,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.asset(
-                            'assets/Pension.png', // Replace with your image path
+                            'assets/Pension.png',
                             fit: BoxFit.cover,
                             height: 400,
                           ),
@@ -169,7 +224,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         alignment: Alignment.bottomLeft,
                         child: Container(
                           width: 290,
-                          height: 135,
+                          height: 155,
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -186,32 +241,21 @@ class _DetailsPageState extends State<DetailsPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    widget.establishmentName, // Use the passed establishment name
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF288F13),
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                widget.establishmentName,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF288F13),
+                                ),
                               ),
                               const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Icon(Icons.location_on, color: Color(0xFF288F13), size: 20),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    'San Miguel, Jordan',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey[500],
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                '${barangayName ?? 'Loading...'}, ${cityName ?? 'Loading...'}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[500],
+                                ),
                               ),
                               const SizedBox(height: 8),
                               const Row(
@@ -221,7 +265,6 @@ class _DetailsPageState extends State<DetailsPage> {
                                   Icon(Icons.star, color: Colors.yellow, size: 20),
                                   Icon(Icons.star, color: Colors.yellow, size: 20),
                                   Icon(Icons.star_border, color: Colors.yellow, size: 20),
-                                  SizedBox(width: 5),
                                 ],
                               ),
                             ],
@@ -239,73 +282,11 @@ class _DetailsPageState extends State<DetailsPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 20),
-                      child: Container(
-                        width: 120,
-                        height: 40,
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.phone, color: Colors.black, size: 20),
-                            SizedBox(width: 5),
-                            Text(
-                              'Contact',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _contactButton('Contact', Icons.phone),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(right: 80),
-                      child: Container(
-                        width: 120,
-                        height: 40,
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.facebook, color: Colors.black, size: 20),
-                            SizedBox(width: 5),
-                            Text(
-                              'Facebook',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _contactButton('Facebook', Icons.facebook),
                     ),
                   ],
                 ),
@@ -378,6 +359,41 @@ class _DetailsPageState extends State<DetailsPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _contactButton(String label, IconData icon) {
+    return Container(
+      width: 120,
+      height: 40,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.black, size: 20),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
     );
   }

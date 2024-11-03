@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Categories.dart';
-import 'package:testing/Expense%20Tracker/Records.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -172,13 +171,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    const Expanded(
-                      child: Text(
-                        'Expense Tracker',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+                   const Padding(
+                padding: const EdgeInsets.only(left: 40.0),
+                child: Text(
+                  'Expense Tracker',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+              ),
                   ],
                 ),
               ),
@@ -186,23 +185,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => CategoriesPage()));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF288F13),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                        ),
-                        child: const Text(
-                          'Categories',
-                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -234,21 +216,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.centerLeft,
+                    const SizedBox(height: 24),
+                    Center(
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => RecordsPage()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => CategoriesPage()));
                         },
-                        icon: const Icon(Icons.insert_drive_file, color: Color(0xFF288F13)),
+                        icon: const Icon(Icons.remove_red_eye, color: Colors.white),
                         label: const Text(
-                          'Records',
-                          style: TextStyle(color: Color(0xFF288F13)),
+                          'View Categories',
+                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: const BorderSide(color: Color(0xFF288F13)),
+                          backgroundColor: const Color(0xFF288F13),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                         ),
@@ -257,6 +237,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   ],
                 ),
               ),
+              SizedBox(height: 35,)
             ],
           ),
         ),

@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
@@ -16,10 +18,28 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
   bool isLoading = true;
   int _selectedIndex = 2;
 
+  Map<String, String> barangayMap = {};
+  Map<String, String> cityMap = {};
+
   @override
   void initState() {
     super.initState();
+    loadLocationNames();
     fetchAccommodationVisits();
+  }
+
+  Future<void> loadLocationNames() async {
+    // Load barangay and city JSON data
+    final String barangayData = await rootBundle.loadString('assets/barangay.json');
+    final String cityData = await rootBundle.loadString('assets/city.json');
+
+    final List<dynamic> barangays = json.decode(barangayData);
+    final List<dynamic> cities = json.decode(cityData);
+
+    setState(() {
+      barangayMap = {for (var b in barangays) b['brgy_code']: b['brgy_name']};
+      cityMap = {for (var c in cities) c['city_code']: c['city_name']};
+    });
   }
 
   Future<void> fetchAccommodationVisits() async {
@@ -36,10 +56,15 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
         visitsSnapshot.children.forEach((document) {
           final visitData = Map<String, dynamic>.from(document.value as Map);
           if (visitData['User']['UID'] == uid && visitData['Category'] == 'Food and Beverages') {
+            String barangayCode = visitData['Establishment']['barangay'] ?? 'Unknown';
+            String cityCode = visitData['Establishment']['city'] ?? 'Unknown';
+            String barangay = barangayMap[barangayCode] ?? 'Unknown';
+            String city = cityMap[cityCode] ?? 'Unknown';
+
             setState(() {
               accommodationVisits.add({
                 'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
-                'address': '${visitData['Establishment']['city']}, ${visitData['Establishment']['barangay']}' ?? 'N/A',
+                'address': '$city, $barangay',
                 'date': visitData['Date'] ?? 'N/A',
               });
             });
@@ -119,8 +144,8 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
               label: 'My QR',
             ),
             BottomNavigationBarItem(
-               icon: Icon(Icons.attach_money),
-               label: 'Expense Tracker',
+              icon: Icon(Icons.attach_money),
+              label: 'Expense Tracker',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),

@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/EstablishmentDetails/Details.dart';
@@ -16,17 +18,49 @@ class UserdashboardPageState extends StatefulWidget {
 
 class _UserdashboardPageState extends State<UserdashboardPageState> {
   int _selectedIndex = 0;
+  int? _selectedCategoryIndex;
   String _firstName = '';
   String _lastName = '';
   final TextEditingController _searchController = TextEditingController();
   final List<bool> _isBookmarked = [];
   List<Map<String, dynamic>> _establishments = [];
 
+  // Initialize barangay and city maps for decoding
+  Map<String, String> barangayMap = {};
+  Map<String, String> cityMap = {};
+
+  final List<Map<String, dynamic>> _categories = [
+    {'name': 'Accommodation', 'icon': Icons.hotel},
+    {'name': 'Food and Beverages', 'icon': Icons.restaurant_menu},
+    {'name': 'Transportation', 'icon': Icons.directions_car},
+    {'name': 'Attractions and Activities', 'icon': Icons.local_activity},
+    {'name': 'Shopping', 'icon': Icons.shopping_bag},
+    {'name': 'Entertainment', 'icon': Icons.theater_comedy},
+    {'name': 'Wellness and Spa Services', 'icon': Icons.spa},
+    {'name': 'Adventure and Outdoor Activities', 'icon': Icons.terrain},
+    {'name': 'Travel Insurance', 'icon': Icons.shield},
+    {'name': 'Local Tours and Guides', 'icon': Icons.tour},
+  ];
+
   @override
   void initState() {
     super.initState();
     _fetchUserData();
     _fetchEstablishments();
+    _loadLocationNames();
+  }
+
+  Future<void> _loadLocationNames() async {
+    final String barangayData = await rootBundle.loadString('assets/barangay.json');
+    final String cityData = await rootBundle.loadString('assets/city.json');
+
+    final List<dynamic> barangays = json.decode(barangayData);
+    final List<dynamic> cities = json.decode(cityData);
+
+    barangayMap = {for (var b in barangays) b['brgy_code']: b['brgy_name']};
+    cityMap = {for (var c in cities) c['city_code']: c['city_name']};
+
+    setState(() {});
   }
 
   void _fetchUserData() async {
@@ -36,7 +70,6 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
         DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('Users');
         DataSnapshot snapshot = await usersRef.get();
 
-        // Look for a user with a matching email (case insensitive)
         for (var userSnapshot in snapshot.children) {
           Map<dynamic, dynamic>? userData = userSnapshot.value as Map<dynamic, dynamic>?;
           String emailFromDatabase = userData?['email'] ?? '';
@@ -50,23 +83,22 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
           }
         }
 
-        // Fetch bookmarks
         DatabaseReference bookmarksRef = FirebaseDatabase.instance.ref().child('Users').child(user.uid).child('Bookmarks');
         DataSnapshot bookmarksSnapshot = await bookmarksRef.get();
 
         _isBookmarked.clear();
         for (var _ in _establishments) {
-          _isBookmarked.add(false); // Default to not bookmarked
+          _isBookmarked.add(false);
         }
         for (var bookmark in bookmarksSnapshot.children) {
           String bookmarkKey = bookmark.key ?? '';
           int index = int.tryParse(bookmarkKey.split('_')[1] ?? '') ?? -1;
           if (index >= 0 && index < _isBookmarked.length) {
-            _isBookmarked[index] = true; // Mark as bookmarked
+            _isBookmarked[index] = true;
           }
         }
 
-        setState(() {}); // Refresh UI
+        setState(() {});
       } catch (error) {
         print('Failed to fetch user data: $error');
       }
@@ -133,14 +165,21 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
         DatabaseReference bookmarkRef = FirebaseDatabase.instance.ref()
             .child('Users').child(user.uid).child('Bookmarks').child('bookmark_$index');
 
+        String barangayCode = _establishments[index]['barangay'] ?? 'Unknown';
+        String cityCode = _establishments[index]['city'] ?? 'Unknown';
+        String barangay = barangayMap[barangayCode] ?? 'Unknown';
+        String city = cityMap[cityCode] ?? 'Unknown';
+
         if (_isBookmarked[index]) {
           await bookmarkRef.remove();
+          print('Bookmark removed');
         } else {
           String title = _establishments[index]['establishmentName'] ?? 'Unknown';
           await bookmarkRef.set({
             'title': title,
-            'location': 'San Miguel, Jordan',
+            'location': '$barangay, $city',
           });
+          print('Bookmark added');
         }
 
         setState(() {
@@ -214,7 +253,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Welcome, $_firstName$_lastName',
+                      'Welcome, $_firstName $_lastName',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -279,6 +318,83 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   ),
                 ),
               ),
+              const Padding(
+                padding: EdgeInsets.only(left: 20, top: 10, bottom: 5),
+                child: Text(
+                  "Categories",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Color(0xFF2C812A),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // Categories in Grid format
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 2.5, // Adjust width-to-height ratio
+                  ),
+                  itemCount: _categories.length,
+                  itemBuilder: (context, index) {
+                    Map<String, dynamic> category = _categories[index];
+                    bool isSelected = _selectedCategoryIndex == index;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedCategoryIndex = index;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0xFF288F13) : Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              category['icon'],
+                              color: isSelected ? Colors.white : const Color(0xFF2C812A),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                category['name'],
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected ? Colors.white : Colors.black,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
               const SizedBox(height: 20),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
@@ -308,6 +424,11 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
 
   Widget _buildResultBoxWithInitial(String resultText, bool isFirstBox, int index) {
     String firstInitial = resultText.isNotEmpty ? resultText[0].toUpperCase() : '';
+
+    String barangayCode = _establishments[index]['barangay'] ?? 'Unknown';
+    String cityCode = _establishments[index]['city'] ?? 'Unknown';
+    String barangay = barangayMap[barangayCode] ?? 'Unknown';
+    String city = cityMap[cityCode] ?? 'Unknown';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -343,7 +464,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                     child: Text(
                       firstInitial,
                       style: const TextStyle(
-                        fontSize: 60,
+                        fontSize: 50,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -365,11 +486,11 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                               child: Text(
                                 resultText,
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: isFirstBox ? const Color(0xFF288F13) : Colors.green,
                                 ),
-                                maxLines: 2,
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -380,21 +501,25 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                               child: Icon(
                                 Icons.bookmark,
                                 color: _isBookmarked.length > index && _isBookmarked[index] ? Colors.yellow : Colors.grey,
-                                size: 30,
+                                size: 25,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 5),
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.location_on, color: Colors.green),
-                            SizedBox(width: 5),
-                            Text(
-                              'San Miguel, Jordan',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
+                            const Icon(Icons.location_on, color: Colors.green, size: 16),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                '$barangay, $city',
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -411,11 +536,14 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
             bottom: 10,
             child: GestureDetector(
               onTap: () {
-                // Navigate to DetailsPage when the arrow is clicked
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DetailsPage(establishmentName: resultText), // Pass the name here
+                    builder: (context) => DetailsPage(
+                      establishmentName: resultText,
+                      barangay: barangayCode,
+                      city: cityCode,
+                    ),
                   ),
                 );
               },
@@ -429,11 +557,11 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                 ),
                 child: Center(
                   child: Transform.rotate(
-                    angle: 330 * 3.14159 / 180, // Angle for the arrow icon
+                    angle: 330 * 3.14159 / 180,
                     child: const Icon(
                       Icons.arrow_forward,
                       color: Color(0xFF2C812A),
-                      size: 20,
+                      size: 18,
                     ),
                   ),
                 ),
