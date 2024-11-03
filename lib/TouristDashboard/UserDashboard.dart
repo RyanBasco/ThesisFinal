@@ -4,7 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/EstablishmentDetails/Details.dart';
 import 'package:testing/TouristDashboard/Notifications.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
-import 'package:testing/Wallet/Wallet.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 
 class UserdashboardPageState extends StatefulWidget {
@@ -214,9 +214,9 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Welcome, $_firstName $_lastName',
+                      'Welcome, $_firstName$_lastName',
                       style: const TextStyle(
-                        fontSize: 24,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),

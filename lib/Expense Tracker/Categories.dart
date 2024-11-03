@@ -1,4 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:testing/Categories/Accomodation.dart';
+import 'package:testing/Categories/AdventureandOutdoor.dart';
+import 'package:testing/Categories/AttractionsandActivities.dart';
+import 'package:testing/Categories/Entertainment.dart';
+import 'package:testing/Categories/Food&Beverages.dart';
+import 'package:testing/Categories/LocaltoursandGuides.dart';
+import 'package:testing/Categories/Shopping.dart';
+import 'package:testing/Categories/Transportation.dart';
+import 'package:testing/Categories/TravelandInsurance.dart';
+import 'package:testing/Categories/WellnessandSpa.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -95,6 +105,71 @@ class _CategoriesPageState extends State<CategoriesPage> {
         break;
     }
   }
+
+   void navigateToCategoryPage(String categoryName) {
+    switch (categoryName) {
+      case 'Accommodation':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Accommodation()),
+        );
+        break;
+      case 'Food and Beverages':
+         Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Foodandbeverages()),
+        );
+        break;
+      case 'Transportation':
+        Navigator.push(
+          context,
+           MaterialPageRoute(builder: (context) => Transportation()),
+           );
+        break;
+      case 'Attractions and Activities':
+         Navigator.push(
+          context,
+           MaterialPageRoute(builder: (context) => Attractionsandactivities()),
+           );
+        break;  
+      case 'Shopping':
+          Navigator.push(
+          context,
+           MaterialPageRoute(builder: (context) => Shopping()),
+           ); 
+        break;
+      case 'Entertainment':
+          Navigator.push(
+          context,
+           MaterialPageRoute(builder: (context) => Entertainment()),
+           ); 
+        break;  
+      case 'Wellness and Spa Services':
+        Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (context) => Wellnessandspa()),
+          );
+        break;
+      case 'Adventure and Outdoor Activities':
+        Navigator.push(context, 
+        MaterialPageRoute(builder: (context) => Adventureandoutdoor()),
+        );
+        break;
+      case 'Travel Insurance':
+        Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (context) => Travelandinsurance()),
+          );
+        break;
+      case 'Local Tours and Guides':
+        Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (context) => Localtoursandguides()),
+          );
+      break;    
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -195,36 +270,39 @@ class _CategoriesPageState extends State<CategoriesPage> {
               const SizedBox(height: 20),
               Column(
                 children: categories.map((category) {
-                  return Container(
-                    height: 80,
-                    width: MediaQuery.of(context).size.width,
-                    margin: const EdgeInsets.symmetric(vertical: 0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: const Color(0xFFA7A7A7)),
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: CircleAvatar(
-                            backgroundColor: category['color'],
-                            child: Icon(category['icon'], color: Colors.white),
+                  return InkWell(
+                    onTap: () => navigateToCategoryPage(category['name']),
+                    child: Container(
+                      height: 80,
+                      width: MediaQuery.of(context).size.width,
+                      margin: const EdgeInsets.symmetric(vertical: 0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: const Color(0xFFA7A7A7)),
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: CircleAvatar(
+                              backgroundColor: category['color'],
+                              child: Icon(category['icon'], color: Colors.white),
+                            ),
                           ),
-                        ),
-                        Text(
-                          category['name'],
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
+                          Text(
+                            category['name'],
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 }).toList(),
               ),
-            SizedBox( height: 50,)
+              const SizedBox(height: 50),
             ],
           ),
         ),

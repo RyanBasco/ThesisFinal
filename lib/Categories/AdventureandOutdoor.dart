@@ -5,12 +5,12 @@ import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
-class Accommodation extends StatefulWidget {
+class Adventureandoutdoor extends StatefulWidget {
   @override
-  _AccommodationState createState() => _AccommodationState();
+  _AdventureandoutdoorState createState() => _AdventureandoutdoorState();
 }
 
-class _AccommodationState extends State<Accommodation> {
+class _AdventureandoutdoorState extends State<Adventureandoutdoor> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Map<String, dynamic>> accommodationVisits = [];
   bool isLoading = true;
@@ -35,7 +35,7 @@ class _AccommodationState extends State<Accommodation> {
       if (visitsSnapshot.exists) {
         visitsSnapshot.children.forEach((document) {
           final visitData = Map<String, dynamic>.from(document.value as Map);
-          if (visitData['User']['UID'] == uid && visitData['Category'] == 'Accommodation') {
+          if (visitData['User']['UID'] == uid && visitData['Category'] == 'Adventure and Outdoor Activities') {
             setState(() {
               accommodationVisits.add({
                 'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
@@ -50,7 +50,7 @@ class _AccommodationState extends State<Accommodation> {
       if (accommodationVisits.isEmpty) {
         setState(() {
           accommodationVisits.add({
-            'establishmentName': 'Currently no expense in this accommodation category.',
+            'establishmentName': 'Currently no expense in this Adventure and Outdoor Activities category.',
             'address': '',
             'date': '',
           });
@@ -158,10 +158,10 @@ class _AccommodationState extends State<Accommodation> {
                     ),
                     SizedBox(width: 10),
                     Padding(
-                      padding: const EdgeInsets.only(left: 42),
+                      padding: const EdgeInsets.only(left: 12),
                       child: Text(
-                        'Accommodation',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
+                        'Adventure and Outdoor Activities',
+                        style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                     ),
                   ],
@@ -186,7 +186,7 @@ class _AccommodationState extends State<Accommodation> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Accommodation History',
+                      'Adventure and Outdoor Activities History',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),

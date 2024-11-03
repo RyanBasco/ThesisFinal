@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:testing/TouristDashboard/GenerateQR.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
-import 'package:testing/Wallet/Wallet.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 
 class QRPage extends StatefulWidget {
   const QRPage({super.key});

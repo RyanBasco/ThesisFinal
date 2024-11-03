@@ -5,9 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:math';
 import 'package:testing/Authentication/TouristLogin.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
-import 'package:testing/Wallet/Wallet.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
-import 'package:testing/UserProfile/Addfriends.dart';
 import 'package:testing/UserProfile/Changepassword.dart';
 import 'package:testing/UserProfile/Editprofile.dart';
 import 'package:testing/UserProfile/HelpCenter.dart';
@@ -38,7 +37,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
     _generateUserId();
   }
 
- Future<void> _pickImage() async {
+  Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
@@ -48,7 +47,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
     }
   }
 
-   Future<void> _uploadProfileImage(XFile imageFile) async {
+  Future<void> _uploadProfileImage(XFile imageFile) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
@@ -100,22 +99,20 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
     }
   }
 
-
   void _generateUserId() {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    // Generate a hash code from the user's email
-    final emailHash = user.email?.hashCode ?? 0;
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Generate a hash code from the user's email
+      final emailHash = user.email?.hashCode ?? 0;
 
-    // Map the hash code to a 4-digit number
-    final userId = (emailHash.abs() % 9000 + 1000).toString();
+      // Map the hash code to a 4-digit number
+      final userId = (emailHash.abs() % 9000 + 1000).toString();
 
-    setState(() {
-      _userId = userId;
-    });
+      setState(() {
+        _userId = userId;
+      });
+    }
   }
-}
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -233,7 +230,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
               Center(
                 child: Container(
                   width: 300,
-                  height: 650, // Increased height to accommodate new items
+                  height: 550, // Adjusted height if needed
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -249,9 +246,9 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                   child: Stack(
                     children: [
                       Positioned(
-                          top: 20,
-                          left: 20,
-                          child: CircleAvatar(
+                        top: 20,
+                        left: 20,
+                        child: CircleAvatar(
                           backgroundColor: Colors.black,
                           radius: 45,
                           child: _profileImageUrl == null
@@ -268,14 +265,14 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                       ),
                       Positioned(
                         top: 30,
-                        left: 120,
+                        left: 115,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               '$_firstName $_lastName',
                               style: const TextStyle(
-                                fontSize: 24,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
@@ -292,7 +289,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 50,
+                        top: 100,
                         left: 20,
                         bottom: 340,
                         child: GestureDetector(
@@ -325,7 +322,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 92), // Add space between text and arrow
+                              const SizedBox(width: 92),
                               const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
@@ -336,7 +333,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 150,
+                        top: 180,
                         left: 20,
                         bottom: 310,
                         child: GestureDetector(
@@ -369,7 +366,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 40), // Add space between text and arrow
+                              const SizedBox(width: 40),
                               const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
@@ -380,51 +377,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 250,
-                        left: 20,
-                        bottom: 280,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => FriendsPage()),
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(0xFF2C812A),
-                                ),
-                                child: const Icon(
-                                  Icons.group_add,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 25),
-                              const Text(
-                                'Add Friends',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(width: 85), // Add space between text and arrow
-                              const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Colors.black,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 350,
+                        top: 230,
                         left: 20,
                         bottom: 250,
                         child: GestureDetector(
@@ -457,7 +410,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 63), // Add space between text and arrow
+                              const SizedBox(width: 63),
                               const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
@@ -468,7 +421,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 400,
+                        top: 270,
                         left: 20,
                         bottom: 170,
                         child: GestureDetector(
@@ -501,7 +454,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 85), // Add space between text and arrow
+                              const SizedBox(width: 85),
                               const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
@@ -512,7 +465,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 490,
+                        top: 360,
                         left: 20,
                         child: GestureDetector(
                           onTap: () {
@@ -544,7 +497,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 120), // Add space between text and arrow
+                              const SizedBox(width: 120),
                               const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
-import 'package:testing/Wallet/Wallet.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 
 class DirectionsPage extends StatefulWidget {
   const DirectionsPage({super.key});

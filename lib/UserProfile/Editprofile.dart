@@ -6,7 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
-import 'package:testing/Wallet/Wallet.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:firebase_database/firebase_database.dart';
 

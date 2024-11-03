@@ -1,0 +1,320 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Expense%20Tracker/Categories.dart';
+import 'package:testing/Expense%20Tracker/Records.dart';
+import 'package:testing/TouristDashboard/TouristProfile.dart';
+import 'package:testing/TouristDashboard/UserDashboard.dart';
+
+class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({super.key});
+
+  @override
+  _RegistrationPageState createState() => _RegistrationPageState();
+}
+
+class _RegistrationPageState extends State<RegistrationPage> {
+  int _selectedIndex = 2;
+  Map<String, double> spendingData = {};
+  double totalSpending = 0.0;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  final List<String> orderedCategories = [
+    'Accommodation',
+    'Food and Beverages',
+    'Transportation',
+    'Attractions and Activities',
+    'Shopping',
+    'Entertainment',
+    'Wellness and Spa Services',
+    'Adventure and Outdoor Activities',
+    'Travel Insurance',
+    'Local Tours and Guides',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSpendingData();
+  }
+
+  Future<void> _fetchSpendingData() async {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) return;
+
+    String uid = currentUser.uid;
+    DatabaseReference visitsRef = FirebaseDatabase.instance.ref('Visits');
+
+    Map<String, double> categorySpending = {};
+
+    try {
+      DataSnapshot visitsSnapshot = await visitsRef.get();
+
+      if (visitsSnapshot.exists) {
+        visitsSnapshot.children.forEach((document) {
+          final visitData = Map<String, dynamic>.from(document.value as Map);
+          final userUID = visitData['User']?['UID'];
+          final category = visitData['Category'] as String?;
+          final totalSpend = double.tryParse(visitData['TotalSpend'].toString()) ?? 0.0;
+
+          if (userUID == uid && category != null) {
+            categorySpending[category] = (categorySpending[category] ?? 0.0) + totalSpend;
+          }
+        });
+      }
+
+      setState(() {
+        spendingData = categorySpending;
+        totalSpending = categorySpending.values.fold(0.0, (sum, amount) => sum + amount);
+      });
+    } catch (e) {
+      print("Error fetching spending data: $e");
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.push(context, MaterialPageRoute(builder: (context) => UserdashboardPageState()));
+        break;
+      case 1:
+        Navigator.push(context, MaterialPageRoute(builder: (context) => QRPage()));
+        break;
+      case 2:
+        break; // Current page
+      case 3:
+        Navigator.push(context, MaterialPageRoute(builder: (context) => TouristprofilePage()));
+        break;
+    }
+  }
+
+  Widget _buildLegendItem(String category) {
+    double percentage = (spendingData[category] ?? 0) / totalSpending * 100;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _getCategoryColor(category),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '$category - ${percentage.toStringAsFixed(1)}%',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Colors.white,
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          selectedItemColor: const Color(0xFF2C812A),
+          unselectedItemColor: Colors.black,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.qr_code), label: 'My QR'),
+            BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: 'Expense Tracker'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          ],
+        ),
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFEEFFA9), Color(0xFFDBFF4C), Color(0xFF51F643)],
+            stops: [0.15, 0.54, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context); // Navigate back to the previous page
+                      },
+                      child: const CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.arrow_back, color: Colors.black),
+                      ),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        'Expense Tracker',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => CategoriesPage()));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF288F13),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                        ),
+                        child: const Text(
+                          'Categories',
+                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                      child: Column(
+                        children: [
+                          const Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'Expenses',
+                              style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: 200,
+                            height: 200,
+                            child: CustomPaint(
+                              painter: PieChartPainter(spendingData: spendingData, totalSpending: totalSpending),
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: orderedCategories.map((category) => _buildLegendItem(category)).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => RecordsPage()));
+                        },
+                        icon: const Icon(Icons.insert_drive_file, color: Color(0xFF288F13)),
+                        label: const Text(
+                          'Records',
+                          style: TextStyle(color: Color(0xFF288F13)),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          side: const BorderSide(color: Color(0xFF288F13)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PieChartPainter extends CustomPainter {
+  final Map<String, double> spendingData;
+  final double totalSpending;
+
+  PieChartPainter({required this.spendingData, required this.totalSpending});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (totalSpending == 0) return;
+
+    final rect = Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2);
+    double startAngle = -3.14 / 2;
+
+    spendingData.forEach((category, amount) {
+      final sweepAngle = (amount / totalSpending) * 2 * 3.14;
+      final paint = Paint()
+        ..color = _getCategoryColor(category)
+        ..style = PaintingStyle.fill;
+      canvas.drawArc(rect, startAngle, sweepAngle, true, paint);
+      startAngle += sweepAngle;
+    });
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+Color _getCategoryColor(String category) {
+  switch (category) {
+    case 'Accommodation':
+      return Colors.red;
+    case 'Food and Beverages':
+      return Colors.green;
+    case 'Transportation':
+      return Colors.blue;
+    case 'Attractions and Activities':
+      return Colors.orange;
+    case 'Shopping':
+      return Colors.cyan;
+    case 'Entertainment':
+      return Colors.purple;
+    case 'Wellness and Spa Services':
+      return Colors.brown;
+    case 'Adventure and Outdoor Activities':
+      return Colors.yellow;
+    case 'Travel Insurance':
+      return Colors.pink;
+    case 'Local Tours and Guides':
+      return Colors.indigo;
+    default:
+      return Colors.grey;
+  }
+}
