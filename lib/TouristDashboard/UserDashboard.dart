@@ -19,11 +19,13 @@ class UserdashboardPageState extends StatefulWidget {
 class _UserdashboardPageState extends State<UserdashboardPageState> {
   int _selectedIndex = 0;
   int? _selectedCategoryIndex;
+  int? _selectedLocationIndex;
   String _firstName = '';
   String _lastName = '';
   final TextEditingController _searchController = TextEditingController();
   final List<bool> _isBookmarked = [];
   List<Map<String, dynamic>> _establishments = [];
+  List<Map<String, dynamic>> _filteredEstablishments = []; // Added filtered list
 
   // Initialize barangay and city maps for decoding
   Map<String, String> barangayMap = {};
@@ -42,16 +44,38 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     {'name': 'Local Tours and Guides', 'icon': Icons.tour},
   ];
 
+  final List<String> _locations = [
+    "Buenavista",
+    "Jordan",
+    "San Lorenzo",
+    "Sibunag",
+    "Nueva Valencia",
+  ];
+
+  final Map<String, String> cityNameMapping = {
+    "Jordan": "Jordan (Capital)",
+    // Add more mappings if necessary
+  };
+
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_filterEstablishments); // Add listener for search
     _fetchUserData();
     _fetchEstablishments();
     _loadLocationNames();
   }
 
+  @override
+  void dispose() {
+    _searchController.removeListener(_filterEstablishments);
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadLocationNames() async {
-    final String barangayData = await rootBundle.loadString('assets/barangay.json');
+    final String barangayData =
+        await rootBundle.loadString('assets/barangay.json');
     final String cityData = await rootBundle.loadString('assets/city.json');
 
     final List<dynamic> barangays = json.decode(barangayData);
@@ -63,15 +87,27 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     setState(() {});
   }
 
+  void _filterEstablishments() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredEstablishments = _establishments.where((establishment) {
+        String name = establishment['establishmentName']?.toLowerCase() ?? '';
+        return name.contains(query);
+      }).toList();
+    });
+  }
+
   void _fetchUserData() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('Users');
+        DatabaseReference usersRef =
+            FirebaseDatabase.instance.ref().child('Users');
         DataSnapshot snapshot = await usersRef.get();
 
         for (var userSnapshot in snapshot.children) {
-          Map<dynamic, dynamic>? userData = userSnapshot.value as Map<dynamic, dynamic>?;
+          Map<dynamic, dynamic>? userData =
+              userSnapshot.value as Map<dynamic, dynamic>?;
           String emailFromDatabase = userData?['email'] ?? '';
 
           if (emailFromDatabase.toLowerCase() == user.email!.toLowerCase()) {
@@ -83,7 +119,11 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
           }
         }
 
-        DatabaseReference bookmarksRef = FirebaseDatabase.instance.ref().child('Users').child(user.uid).child('Bookmarks');
+        DatabaseReference bookmarksRef = FirebaseDatabase.instance
+            .ref()
+            .child('Users')
+            .child(user.uid)
+            .child('Bookmarks');
         DataSnapshot bookmarksSnapshot = await bookmarksRef.get();
 
         _isBookmarked.clear();
@@ -107,17 +147,20 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
 
   void _fetchEstablishments() async {
     try {
-      DatabaseReference establishmentsRef = FirebaseDatabase.instance.ref().child('establishments');
+      DatabaseReference establishmentsRef =
+          FirebaseDatabase.instance.ref().child('establishments');
       DataSnapshot snapshot = await establishmentsRef.get();
 
       setState(() {
         _establishments = [];
         for (var establishmentSnapshot in snapshot.children) {
-          Map<dynamic, dynamic>? establishmentData = establishmentSnapshot.value as Map<dynamic, dynamic>?;
+          Map<dynamic, dynamic>? establishmentData =
+              establishmentSnapshot.value as Map<dynamic, dynamic>?;
           if (establishmentData != null) {
             _establishments.add(Map<String, dynamic>.from(establishmentData));
           }
         }
+        _filteredEstablishments = _establishments; // Initialize filtered list
         _isBookmarked.addAll(List.filled(_establishments.length, false));
       });
     } catch (error) {
@@ -134,7 +177,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
       case 0:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const UserdashboardPageState()),
+          MaterialPageRoute(
+              builder: (context) => const UserdashboardPageState()),
         );
         break;
       case 1:
@@ -162,8 +206,12 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        DatabaseReference bookmarkRef = FirebaseDatabase.instance.ref()
-            .child('Users').child(user.uid).child('Bookmarks').child('bookmark_$index');
+        DatabaseReference bookmarkRef = FirebaseDatabase.instance
+            .ref()
+            .child('Users')
+            .child(user.uid)
+            .child('Bookmarks')
+            .child('bookmark_$index');
 
         String barangayCode = _establishments[index]['barangay'] ?? 'Unknown';
         String cityCode = _establishments[index]['city'] ?? 'Unknown';
@@ -174,7 +222,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
           await bookmarkRef.remove();
           print('Bookmark removed');
         } else {
-          String title = _establishments[index]['establishmentName'] ?? 'Unknown';
+          String title =
+              _establishments[index]['establishmentName'] ?? 'Unknown';
           await bookmarkRef.set({
             'title': title,
             'location': '$barangay, $city',
@@ -189,6 +238,12 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
         print('Failed to update bookmark: $error');
       }
     }
+  }
+
+  void _onLocationSelected(int index) {
+    setState(() {
+      _selectedLocationIndex = index;
+    });
   }
 
   @override
@@ -265,7 +320,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Notifications()),
+                          MaterialPageRoute(
+                              builder: (context) => Notifications()),
                         );
                       },
                     ),
@@ -318,8 +374,89 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   ),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(3, (index) {
+                        return GestureDetector(
+                          onTap: () => _onLocationSelected(index),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: _selectedLocationIndex == index
+                                  ? const Color(0xFF288F13)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              _locations[index],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _selectedLocationIndex == index
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(2, (index) {
+                        int locationIndex = index + 3;
+                        return GestureDetector(
+                          onTap: () => _onLocationSelected(locationIndex),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: _selectedLocationIndex == locationIndex
+                                  ? const Color(0xFF288F13)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              _locations[locationIndex],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _selectedLocationIndex == locationIndex
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
               const Padding(
-                padding: EdgeInsets.only(left: 20, top: 10, bottom: 5),
+                padding: EdgeInsets.only(left: 20, top: 0, bottom: 5),
                 child: Text(
                   "Categories",
                   style: TextStyle(
@@ -329,7 +466,6 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   ),
                 ),
               ),
-              // Categories in Grid format
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GridView.builder(
@@ -355,7 +491,9 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF288F13) : Colors.white,
+                          color: isSelected
+                              ? const Color(0xFF288F13)
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
@@ -371,7 +509,9 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                           children: [
                             Icon(
                               category['icon'],
-                              color: isSelected ? Colors.white : const Color(0xFF2C812A),
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF2C812A),
                               size: 20,
                             ),
                             const SizedBox(width: 5),
@@ -381,7 +521,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: isSelected ? Colors.white : Colors.black,
+                                  color:
+                                      isSelected ? Colors.white : Colors.black,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -395,6 +536,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   },
                 ),
               ),
+
               const SizedBox(height: 20),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
@@ -408,12 +550,18 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                 ),
               ),
               const SizedBox(height: 10),
-              for (int i = 0; i < _establishments.length; i++)
-                _buildResultBoxWithInitial(
-                  _establishments[i]['establishmentName'],
-                  i == 0,
-                  i,
-                ),
+
+              // Filtered results based on search query and selected city (case-insensitive)
+              for (int i = 0; i < _filteredEstablishments.length; i++)
+                if ((_selectedLocationIndex == null ||
+                    cityMap[_filteredEstablishments[i]['city']] ==
+                        (cityNameMapping[_locations[_selectedLocationIndex!]] ??
+                            _locations[_selectedLocationIndex!])))
+                  _buildResultBoxWithInitial(
+                    _filteredEstablishments[i]['establishmentName'],
+                    i == 0,
+                    i,
+                  ),
               const SizedBox(height: 20),
             ],
           ),
@@ -422,11 +570,13 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     );
   }
 
-  Widget _buildResultBoxWithInitial(String resultText, bool isFirstBox, int index) {
-    String firstInitial = resultText.isNotEmpty ? resultText[0].toUpperCase() : '';
+  Widget _buildResultBoxWithInitial(
+      String resultText, bool isFirstBox, int index) {
+    String firstInitial =
+        resultText.isNotEmpty ? resultText[0].toUpperCase() : '';
 
-    String barangayCode = _establishments[index]['barangay'] ?? 'Unknown';
-    String cityCode = _establishments[index]['city'] ?? 'Unknown';
+    String barangayCode = _filteredEstablishments[index]['barangay'] ?? 'Unknown';
+    String cityCode = _filteredEstablishments[index]['city'] ?? 'Unknown';
     String barangay = barangayMap[barangayCode] ?? 'Unknown';
     String city = cityMap[cityCode] ?? 'Unknown';
 
@@ -488,7 +638,9 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: isFirstBox ? const Color(0xFF288F13) : Colors.green,
+                                  color: isFirstBox
+                                      ? const Color(0xFF288F13)
+                                      : Colors.green,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -500,7 +652,10 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                               },
                               child: Icon(
                                 Icons.bookmark,
-                                color: _isBookmarked.length > index && _isBookmarked[index] ? Colors.yellow : Colors.grey,
+                                color: _isBookmarked.length > index &&
+                                        _isBookmarked[index]
+                                    ? Colors.yellow
+                                    : Colors.grey,
                                 size: 25,
                               ),
                             ),
@@ -509,7 +664,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                         const SizedBox(height: 5),
                         Row(
                           children: [
-                            const Icon(Icons.location_on, color: Colors.green, size: 16),
+                            const Icon(Icons.location_on,
+                                color: Colors.green, size: 16),
                             const SizedBox(width: 5),
                             Expanded(
                               child: Text(

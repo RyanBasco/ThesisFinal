@@ -55,7 +55,7 @@ class _LandingPageState extends State<LandingPage> {
         ),
         child: Center(
           child: Image.asset(
-            'assets/guimarasvist.png',
+            'assets/Newlogo.png',
             fit: BoxFit.contain, // Adjust the image fit
             width: MediaQuery.of(context).size.width * 0.8, // Adjust the width as needed
             height: MediaQuery.of(context).size.height * 0.8, // Adjust the height as needed

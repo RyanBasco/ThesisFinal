@@ -5,6 +5,29 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
 import 'package:testing/Authentication/TouristSignupcontinue.dart';
 
+class CountryCode {
+  final String name;
+  final String code;
+  final String abbreviation;
+  final int maxDigits;
+
+  CountryCode({
+    required this.name,
+    required this.code,
+    required this.abbreviation,
+    required this.maxDigits,
+  });
+
+  factory CountryCode.fromJson(Map<String, dynamic> json) {
+    return CountryCode(
+      name: json['name'],
+      code: json['code'],
+      abbreviation: json['abbreviation'],
+      maxDigits: json['maxDigits'],
+    );
+  }
+}
+
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
@@ -19,51 +42,208 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _contactNumberController = TextEditingController();
+  final TextEditingController _contactNumberController =
+      TextEditingController();
 
   DateTime? _selectedDate;
   String? _selectedSex;
   String? _selectedCivilStatus;
   String? _selectedNationality;
 
+  List<CountryCode> _countryCodes = [];
+  CountryCode? _selectedCountry;
+
   // Directly populated list of nationalities
   final List<String> _nationalities = [
-    "Afghan", "Albanian", "Algerian", "Andorran", "Angolan", "Antiguan", 
-    "Argentine", "Armenian", "Australian", "Austrian", "Azerbaijani", 
-    "Bahaman", "Bahraini", "Bangladeshi", "Barbadian", "Belarusian", 
-    "Belgian", "Belizean", "Beninese", "Bhutanese", "Bolivian", "Bosnian", 
-    "Botswanan", "Brazilian", "Bruneian", "Bulgarian", "Burkinabe", 
-    "Burundian", "Cabo Verdean", "Cambodian", "Cameroonian", "Canadian", 
-    "Central African", "Chadian", "Chilean", "Chinese", "Colombian", 
-    "Comoran", "Congolese", "Costa Rican", "Croatian", "Cuban", "Cypriot", 
-    "Czech", "Danish", "Djiboutian", "Dominican", "Ecuadorian", "Egyptian", 
-    "Emirati", "Equatorial Guinean", "Eritrean", "Estonian", "Eswatini", 
-    "Ethiopian", "Fijian", "Filipino", "Finnish", "French", "Gabonese", 
-    "Gambian", "Georgian", "German", "Ghanaian", "Greek", "Grenadian", 
-    "Guatemalan", "Guinean", "Guinean-Bissauan", "Guyanese", "Haitian", 
-    "Honduran", "Hungarian", "Icelander", "Indian", "Indonesian", "Iranian", 
-    "Iraqi", "Irish", "Israeli", "Italian", "Jamaican", "Japanese", 
-    "Jordanian", "Kazakhstani", "Kenyan", "Kiribati", "North Korean", 
-    "South Korean", "Kuwaiti", "Kyrgyz", "Laotian", "Latvian", "Lebanese", 
-    "Lesotho", "Liberian", "Libyan", "Liechtensteiner", "Lithuanian", 
-    "Luxembourger", "Madagascan", "Malawian", "Malaysian", "Maldivian", 
-    "Malian", "Maltese", "Marshallese", "Mauritanian", "Mauritian", 
-    "Mexican", "Micronesian", "Moldovan", "Monacan", "Mongolian", 
-    "Montenegrin", "Moroccan", "Mozambican", "Myanmarian", "Namibian", 
-    "Nauruan", "Nepalese", "Dutch", "New Zealander", "Nicaraguan", 
-    "Nigerien", "Nigerian", "North Macedonian", "Norwegian", "Omani", 
-    "Pakistani", "Palauan", "Panamanian", "Papua New Guinean", 
-    "Paraguayan", "Peruvian", "Polish", "Portuguese", "Qatari", "Romanian", 
-    "Russian", "Rwandan", "Saint Kitts and Nevisian", "Saint Lucian", 
-    "Saint Vincentian", "Samoan", "San Marinese", "Sao Tomean", 
-    "Saudi Arabian", "Senegalese", "Serbian", "Seychellois", "Sierra Leonean", 
-    "Singaporean", "Slovak", "Slovenian", "Solomon Islander", "Somali", 
-    "South African", "South Sudanese", "Spanish", "Sri Lankan", "Sudanese", 
-    "Surinamese", "Swedish", "Swiss", "Syrian", "Taiwanese", "Tajikistani", 
-    "Tanzanian", "Thai", "Timorese", "Togolese", "Tongan", "Trinidadian", 
-    "Tunisian", "Turkish", "Turkmen", "Tuvaluan", "Ugandan", "Ukrainian", 
-    "Uruguayan", "Uzbek", "Vanuatuan", "Vatican", "Venezuelan", 
-    "Vietnamese", "Yemeni", "Zambian", "Zimbabwean"
+    "Afghan",
+    "Albanian",
+    "Algerian",
+    "Andorran",
+    "Angolan",
+    "Antiguan",
+    "Argentine",
+    "Armenian",
+    "Australian",
+    "Austrian",
+    "Azerbaijani",
+    "Bahaman",
+    "Bahraini",
+    "Bangladeshi",
+    "Barbadian",
+    "Belarusian",
+    "Belgian",
+    "Belizean",
+    "Beninese",
+    "Bhutanese",
+    "Bolivian",
+    "Bosnian",
+    "Botswanan",
+    "Brazilian",
+    "Bruneian",
+    "Bulgarian",
+    "Burkinabe",
+    "Burundian",
+    "Cabo Verdean",
+    "Cambodian",
+    "Cameroonian",
+    "Canadian",
+    "Central African",
+    "Chadian",
+    "Chilean",
+    "Chinese",
+    "Colombian",
+    "Comoran",
+    "Congolese",
+    "Costa Rican",
+    "Croatian",
+    "Cuban",
+    "Cypriot",
+    "Czech",
+    "Danish",
+    "Djiboutian",
+    "Dominican",
+    "Ecuadorian",
+    "Egyptian",
+    "Emirati",
+    "Equatorial Guinean",
+    "Eritrean",
+    "Estonian",
+    "Eswatini",
+    "Ethiopian",
+    "Fijian",
+    "Filipino",
+    "Finnish",
+    "French",
+    "Gabonese",
+    "Gambian",
+    "Georgian",
+    "German",
+    "Ghanaian",
+    "Greek",
+    "Grenadian",
+    "Guatemalan",
+    "Guinean",
+    "Guinean-Bissauan",
+    "Guyanese",
+    "Haitian",
+    "Honduran",
+    "Hungarian",
+    "Icelander",
+    "Indian",
+    "Indonesian",
+    "Iranian",
+    "Iraqi",
+    "Irish",
+    "Israeli",
+    "Italian",
+    "Jamaican",
+    "Japanese",
+    "Jordanian",
+    "Kazakhstani",
+    "Kenyan",
+    "Kiribati",
+    "North Korean",
+    "South Korean",
+    "Kuwaiti",
+    "Kyrgyz",
+    "Laotian",
+    "Latvian",
+    "Lebanese",
+    "Lesotho",
+    "Liberian",
+    "Libyan",
+    "Liechtensteiner",
+    "Lithuanian",
+    "Luxembourger",
+    "Madagascan",
+    "Malawian",
+    "Malaysian",
+    "Maldivian",
+    "Malian",
+    "Maltese",
+    "Marshallese",
+    "Mauritanian",
+    "Mauritian",
+    "Mexican",
+    "Micronesian",
+    "Moldovan",
+    "Monacan",
+    "Mongolian",
+    "Montenegrin",
+    "Moroccan",
+    "Mozambican",
+    "Myanmarian",
+    "Namibian",
+    "Nauruan",
+    "Nepalese",
+    "Dutch",
+    "New Zealander",
+    "Nicaraguan",
+    "Nigerien",
+    "Nigerian",
+    "North Macedonian",
+    "Norwegian",
+    "Omani",
+    "Pakistani",
+    "Palauan",
+    "Panamanian",
+    "Papua New Guinean",
+    "Paraguayan",
+    "Peruvian",
+    "Polish",
+    "Portuguese",
+    "Qatari",
+    "Romanian",
+    "Russian",
+    "Rwandan",
+    "Saint Kitts and Nevisian",
+    "Saint Lucian",
+    "Saint Vincentian",
+    "Samoan",
+    "San Marinese",
+    "Sao Tomean",
+    "Saudi Arabian",
+    "Senegalese",
+    "Serbian",
+    "Seychellois",
+    "Sierra Leonean",
+    "Singaporean",
+    "Slovak",
+    "Slovenian",
+    "Solomon Islander",
+    "Somali",
+    "South African",
+    "South Sudanese",
+    "Spanish",
+    "Sri Lankan",
+    "Sudanese",
+    "Surinamese",
+    "Swedish",
+    "Swiss",
+    "Syrian",
+    "Taiwanese",
+    "Tajikistani",
+    "Tanzanian",
+    "Thai",
+    "Timorese",
+    "Togolese",
+    "Tongan",
+    "Trinidadian",
+    "Tunisian",
+    "Turkish",
+    "Turkmen",
+    "Tuvaluan",
+    "Ugandan",
+    "Ukrainian",
+    "Uruguayan",
+    "Uzbek",
+    "Vanuatuan",
+    "Vatican",
+    "Venezuelan",
+    "Vietnamese",
+    "Yemeni",
+    "Zambian",
+    "Zimbabwean"
   ];
 
   @override
@@ -73,6 +253,22 @@ class _SignupPageState extends State<SignupPage> {
     _emailController.dispose();
     _contactNumberController.dispose();
     super.dispose();
+  }
+
+  Future<void> loadCountryCodes() async {
+    // Load JSON from assets
+    final String response =
+        await rootBundle.loadString('assets/country_codes.json');
+    final data = json.decode(response);
+
+    // Decode JSON into a list of CountryCode objects
+    setState(() {
+      _countryCodes = (data['countries'] as List)
+          .map((json) => CountryCode.fromJson(json))
+          .toList();
+      _selectedCountry =
+          _countryCodes.firstWhere((country) => country.name == "Philippines");
+    });
   }
 
   @override
@@ -168,7 +364,9 @@ class _SignupPageState extends State<SignupPage> {
                       'Birthday',
                       Icons.calendar_today,
                       TextEditingController(
-                        text: _selectedDate != null ? DateFormat.yMMMMd().format(_selectedDate!) : '',
+                        text: _selectedDate != null
+                            ? DateFormat.yMMMMd().format(_selectedDate!)
+                            : '',
                       ),
                       readOnly: true,
                     ),
@@ -194,11 +392,13 @@ class _SignupPageState extends State<SignupPage> {
                           items: const [
                             DropdownMenuItem(
                               value: 'Male',
-                              child: Text('Male', style: TextStyle(color: Colors.white)),
+                              child: Text('Male',
+                                  style: TextStyle(color: Colors.white)),
                             ),
                             DropdownMenuItem(
                               value: 'Female',
-                              child: Text('Female', style: TextStyle(color: Colors.white)),
+                              child: Text('Female',
+                                  style: TextStyle(color: Colors.white)),
                             ),
                           ],
                           onChanged: (value) {
@@ -210,10 +410,12 @@ class _SignupPageState extends State<SignupPage> {
                             hintText: 'Sex',
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.only(bottom: 8, top: 3.8),
+                            contentPadding:
+                                EdgeInsets.only(bottom: 8, top: 3.8),
                           ),
                           dropdownColor: const Color(0xFF5CA14E),
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16),
                           iconEnabledColor: Colors.white,
                           validator: (value) {
                             if (value == null) {
@@ -245,19 +447,23 @@ class _SignupPageState extends State<SignupPage> {
                           items: const [
                             DropdownMenuItem(
                               value: 'Single',
-                              child: Text('Single', style: TextStyle(color: Colors.white)),
+                              child: Text('Single',
+                                  style: TextStyle(color: Colors.white)),
                             ),
                             DropdownMenuItem(
                               value: 'Married',
-                              child: Text('Married', style: TextStyle(color: Colors.white)),
+                              child: Text('Married',
+                                  style: TextStyle(color: Colors.white)),
                             ),
                             DropdownMenuItem(
                               value: 'Divorced',
-                              child: Text('Divorced', style: TextStyle(color: Colors.white)),
+                              child: Text('Divorced',
+                                  style: TextStyle(color: Colors.white)),
                             ),
                             DropdownMenuItem(
                               value: 'Widowed',
-                              child: Text('Widowed', style: TextStyle(color: Colors.white)),
+                              child: Text('Widowed',
+                                  style: TextStyle(color: Colors.white)),
                             ),
                           ],
                           onChanged: (value) {
@@ -269,7 +475,8 @@ class _SignupPageState extends State<SignupPage> {
                             hintText: 'Civil Status',
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.only(bottom: 8, top: 3.8),
+                            contentPadding:
+                                EdgeInsets.only(bottom: 8, top: 3.8),
                           ),
                           dropdownColor: const Color(0xFF5CA14E),
                           style: const TextStyle(color: Colors.white),
@@ -304,7 +511,8 @@ class _SignupPageState extends State<SignupPage> {
                           items: _nationalities.map((nationality) {
                             return DropdownMenuItem<String>(
                               value: nationality,
-                              child: Text(nationality, style: const TextStyle(color: Colors.white)),
+                              child: Text(nationality,
+                                  style: const TextStyle(color: Colors.white)),
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -316,7 +524,8 @@ class _SignupPageState extends State<SignupPage> {
                             hintText: 'Nationality',
                             hintStyle: TextStyle(color: Colors.white),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.only(bottom: 8, top: 3.8),
+                            contentPadding:
+                                EdgeInsets.only(bottom: 8, top: 3.8),
                           ),
                           dropdownColor: const Color(0xFF5CA14E),
                           style: const TextStyle(color: Colors.white),
@@ -332,42 +541,94 @@ class _SignupPageState extends State<SignupPage> {
                     ],
                   ),
                 ),
-                // Contact Number Field
+
                 Container(
-                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     color: const Color(0xFF5CA14E),
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: TextFormField(
-                    controller: _contactNumberController,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(11),
-                    ],
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.phone, color: Colors.white),
-                      hintText: 'Contact Number',
-                      hintStyle: const TextStyle(color: Colors.white),
-                      filled: true,
-                      fillColor: const Color(0xFF5CA14E),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
+                  child: Row(
+                    children: [
+                      // Country Code Dropdown
+                      Container(
+                        width: 100,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: const BoxDecoration(
+                          color:  Color(0xFF5CA14E),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            bottomLeft: Radius.circular(10),
+                          ),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<CountryCode>(
+                            value: _selectedCountry,
+                            isExpanded: true,
+                            dropdownColor: const Color(0xFF5CA14E),
+                            iconEnabledColor: Colors.white,
+                            items: _countryCodes.map((country) {
+                              return DropdownMenuItem<CountryCode>(
+                                value: country,
+                                child: Text(
+                                  "${country.code} ${country.abbreviation}",
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (CountryCode? newCountry) {
+                              setState(() {
+                                _selectedCountry = newCountry;
+                                _contactNumberController.clear();
+                              });
+                            },
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 16),
+                          ),
+                        ),
                       ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter contact number';
-                      }
-                      if (value.length < 11) {
-                        return 'Contact number must be 11 digits';
-                      }
-                      return null;
-                    },
+                      const SizedBox(
+                          width: 8), // Space between dropdown and contact field
+
+                      // Contact Number Field
+                      Expanded(
+                        child: TextFormField(
+                          controller: _contactNumberController,
+                          keyboardType: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(
+                                _selectedCountry?.maxDigits ?? 10),
+                          ],
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            hintText: 'Contact Number',
+                            hintStyle:  TextStyle(color: Colors.white),
+                            filled: true,
+                            fillColor:  Color(0xFF5CA14E),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(10),
+                                bottomRight: Radius.circular(10),
+                              ),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter contact number';
+                            }
+                            if (value.length <
+                                (_selectedCountry?.maxDigits ?? 10)) {
+                              return 'Contact number must be ${_selectedCountry?.maxDigits} digits';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 60),
@@ -391,7 +652,9 @@ class _SignupPageState extends State<SignupPage> {
                                 email: _emailController.text,
                                 selectedNationality: _selectedNationality ?? '',
                                 contactNumber: _contactNumberController.text,
-                                birthday: _selectedDate != null ? DateFormat.yMMMMd().format(_selectedDate!) : '',
+                                birthday: _selectedDate != null
+                                    ? DateFormat.yMMMMd().format(_selectedDate!)
+                                    : '',
                                 sex: _selectedSex ?? '',
                                 civilStatus: _selectedCivilStatus ?? '',
                               ),
@@ -409,7 +672,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 70),
+                const SizedBox(height: 40),
               ],
             ),
           ),

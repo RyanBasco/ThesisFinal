@@ -109,7 +109,7 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 80.0, 16.0, 16.0), // Adjust this value to move down
+              padding: const EdgeInsets.fromLTRB(16.0, 35.0, 16.0, 16.0), // Adjust this value to move down
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,12 +119,12 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                       width: 250,
                       height: 250,
                       child: Image.asset(
-                        'assets/guimarasvist.png',
+                        'assets/Newlogo.png',
                         fit: BoxFit.contain,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 0),
 
                   // "Login" Text
                   const Padding(
