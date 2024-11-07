@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/Authentication/Forgetpass.dart';
 import 'package:testing/Authentication/TouristSignup.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -42,11 +43,13 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
       if (userCredential.user != null) {
         print("User authenticated successfully.");
 
-        DatabaseReference userRef = _database.child('Users').child(userCredential.user!.uid);
+        DatabaseReference userRef =
+            _database.child('Users').child(userCredential.user!.uid);
         DatabaseEvent userEvent = await userRef.once();
 
         if (userEvent.snapshot.exists) {
-          if (mounted) { // Check if the widget is still mounted
+          if (mounted) {
+            // Check if the widget is still mounted
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => UserdashboardPageState()),
@@ -54,7 +57,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           }
         } else {
           await _auth.signOut();
-          if (mounted) { // Check if the widget is still mounted
+          if (mounted) {
+            // Check if the widget is still mounted
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text("Login failed: Invalid email or password."),
@@ -63,7 +67,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           }
         }
       } else {
-        if (mounted) { // Check if the widget is still mounted
+        if (mounted) {
+          // Check if the widget is still mounted
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Failed to login: Invalid email or password."),
@@ -73,7 +78,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
       }
     } catch (e) {
       print("Failed to login: $e");
-      if (mounted) { // Check if the widget is still mounted
+      if (mounted) {
+        // Check if the widget is still mounted
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Failed to login: $e"),
@@ -109,7 +115,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 35.0, 16.0, 16.0), // Adjust this value to move down
+              padding: const EdgeInsets.fromLTRB(
+                  16.0, 35.0, 16.0, 16.0), // Adjust this value to move down
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,7 +153,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                         // Email Field with Icon
                         Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFF5CA14E), // Background color for email field
+                            color: const Color(
+                                0xFF5CA14E), // Background color for email field
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: TextFormField(
@@ -155,10 +163,12 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                               labelText: 'Email',
                               labelStyle: TextStyle(color: Colors.white),
                               border: InputBorder.none,
-                              prefixIcon: Icon(Icons.email, color: Colors.white), // Email Icon
+                              prefixIcon: Icon(Icons.email,
+                                  color: Colors.white), // Email Icon
                             ),
                             keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(color: Colors.white), // White text inside
+                            style: const TextStyle(
+                                color: Colors.white), // White text inside
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter email';
@@ -172,7 +182,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                         // Password Field with Icon
                         Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFF5CA14E), // Background color for password field
+                            color: const Color(
+                                0xFF5CA14E), // Background color for password field
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: TextFormField(
@@ -181,10 +192,13 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                               labelText: 'Password',
                               labelStyle: const TextStyle(color: Colors.white),
                               border: InputBorder.none,
-                              prefixIcon: Icon(Icons.lock, color: Colors.white), // Lock Icon
+                              prefixIcon: Icon(Icons.lock,
+                                  color: Colors.white), // Lock Icon
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                  _obscurePassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
                                   color: Colors.white,
                                 ),
                                 onPressed: () {
@@ -195,7 +209,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                               ),
                             ),
                             obscureText: _obscurePassword,
-                            style: const TextStyle(color: Colors.white), // White text inside
+                            style: const TextStyle(
+                                color: Colors.white), // White text inside
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter password';
@@ -208,19 +223,25 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-
-                  // Forgot password? text
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      'Forgot password?',
-                      style: TextStyle(
-                        color: Colors.black, // Black text color
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PhoneAuthPage()),
+                        );
+                      },
+                      child: const Text(
+                        'Forgot password?',
+                        style: TextStyle(
+                          color: Colors.black, // Black text color
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 40),
-
                   // Login Button
                   Center(
                     child: Container(
@@ -233,7 +254,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                       child: _isLoading
                           ? const Center(
                               child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
                           : TextButton(
@@ -241,7 +263,8 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                                 _login(context);
                               },
                               style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
                               ),
                               child: const Text(
                                 'Login',

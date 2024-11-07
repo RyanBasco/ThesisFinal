@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/Receipt/TravelInsuranceReceipt.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -65,6 +66,7 @@ class _TravelandinsuranceState extends State<Travelandinsurance> {
                 'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
                 'address': '$city, $barangay',
                 'date': visitData['Date'] ?? 'N/A',
+                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0, // Add TotalSpend field
               });
             });
           }
@@ -77,6 +79,7 @@ class _TravelandinsuranceState extends State<Travelandinsurance> {
             'establishmentName': 'Currently no expense in this Travel Insurance category.',
             'address': '',
             'date': '',
+            'totalSpend': '', // Placeholder TotalSpend value
           });
         });
       }
@@ -117,6 +120,21 @@ class _TravelandinsuranceState extends State<Travelandinsurance> {
         break;
     }
   }
+
+  void _navigateToDetail(Map<String, dynamic> visit) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => TravelReceiptDetailPage(
+        establishmentName: visit['establishmentName'],
+        address: visit['address'],
+        date: visit['date'],
+        totalSpend: visit['totalSpend'] ?? 0.0, // Provide default value if null
+      ),
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +241,9 @@ class _TravelandinsuranceState extends State<Travelandinsurance> {
                         itemCount: accommodationVisits.length,
                         itemBuilder: (context, index) {
                           final visit = accommodationVisits[index];
-                          return Column(
+                          return GestureDetector(
+                            onTap: () => _navigateToDetail(visit),
+                            child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (visit['address'] != '')
@@ -243,6 +263,7 @@ class _TravelandinsuranceState extends State<Travelandinsurance> {
                                   textAlign: TextAlign.center,
                                 ),
                             ],
+                            )
                           );
                         },
                       ),

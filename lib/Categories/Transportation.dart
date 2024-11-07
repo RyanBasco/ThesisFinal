@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/Receipt/Transportationreceipt.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -14,7 +15,7 @@ class Transportation extends StatefulWidget {
 
 class _TransportationState extends State<Transportation> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  List<Map<String, dynamic>> accommodationVisits = [];
+  List<Map<String, dynamic>> transportationVisits = [];
   bool isLoading = true;
   int _selectedIndex = 2;
 
@@ -25,11 +26,10 @@ class _TransportationState extends State<Transportation> {
   void initState() {
     super.initState();
     loadLocationNames();
-    fetchAccommodationVisits();
+    fetchTransportationVisits();
   }
 
   Future<void> loadLocationNames() async {
-    // Load barangay and city JSON data
     final String barangayData = await rootBundle.loadString('assets/barangay.json');
     final String cityData = await rootBundle.loadString('assets/city.json');
 
@@ -42,7 +42,7 @@ class _TransportationState extends State<Transportation> {
     });
   }
 
-  Future<void> fetchAccommodationVisits() async {
+  Future<void> fetchTransportationVisits() async {
     final currentUser = _auth.currentUser;
     if (currentUser == null) return;
 
@@ -62,32 +62,48 @@ class _TransportationState extends State<Transportation> {
             String city = cityMap[cityCode] ?? 'Unknown';
 
             setState(() {
-              accommodationVisits.add({
+              transportationVisits.add({
                 'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
                 'address': '$city, $barangay',
                 'date': visitData['Date'] ?? 'N/A',
+                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0, // Add TotalSpend field
               });
             });
           }
         });
       }
 
-      if (accommodationVisits.isEmpty) {
+      if (transportationVisits.isEmpty) {
         setState(() {
-          accommodationVisits.add({
+          transportationVisits.add({
             'establishmentName': 'Currently no expense in this Transportation category.',
             'address': '',
             'date': '',
+            'totalSpend': '', // Placeholder TotalSpend value
           });
         });
       }
     } catch (e) {
-      print("Error fetching accommodation visits: $e");
+      print("Error fetching transportation visits: $e");
     } finally {
       setState(() {
         isLoading = false;
       });
     }
+  }
+
+  void _navigateToDetail(Map<String, dynamic> visit) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TransportationReceiptDetailPage(
+          establishmentName: visit['establishmentName'],
+          address: visit['address'],
+          date: visit['date'],
+          totalSpend: visit['totalSpend'] ?? 0.0, // Pass totalSpend for details page
+        ),
+      ),
+    );
   }
 
   void _onItemTapped(int index) {
@@ -135,22 +151,10 @@ class _TransportationState extends State<Transportation> {
           showSelectedLabels: true,
           showUnselectedLabels: true,
           items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code),
-              label: 'My QR',
-            ),
-            BottomNavigationBarItem(
-               icon: Icon(Icons.attach_money),
-               label: 'Expense Tracker',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.qr_code), label: 'My QR'),
+            BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: 'Expense Tracker'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
         ),
       ),
@@ -221,29 +225,32 @@ class _TransportationState extends State<Transportation> {
                     else
                       ListView.builder(
                         shrinkWrap: true,
-                        itemCount: accommodationVisits.length,
+                        itemCount: transportationVisits.length,
                         itemBuilder: (context, index) {
-                          final visit = accommodationVisits[index];
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (visit['address'] != '')
-                                ...[
+                          final visit = transportationVisits[index];
+                          return GestureDetector(
+                            onTap: () => _navigateToDetail(visit),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (visit['address'] != '')
+                                  ...[
+                                    Text(
+                                      'Establishment Name: ${visit['establishmentName']}',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    Text('Address: ${visit['address']}'),
+                                    Text('Date: ${visit['date']}'),
+                                    Divider(color: Colors.grey[400]),
+                                  ]
+                                else
                                   Text(
-                                    'Establishment Name: ${visit['establishmentName']}',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    visit['establishmentName'],
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  Text('Address: ${visit['address']}'),
-                                  Text('Date: ${visit['date']}'),
-                                  Divider(color: Colors.grey[400]),
-                                ]
-                              else
-                                Text(
-                                  visit['establishmentName'],
-                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-                                  textAlign: TextAlign.center,
-                                ),
-                            ],
+                              ],
+                            ),
                           );
                         },
                       ),

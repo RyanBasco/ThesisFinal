@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/Receipt/EntertainmentReceipt.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -65,6 +66,7 @@ class _EntertainmentState extends State<Entertainment> {
                 'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
                 'address': '$city, $barangay',
                 'date': visitData['Date'] ?? 'N/A',
+                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0, // Add TotalSpend field
               });
             });
           }
@@ -77,6 +79,7 @@ class _EntertainmentState extends State<Entertainment> {
             'establishmentName': 'Currently no expense in this Entertainment category.',
             'address': '',
             'date': '',
+            'totalSpend': '', // Placeholder TotalSpend value
           });
         });
       }
@@ -88,6 +91,20 @@ class _EntertainmentState extends State<Entertainment> {
       });
     }
   }
+
+   void _navigateToDetail(Map<String, dynamic> visit) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => EntertainmentDetailPage(
+        establishmentName: visit['establishmentName'],
+        address: visit['address'],
+        date: visit['date'],
+        totalSpend: visit['totalSpend'] ?? 0.0, // Provide default value if null
+      ),
+    ),
+  );
+}
 
   void _onItemTapped(int index) {
     setState(() {
@@ -223,7 +240,9 @@ class _EntertainmentState extends State<Entertainment> {
                         itemCount: accommodationVisits.length,
                         itemBuilder: (context, index) {
                           final visit = accommodationVisits[index];
-                          return Column(
+                          return GestureDetector(
+                            onTap:() => _navigateToDetail(visit),
+                            child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (visit['address'] != '')
@@ -243,6 +262,7 @@ class _EntertainmentState extends State<Entertainment> {
                                   textAlign: TextAlign.center,
                                 ),
                             ],
+                            ) 
                           );
                         },
                       ),

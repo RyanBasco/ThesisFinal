@@ -111,7 +111,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           Text(
             '$category - ${percentage.toStringAsFixed(1)}%',
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),

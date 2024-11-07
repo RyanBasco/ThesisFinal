@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/Receipt/Receiptdetailed.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+
 
 class Accommodation extends StatefulWidget {
   @override
@@ -65,6 +67,7 @@ class _AccommodationState extends State<Accommodation> {
                 'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
                 'address': '$city, $barangay',
                 'date': visitData['Date'] ?? 'N/A',
+                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0, // Add TotalSpend field
               });
             });
           }
@@ -77,6 +80,7 @@ class _AccommodationState extends State<Accommodation> {
             'establishmentName': 'Currently no expense in this accommodation category.',
             'address': '',
             'date': '',
+            'totalSpend': '', // Placeholder TotalSpend value
           });
         });
       }
@@ -117,6 +121,21 @@ class _AccommodationState extends State<Accommodation> {
         break;
     }
   }
+
+ void _navigateToDetail(Map<String, dynamic> visit) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ReceiptDetailPage(
+        establishmentName: visit['establishmentName'],
+        address: visit['address'],
+        date: visit['date'],
+        totalSpend: visit['totalSpend'] ?? 0.0, // Provide default value if null
+      ),
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -220,29 +239,33 @@ class _AccommodationState extends State<Accommodation> {
                     else
                       ListView.builder(
                         shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
                         itemCount: accommodationVisits.length,
                         itemBuilder: (context, index) {
                           final visit = accommodationVisits[index];
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (visit['address'] != '')
-                                ...[
+                          return GestureDetector(
+                            onTap: () => _navigateToDetail(visit),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (visit['address'] != '')
+                                  ...[
+                                    Text(
+                                      'Establishment Name: ${visit['establishmentName']}',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    Text('Address: ${visit['address']}'),
+                                    Text('Date: ${visit['date']}'),
+                                    Divider(color: Colors.grey[400]),
+                                  ]
+                                else
                                   Text(
-                                    'Establishment Name: ${visit['establishmentName']}',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    visit['establishmentName'],
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  Text('Address: ${visit['address']}'),
-                                  Text('Date: ${visit['date']}'),
-                                  Divider(color: Colors.grey[400]),
-                                ]
-                              else
-                                Text(
-                                  visit['establishmentName'],
-                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-                                  textAlign: TextAlign.center,
-                                ),
-                            ],
+                              ],
+                            ),
                           );
                         },
                       ),

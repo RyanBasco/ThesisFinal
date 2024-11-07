@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/Receipt/FoodReceipt.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -14,7 +15,7 @@ class Foodandbeverages extends StatefulWidget {
 
 class _FoodandbeveragesState extends State<Foodandbeverages> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  List<Map<String, dynamic>> accommodationVisits = [];
+  List<Map<String, dynamic>> foodAndBeverageVisits = [];
   bool isLoading = true;
   int _selectedIndex = 2;
 
@@ -25,7 +26,7 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
   void initState() {
     super.initState();
     loadLocationNames();
-    fetchAccommodationVisits();
+    fetchFoodAndBeverageVisits();
   }
 
   Future<void> loadLocationNames() async {
@@ -42,7 +43,7 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
     });
   }
 
-  Future<void> fetchAccommodationVisits() async {
+  Future<void> fetchFoodAndBeverageVisits() async {
     final currentUser = _auth.currentUser;
     if (currentUser == null) return;
 
@@ -62,27 +63,29 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
             String city = cityMap[cityCode] ?? 'Unknown';
 
             setState(() {
-              accommodationVisits.add({
+              foodAndBeverageVisits.add({
                 'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
                 'address': '$city, $barangay',
                 'date': visitData['Date'] ?? 'N/A',
+                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0, // Include totalSpend
               });
             });
           }
         });
       }
 
-      if (accommodationVisits.isEmpty) {
+      if (foodAndBeverageVisits.isEmpty) {
         setState(() {
-          accommodationVisits.add({
+          foodAndBeverageVisits.add({
             'establishmentName': 'Currently no expense in this Food and Beverages category.',
             'address': '',
             'date': '',
+            'totalSpend': '', // Default value
           });
         });
       }
     } catch (e) {
-      print("Error fetching accommodation visits: $e");
+      print("Error fetching food and beverage visits: $e");
     } finally {
       setState(() {
         isLoading = false;
@@ -117,6 +120,20 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
         );
         break;
     }
+  }
+
+  void _navigateToDetail(Map<String, dynamic> visit) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FoodReceiptDetailPage(
+          establishmentName: visit['establishmentName'],
+          address: visit['address'],
+          date: visit['date'],
+          totalSpend: visit['totalSpend'] ?? 0.0, // Pass totalSpend
+        ),
+      ),
+    );
   }
 
   @override
@@ -157,7 +174,7 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFEEFFA9), Color(0xFFDBFF4C), Color(0xFF51F643)],
             stops: [0.15, 0.54, 1.0],
@@ -176,14 +193,14 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30),
+                    const SizedBox(width: 10),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 30),
                       child: Text(
                         'Food and Beverages',
                         style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
@@ -210,40 +227,43 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       'Food and Beverages History',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
                     if (isLoading)
-                      CircularProgressIndicator()
+                      const CircularProgressIndicator()
                     else
                       ListView.builder(
                         shrinkWrap: true,
-                        itemCount: accommodationVisits.length,
+                        itemCount: foodAndBeverageVisits.length,
                         itemBuilder: (context, index) {
-                          final visit = accommodationVisits[index];
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (visit['address'] != '')
-                                ...[
+                          final visit = foodAndBeverageVisits[index];
+                          return GestureDetector(
+                            onTap: () => _navigateToDetail(visit),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (visit['address'] != '')
+                                  ...[
+                                    Text(
+                                      'Establishment Name: ${visit['establishmentName']}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    Text('Address: ${visit['address']}'),
+                                    Text('Date: ${visit['date']}'),
+                                    Divider(color: Colors.grey[400]),
+                                  ]
+                                else
                                   Text(
-                                    'Establishment Name: ${visit['establishmentName']}',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    visit['establishmentName'],
+                                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  Text('Address: ${visit['address']}'),
-                                  Text('Date: ${visit['date']}'),
-                                  Divider(color: Colors.grey[400]),
-                                ]
-                              else
-                                Text(
-                                  visit['establishmentName'],
-                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-                                  textAlign: TextAlign.center,
-                                ),
-                            ],
+                              ],
+                            ),
                           );
                         },
                       ),
