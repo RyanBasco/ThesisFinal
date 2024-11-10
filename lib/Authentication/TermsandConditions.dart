@@ -78,9 +78,9 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                const SizedBox(height: 10),
+               const SizedBox(height: 10),
                 const Text(
-                  'We value your privacy and are committed to protecting your personal data. This Privacy Policy outlines how we collect, use, and protect your information when you use the [APP NAME].',
+                  'We value your privacy and are committed to protecting your personal data. This Privacy Policy outlines how we collect, use, and protect your information when you use the APP.',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 14.5,
@@ -100,22 +100,32 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Detailed information about the data we collect.',
+                        'We collect personal information to provide, personalize, and improve our services. The types of information we collect include:',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Additional details can go here as needed.',
+                        '1. Personal Identification Information: Such as your name, email address, contact information, and date of birth, which are necessary for account creation, customer support, and enhancing user experience.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                      SizedBox(height: 10),
+                      Text(
+                        '2. Feedback and Communication: If you choose to provide feedback or communicate with us, we collect and store those messages to respond to your inquiries, improve our services, and ensure a better user experience.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -132,22 +142,32 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Information about how we use the collected data.',
+                        'We use your personal information to enhance your experience with our app, provide necessary services, and improve our offerings. Specifically, we use the information we collect for the following purposes:',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'More details on usage can be added here.',
+                        '1. Improvement and Development: To analyze usage patterns, gather feedback, and make data-driven improvements to our app, products, and services.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                      SizedBox(height: 10),
+                      Text(
+                        '2. Security and Fraud Prevention: To monitor and enhance security, detect potential fraud, and ensure the safety of all users.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -164,22 +184,32 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Details on how we share and disclose your data.',
+                        'We prioritize your privacy and are committed to handling your data with care. We only share your personal information in the following cases:',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Information on sharing practices can go here.',
+                        '1. Service Providers: We may share your data with trusted third-party providers who assist us in delivering our services, such as cloud storage, customer support, or data analysis. These providers have access only to the information necessary to perform their tasks and are bound by confidentiality agreements.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                      SizedBox(height: 10),
+                      Text(
+                        '2. With Your Consent: We may share your information with third parties when you give us explicit permission to do so.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -196,22 +226,41 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Information about how we secure your data.',
+                        'We are committed to ensuring the security of your personal information and protecting it from unauthorized access, disclosure, alteration, or destruction. To achieve this, we implement a combination of technical, administrative, and physical safeguards:',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Security measures can be detailed here.',
+                        '1. Encryption: All sensitive data transmitted through our app is encrypted both in transit and at rest, helping to prevent unauthorized access.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                      SizedBox(height: 10),
+                      Text(
+                        '2. Access Controls: Access to your personal information is restricted to authorized personnel only, and we employ strict access controls and authentication protocols to maintain data privacy.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                       SizedBox(height: 10),
+                      Text(
+                        '3. User Responsibility: While we implement security measures, we encourage you to help keep your information secure by choosing strong passwords, keeping your credentials confidential, and logging out after using the app on shared devices.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -228,22 +277,41 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Information about your rights regarding your data.',
+                        'We respect your privacy rights and strive to provide you with control over your personal information. Depending on your location and applicable laws, you may have the following rights:',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Details on user rights can be included here.',
+                        '1. Access: You can request access to the personal information we hold about you and receive a copy in a commonly used format.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                      SizedBox(height: 10),
+                      Text(
+                        '2. Correction: If your information is inaccurate or incomplete, you have the right to request that we correct or update it.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        '3. Restrict Processing: You have the right to ask us to restrict the processing of your data in certain circumstances, such as if you contest the accuracy of the data.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -260,22 +328,23 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Details about updates and changes to the privacy policy.',
+                        'We may update this Privacy Policy periodically to reflect changes in our practices, legal requirements, or for other operational reasons. When we make significant changes, we will notify you by posting a prominent notice within the app or by other appropriate means, such as email.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'How changes are communicated can go here.',
+                        'We encourage you to review this policy regularly to stay informed about how we are protecting your personal information. Your continued use of our app following any updates constitutes your acceptance of the revised Privacy Policy.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                      SizedBox(height: 10,)
                     ],
                   ),
                 ),
@@ -311,22 +380,41 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Details about how to use the app responsibly.',
+                        'By using this app, you agree to comply with the following guidelines to ensure a safe, respectful, and lawful experience for all users:',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'More details can be added here.',
+                        '1. Authorized Use: You are permitted to use this app only for its intended purposes as outlined in these Terms and Conditions. Unauthorized use of the app or its content is strictly prohibited.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                       SizedBox(height: 10),
+                      Text(
+                        '2. Account Responsibility: You are responsible for maintaining the confidentiality of your account details and for all activities that occur under your account. Notify us immediately if you suspect any unauthorized access or security breach.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                       SizedBox(height: 10),
+                      Text(
+                        '3. Accurate Information: You agree to provide accurate, current, and complete information when creating an account or interacting with app features.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10,)
                     ],
                   ),
                 ),
@@ -343,22 +431,32 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Information about user responsibilities.',
+                        'As a user of this app, you agree to the following responsibilities to ensure a safe, compliant, and enjoyable experience for all:',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Additional details on user responsibilities can go here.',
+                        '1. Provide Accurate Information: You are responsible for ensuring that all information you provide within the app is accurate, complete, and up-to-date.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                       SizedBox(height: 10),
+                      Text(
+                        '2. Protect Your Account: Safeguard your account information, including your password, and avoid sharing it with others. You are accountable for all actions taken under your account. ',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10,)
                     ],
                   ),
                 ),
@@ -375,22 +473,32 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Information about the use of QR codes within the app.',
+                        'Our app may include QR code features designed to streamline interactions, verify identity, and enhance user experience. By using the QR code feature, you agree to the following guidelines:',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Additional details on QR code usage can go here.',
+                        '1. Authorized Use Only: QR codes generated or provided by this app are for personal use only and must not be shared, duplicated, or tampered with for unauthorized purposes.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                      SizedBox(height: 10),
+                      Text(
+                        '2. Responsibility for Use: You are responsible for QR codes generated by your account. Any actions taken using your QR code are considered your responsibility.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10,)
                     ],
                   ),
                 ),
@@ -407,22 +515,32 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Information about the intellectual property rights.',
+                        'All content, features, and functionality within this app—including but not limited to text, graphics, logos, icons, images, videos, software, and any other material—are the exclusive property of [App Name] and its licensors, protected by copyright, trademark, patent, trade secret, and other intellectual property laws.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Additional details on intellectual property can go here.',
+                        '1. Intellectual Property Infringement: We respect the intellectual property rights of others and expect our users to do the same. If you believe that any content in the app infringes upon your intellectual property rights, please contact us with the relevant details.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                       SizedBox(height: 10),
+                      Text(
+                        '2. User-Generated Content: By submitting content to the app (e.g., reviews, comments, or feedback), you grant us a worldwide, non-exclusive, royalty-free license to use, display, reproduce, modify, or distribute your content as part of the app or our marketing materials.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10,)
                     ],
                   ),
                 ),
@@ -439,22 +557,31 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Information about the no warranty policy.',
+                        'This app and all its features are provided on an "as-is" and "as-available" basis without any warranties of any kind, either express or implied. By using the app, you acknowledge and agree to the following:',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Additional details on the no warranty policy can go here.',
+                        '1. Service Availability: We do not guarantee that the app will be available, uninterrupted, secure, or error-free at all times. Downtime may occur due to maintenance, updates, technical issues, or other reasons beyond our control.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
+                      Text(
+                        '2. No Guarantees: We make no warranties or guarantees regarding the accuracy, completeness, or reliability of any content, information, or features provided through the app.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10,)
                     ],
                   ),
                 ),

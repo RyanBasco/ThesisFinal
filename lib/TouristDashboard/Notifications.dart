@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class Notifications extends StatefulWidget {
-  const Notifications({super.key});
+  const Notifications({Key? key}) : super(key: key);
 
   @override
   _NotificationsState createState() => _NotificationsState();
@@ -15,24 +15,142 @@ class Notifications extends StatefulWidget {
 
 class _NotificationsState extends State<Notifications> {
   int _selectedIndex = 0;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late String _currentUserEmail;
+  final DatabaseReference _databaseRef = FirebaseDatabase.instance.ref();
 
   @override
   void initState() {
     super.initState();
-    _fetchCurrentUserEmail();
+    _checkForPendingReviews();
   }
 
-  void _fetchCurrentUserEmail() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      setState(() {
-        _currentUserEmail = user.email!;
-      });
+  void _checkForPendingReviews() {
+    _databaseRef.child('pendingReviews').onChildAdded.listen((event) {
+      final pendingReview = event.snapshot.value as Map<dynamic, dynamic>;
+      if (pendingReview['status'] == 'pending') {
+        _showReviewDialog(event.snapshot.key!);
+      }
+    });
+  }
+
+  void _showReviewDialog(String reviewKey) {
+    double rating = 0.0;
+    String comment = '';
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          titlePadding: EdgeInsets.only(top: 16, left: 16, right: 8),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Give Feedback',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: const Icon(Icons.close, color: Colors.grey),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Please provide your rating:'),
+              const SizedBox(height: 16),
+              RatingBar.builder(
+                initialRating: 0,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemBuilder: (context, _) => const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (newRating) {
+                  rating = newRating;
+                },
+              ),
+              const SizedBox(height: 16),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Add Comments, if any:',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: TextField(
+                  onChanged: (text) {
+                    comment = text;
+                  },
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter your comments here...',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF288F13),
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () {
+                  _submitReview(reviewKey, rating, comment);
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Submit'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _submitReview(String reviewKey, double rating, String comment) async {
+    try {
+      final pendingReviewSnapshot = await _databaseRef.child('pendingReviews/$reviewKey').get();
+      String? establishmentId = pendingReviewSnapshot.value != null 
+          ? (pendingReviewSnapshot.value as Map)['establishment_id'] 
+          : null;
+
+      if (establishmentId != null) {
+        final userSnapshot = await _databaseRef.child('Users/$reviewKey').get();
+        if (userSnapshot.exists) {
+          final userData = Map<String, dynamic>.from(userSnapshot.value as Map);
+          String firstName = userData['first_name'] ?? 'User';
+          String lastName = userData['last_name'] ?? '';
+
+          await _databaseRef.child('reviews').push().set({
+            'rating': rating,
+            'comment': comment,
+            'first_name': firstName,
+            'last_name': lastName,
+            'establishment_id': establishmentId, // Include establishment ID
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          });
+
+          await _databaseRef.child('pendingReviews/$reviewKey').update({'status': 'completed'});
+        }
+      }
+    } catch (e) {
+      print('Error submitting review: $e');
     }
   }
 
+  // Bottom navigation bar function
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -40,24 +158,25 @@ class _NotificationsState extends State<Notifications> {
 
     switch (index) {
       case 0:
-        // Handle "Home"
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
+        );
         break;
       case 1:
-        // Handle "My QR"
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => QRPage()),
         );
         break;
       case 2:
-        // Handle "Wallet"
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => RegistrationPage()),
-        );       
+        );
         break;
       case 3:
-      Navigator.push(
+        Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => TouristprofilePage()),
         );
@@ -68,36 +187,7 @@ class _NotificationsState extends State<Notifications> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: const Color(0xFF2C812A),
-        unselectedItemColor: Colors.black,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code),
-            label: 'My Qr',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -110,147 +200,60 @@ class _NotificationsState extends State<Notifications> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context); // Navigate back to the previous page
-                      },
-                      child: const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.arrow_back, color: Colors.black),
-                      ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const CircleAvatar(
+                      backgroundColor: Colors.white,
+                      child: Icon(Icons.arrow_back, color: Colors.black),
                     ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Notifications',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+                  ),
+                  const SizedBox(width: 80),
+                  const Text(
+                    'Notifications',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(),
+            const Center(
+              child: Text(
+                'No Notifications Available',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 20),
-              StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('FriendRequests').where('recipientEmail', isEqualTo: _currentUserEmail).snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-                  List<DocumentSnapshot> requests = snapshot.data?.docs ?? [];
-                  if (requests.isEmpty) {
-                    return const Center(child: Text('No friend requests.'));
-                  }
-
-                  return Column(
-                    children: requests.map((request) {
-                      String senderEmail = request['senderEmail'];
-                      String senderFirstName = request['senderFirstName'];
-                      String senderLastName = request['senderLastName'];
-                      String status = request['status'];
-                      String requestId = request.id;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        child: Container(
-                          padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                status == 'accepted'
-                                    ? 'You accepted $senderFirstName $senderLastName\'s friend request'
-                                    : '$senderFirstName $senderLastName sent you a friend request',
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              if (status != 'accepted') ...[
-                                const SizedBox(height: 5),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        _acceptFriendRequest(requestId);
-                                      },
-                                      child: const Text('Accept'),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        _deleteFriendRequest(requestId);
-                                      },
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                ),
-                              ]
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-            ],
-          ),
+            ),
+            const Spacer(),
+          ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: const Color(0xFF2C812A),
+        unselectedItemColor: Colors.black,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.qr_code), label: 'My QR'),
+          BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: 'Wallet'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
       ),
     );
   }
-
-  void _acceptFriendRequest(String requestId) async {
-  try {
-    // Update status of the friend request in Firestore
-    await _firestore.collection('FriendRequests').doc(requestId).update({
-      'status': 'accepted',
-    });
-
-    // Refresh the UI or handle any necessary state changes
-    if (mounted) {
-      setState(() {});
-    }
-  } catch (e) {
-    // Handle the error
-    if (mounted) {
-      setState(() {});
-    }
-  }
-}
-
-void _deleteFriendRequest(String requestId) async {
-  try {
-    // Delete the friend request document from Firestore
-    await _firestore.collection('FriendRequests').doc(requestId).delete();
-
-    // Refresh the UI
-    if (mounted) {
-      setState(() {});
-    }
-  } catch (e) {
-    // Handle the error
-    if (mounted) {
-      setState(() {});
-    }
-  }
-}
 }
