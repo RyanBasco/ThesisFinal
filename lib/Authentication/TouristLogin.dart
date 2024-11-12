@@ -23,75 +23,79 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
   bool _isLoading = false; // Added to indicate loading state
 
   Future<void> _login(BuildContext context) async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  // Validate form input
+  if (!_formKey.currentState!.validate()) {
+    return;
+  }
 
-    setState(() {
-      _isLoading = true; // Set loading to true
-    });
+  // Show loading indicator
+  setState(() {
+    _isLoading = true;
+  });
 
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
+  String email = _emailController.text.trim();
+  String password = _passwordController.text.trim();
 
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+  try {
+    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      if (userCredential.user != null) {
-        print("User authenticated successfully.");
+    if (userCredential.user != null) {
+      print("User authenticated successfully.");
 
-        DatabaseReference userRef =
-            _database.child('Users').child(userCredential.user!.uid);
-        DatabaseEvent userEvent = await userRef.once();
+      DatabaseReference userRef =
+          _database.child('Users').child(userCredential.user!.uid);
+      DatabaseEvent userEvent = await userRef.once();
 
-        if (userEvent.snapshot.exists) {
-          if (mounted) {
-            // Check if the widget is still mounted
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-            );
-          }
-        } else {
-          await _auth.signOut();
-          if (mounted) {
-            // Check if the widget is still mounted
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Login failed: Invalid email or password."),
-              ),
-            );
-          }
+      if (userEvent.snapshot.exists) {
+        if (mounted) {
+          // Navigate to User Dashboard if user exists
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => UserdashboardPageState()),
+          );
         }
       } else {
+        // Sign out if user data not found in database
+        await _auth.signOut();
         if (mounted) {
-          // Check if the widget is still mounted
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Failed to login: Invalid email or password."),
+              content: Text("Login failed: Invalid email or password."),
             ),
           );
         }
       }
-    } catch (e) {
-      print("Failed to login: $e");
+    } else {
       if (mounted) {
-        // Check if the widget is still mounted
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Failed to login: $e"),
+          const SnackBar(
+            content: Text("Failed to login: Invalid email or password."),
           ),
         );
       }
-    } finally {
+    }
+  } catch (e) {
+    print("Failed to login: $e");
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to login: $e"),
+        ),
+      );
+    }
+  } finally {
+    // Hide loading indicator
+    if (mounted) {
       setState(() {
-        _isLoading = false; // Set loading to false
+        _isLoading = false;
       });
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

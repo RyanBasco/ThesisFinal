@@ -5,9 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
-import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class EditProfile extends StatefulWidget {
@@ -42,76 +39,33 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   void _fetchUserData() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      final DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('Users');
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('Users');
+        final snapshot = await usersRef.child(user.uid).get();
 
-      // Step 1: Try to fetch user data by email
-      final snapshot = await usersRef.get();
-      bool userFound = false;
-
-      if (snapshot.exists) {
-        for (var entry in (snapshot.value as Map).entries) {
-          final userData = Map<String, dynamic>.from(entry.value);
-          String emailFromDatabase = userData['email'] ?? '';
-
-          // Check if email matches (case-insensitive)
-          if (emailFromDatabase.toLowerCase() == user.email!.toLowerCase()) {
-            userFound = true;
-            setState(() {
-              _firstName = userData['first_name'] ?? '';
-              _lastName = userData['last_name'] ?? '';
-              _birthday = userData['birthday'] ?? '';
-              _email = user.email ?? '';
-              _contactNumber = userData['contact_number'] ?? '';
-              _profileImageUrl = userData['profile_image_url'];
-
-              // Set the controllers
-              _nameController.text = '$_firstName $_lastName';
-              _birthdayController.text = _birthday;
-              _emailController.text = _email;
-              _contactNumberController.text = _contactNumber;
-            });
-            break;
-          }
-        }
-      }
-
-      // Step 2: If no user data found by email, try to fetch by UID
-      if (!userFound) {
-        final uidSnapshot = await usersRef.child(user.uid).get();
-        if (uidSnapshot.exists) {
-          final userData = Map<String, dynamic>.from(uidSnapshot.value as Map);
-
+        if (snapshot.exists) {
+          final userData = Map<String, dynamic>.from(snapshot.value as Map);
           setState(() {
             _firstName = userData['first_name'] ?? '';
             _lastName = userData['last_name'] ?? '';
             _birthday = userData['birthday'] ?? '';
-            _email = userData['email'] ?? ''; // Assuming email is stored in the document
+            _email = user.email ?? '';
             _contactNumber = userData['contact_number'] ?? '';
             _profileImageUrl = userData['profile_image_url'];
 
-            // Set the controllers
             _nameController.text = '$_firstName $_lastName';
             _birthdayController.text = _birthday;
             _emailController.text = _email;
             _contactNumberController.text = _contactNumber;
           });
-        } else {
-          print('User data not found for UID: ${user.uid}');
         }
+      } catch (error) {
+        print('Failed to fetch user data: $error');
       }
-    } catch (error) {
-      print('Failed to fetch user data: $error');
     }
-  } else {
-    print('No authenticated user found.');
   }
-}
-
-
-
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -125,20 +79,18 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
- Future<void> _uploadImageToFirebase(XFile image) async {
+  Future<void> _uploadImageToFirebase(XFile image) async {
   User? user = FirebaseAuth.instance.currentUser;
   if (user != null) {
     try {
-      // Use the user's email (or document ID) to create a unique file name
-      String email = user.email?.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_') ?? 'unknown_user';
-      String fileName = 'User Profile/$email/profile_image/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      String fileName = 'UserProfile/${user.uid}/profile_image/latest_image.jpg'; // Updated path
       Reference ref = FirebaseStorage.instance.ref().child(fileName);
       await ref.putFile(File(image.path));
 
       String downloadUrl = await ref.getDownloadURL();
 
-      // Update Firestore with the new image URL
-      await FirebaseFirestore.instance.collection('Users').doc(user.uid).update({
+      DatabaseReference dbRef = FirebaseDatabase.instance.ref('Users/${user.uid}');
+      await dbRef.update({
         'profile_image_url': downloadUrl,
       });
 
@@ -150,6 +102,7 @@ class _EditProfileState extends State<EditProfile> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Image uploaded successfully!')),
         );
+        Navigator.pop(context, downloadUrl);
       }
     } catch (error) {
       print('Failed to upload image: $error');
@@ -159,12 +112,8 @@ class _EditProfileState extends State<EditProfile> {
         );
       }
     }
-  } else {
-    print('No authenticated user found.');
   }
 }
-
-
 
 
   void _toggleEdit() {
@@ -189,7 +138,6 @@ class _EditProfileState extends State<EditProfile> {
     if (user != null) {
       try {
         final ref = FirebaseDatabase.instance.ref().child('Users').child(user.uid);
-
         var nameParts = _nameController.text.split(' ');
         String firstName = nameParts.length > 1 ? nameParts.sublist(0, nameParts.length - 1).join(' ') : nameParts.isNotEmpty ? nameParts[0] : '';
         String lastName = nameParts.isNotEmpty ? nameParts.last : '';
@@ -236,53 +184,53 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
- Widget _buildTextField({
-  required String labelText,
-  required TextEditingController controller,
-  bool enabled = false,
-  VoidCallback? onTap,
-  TextStyle? textStyle, // New parameter
-}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        labelText,
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      const SizedBox(height: 10),
-      Container(
-        width: 260,
-        height: 55,
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 18),
-          child: TextField(
-            controller: controller,
-            style: textStyle ?? TextStyle(
-              color: Colors.grey[700],
-              fontSize: 18,
-            ),
-            enabled: enabled,
-            textAlign: TextAlign.center,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-            ),
-            readOnly: onTap != null,
-            onTap: onTap,
+  Widget _buildTextField({
+    required String labelText,
+    required TextEditingController controller,
+    bool enabled = false,
+    VoidCallback? onTap,
+    TextStyle? textStyle,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          labelText,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
-      ),
-    ],
-  );
-}
+        const SizedBox(height: 10),
+        Container(
+          width: 260,
+          height: 55,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 18),
+            child: TextField(
+              controller: controller,
+              style: textStyle ?? TextStyle(
+                color: Colors.grey[700],
+                fontSize: 18,
+              ),
+              enabled: enabled,
+              textAlign: TextAlign.center,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+              ),
+              readOnly: onTap != null,
+              onTap: onTap,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -298,26 +246,6 @@ class _EditProfileState extends State<EditProfile> {
             setState(() {
               _selectedIndex = index;
             });
-            switch (index) {
-              case 0:
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-                );
-                break;
-              case 1:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => QRPage()),
-                );
-                break;
-              case 2:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegistrationPage()), // Update with your Wallet page
-                );
-                break;
-            }
           },
           selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
@@ -367,7 +295,7 @@ class _EditProfileState extends State<EditProfile> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Navigator.pop(context); // Go back to the previous page
+                          Navigator.pop(context);
                         },
                         child: Container(
                           padding: const EdgeInsets.all(10.0),
@@ -480,12 +408,12 @@ class _EditProfileState extends State<EditProfile> {
                         enabled: _isEditing,
                         onTap: () => _selectDate(context),
                       ),
-                     const SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       _buildTextField(
                         labelText: 'Email',
                         controller: _emailController,
-                        enabled: false, // Email is not editable
-                        textStyle: const TextStyle(fontSize: 14), // Reduced font size
+                        enabled: false,
+                        textStyle: const TextStyle(fontSize: 14),
                       ),
                       const SizedBox(height: 10),
                       _buildTextField(

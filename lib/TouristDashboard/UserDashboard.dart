@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/EstablishmentDetails/Details.dart';
 import 'package:testing/TouristDashboard/Notifications.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
@@ -25,9 +26,9 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   final TextEditingController _searchController = TextEditingController();
   final List<bool> _isBookmarked = [];
   List<Map<String, dynamic>> _establishments = [];
-  List<Map<String, dynamic>> _filteredEstablishments = []; // Added filtered list
+  List<Map<String, dynamic>> _filteredEstablishments = [];
 
-  // Initialize barangay and city maps for decoding
+  Map<String, String> establishmentImageUrls = {};
   Map<String, String> barangayMap = {};
   Map<String, String> cityMap = {};
 
@@ -54,13 +55,12 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
 
   final Map<String, String> cityNameMapping = {
     "Jordan": "Jordan (Capital)",
-    // Add more mappings if necessary
   };
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_filterEstablishments); // Add listener for search
+    _searchController.addListener(_filterEstablishments);
     _fetchUserData();
     _fetchEstablishments();
     _loadLocationNames();
@@ -89,10 +89,22 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
 
   void _filterEstablishments() {
     String query = _searchController.text.toLowerCase();
+    String? selectedCategory = _selectedCategoryIndex != null
+        ? _categories[_selectedCategoryIndex!]['name']
+        : null;
+
     setState(() {
       _filteredEstablishments = _establishments.where((establishment) {
         String name = establishment['establishmentName']?.toLowerCase() ?? '';
-        return name.contains(query);
+        bool matchesQuery = name.contains(query);
+
+        bool matchesCategory = selectedCategory == null ||
+            (establishment['Services'] != null &&
+                establishment['Services'] is List &&
+                (establishment['Services'] as List<dynamic>)
+                    .contains(selectedCategory));
+
+        return matchesQuery && matchesCategory;
       }).toList();
     });
   }
@@ -145,24 +157,45 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     }
   }
 
-  void _fetchEstablishments() async {
+  Future<void> _fetchEstablishments() async {
     try {
       DatabaseReference establishmentsRef =
           FirebaseDatabase.instance.ref().child('establishments');
       DataSnapshot snapshot = await establishmentsRef.get();
 
-      setState(() {
-        _establishments = [];
+      if (snapshot.exists) {
+        List<Map<String, dynamic>> establishmentsList = [];
+
         for (var establishmentSnapshot in snapshot.children) {
-          Map<dynamic, dynamic>? establishmentData =
-              establishmentSnapshot.value as Map<dynamic, dynamic>?;
-          if (establishmentData != null) {
-            _establishments.add(Map<String, dynamic>.from(establishmentData));
+          Map<String, dynamic> establishmentData =
+              Map<String, dynamic>.from(establishmentSnapshot.value as Map);
+          String establishmentId = establishmentSnapshot.key ?? '';
+
+          // Add establishment data with ID to the list
+          establishmentsList.add({
+            ...establishmentData,
+            'establishmentId': establishmentId,
+          });
+
+          // Fetch image for each establishment
+          try {
+            String imagePath =
+                'Establishment/$establishmentId/profile_image/latest_image.jpg';
+            String downloadUrl = await FirebaseStorage.instance
+                .ref()
+                .child(imagePath)
+                .getDownloadURL();
+            establishmentImageUrls[establishmentId] = downloadUrl;
+          } catch (e) {
+            print("No image found for $establishmentId: $e");
           }
         }
-        _filteredEstablishments = _establishments; // Initialize filtered list
-        _isBookmarked.addAll(List.filled(_establishments.length, false));
-      });
+
+        setState(() {
+          _establishments = establishmentsList;
+          _filteredEstablishments = _establishments;
+        });
+      }
     } catch (error) {
       print('Failed to fetch establishments: $error');
     }
@@ -244,6 +277,13 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     setState(() {
       _selectedLocationIndex = index;
     });
+  }
+
+  void _onCategorySelected(int index) {
+    setState(() {
+      _selectedCategoryIndex = index;
+    });
+    _filterEstablishments();
   }
 
   @override
@@ -375,7 +415,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Column(
                   children: [
                     Row(
@@ -475,7 +516,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                     crossAxisCount: 3,
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
-                    childAspectRatio: 2.5, // Adjust width-to-height ratio
+                    childAspectRatio: 2.5,
                   ),
                   itemCount: _categories.length,
                   itemBuilder: (context, index) {
@@ -484,9 +525,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
 
                     return GestureDetector(
                       onTap: () {
-                        setState(() {
-                          _selectedCategoryIndex = index;
-                        });
+                        _onCategorySelected(index);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(10),
@@ -536,10 +575,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   },
                 ),
               ),
-
-              const SizedBox(height: 20),
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                 child: Text(
                   'Search Results',
                   style: TextStyle(
@@ -549,9 +586,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-
-              // Filtered results based on search query and selected city (case-insensitive)
+              const SizedBox(height: 0),
               for (int i = 0; i < _filteredEstablishments.length; i++)
                 if ((_selectedLocationIndex == null ||
                     cityMap[_filteredEstablishments[i]['city']] ==
@@ -572,10 +607,11 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
 
   Widget _buildResultBoxWithInitial(
       String resultText, bool isFirstBox, int index) {
+    String docId = _filteredEstablishments[index]['establishmentId'] ?? '';
     String firstInitial =
         resultText.isNotEmpty ? resultText[0].toUpperCase() : '';
-
-    String barangayCode = _filteredEstablishments[index]['barangay'] ?? 'Unknown';
+    String barangayCode =
+        _filteredEstablishments[index]['barangay'] ?? 'Unknown';
     String cityCode = _filteredEstablishments[index]['city'] ?? 'Unknown';
     String barangay = barangayMap[barangayCode] ?? 'Unknown';
     String city = cityMap[cityCode] ?? 'Unknown';
@@ -611,14 +647,27 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                         bottomLeft: Radius.circular(20),
                       ),
                     ),
-                    child: Text(
-                      firstInitial,
-                      style: const TextStyle(
-                        fontSize: 50,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: establishmentImageUrls.containsKey(docId)
+                        ? ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              bottomLeft: Radius.circular(20),
+                            ),
+                            child: Image.network(
+                              establishmentImageUrls[docId]!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          )
+                        : Text(
+                            firstInitial,
+                            style: const TextStyle(
+                              fontSize: 50,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -671,9 +720,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                               child: Text(
                                 '$barangay, $city',
                                 style: const TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.black,
-                                ),
+                                    fontSize: 15, color: Colors.black),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -687,6 +734,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
               ],
             ),
           ),
+          // Green arrow icon
           Positioned(
             right: 10,
             bottom: 10,
@@ -696,9 +744,10 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailsPage(
-                      establishmentName: resultText,
-                      barangay: barangayCode,
-                      city: cityCode,
+                      establishmentName: resultText, // Pass the name here
+                      barangay: barangayCode, // Pass barangay here
+                      city: cityCode, // Pass city here
+                      establishmentId: docId, // Pass the establishment ID here
                     ),
                   ),
                 );

@@ -27,11 +27,11 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
         );
         break;
       case 1:
-      Navigator.push(
+        Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => QRPage()),
         );
-        break; // Current page
+        break;
       case 2:
         Navigator.push(
           context,
@@ -39,7 +39,6 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
         );
         break;
       case 3:
-        
         break;
     }
   }
@@ -69,8 +68,8 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
               label: 'My QR',
             ),
             BottomNavigationBarItem(
-               icon: Icon(Icons.attach_money),
-               label: 'Expense Tracker',
+              icon: Icon(Icons.attach_money),
+              label: 'Expense Tracker',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
@@ -104,7 +103,7 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        Navigator.pop(context); // Navigate back to the previous page
+                        Navigator.pop(context);
                       },
                       child: const CircleAvatar(
                         radius: 24,
@@ -128,306 +127,169 @@ class _TravelandtouragenciesState extends State<Travelandtouragencies> {
               ),
               const SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF83E6F4),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                          bottomLeft: Radius.circular(0),
-                          bottomRight: Radius.circular(0),
+                    // SAN MIGUEL, JORDAN
+                    _buildLocationCard(
+                      'SAN MIGUEL, JORDAN',
+                      Icons.business_center,
+                      [
+                        _buildAgencyRow(
+                          'CHERALD TRAVEL AND TOURS',
+                          'MR. CHERALD PADOJENG',
+                          '09084748122 / 09179647934',
                         ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'SAN MIGUEL, JORDAN',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+                        _buildAgencyRow(
+                          'MARRIANE GELARAGA TRAVEL AND TOURS',
+                          'MS. MARIANNE GALARAGA',
+                          '0997439011 / 09484127873',
                         ),
-                      ),
+                        _buildAgencyRow(
+                          'GENNED-UP TRAVEL EVENTS AND SEMINARS, INC.',
+                          'MS. GENNEL SEGOVIA',
+                          '09257589553 / 09228025200',
+                        ),
+                        _buildAgencyRow(
+                          'JUZLEN TRAVEL AND TOURS',
+                          'MS. JUSTINE KENNETH LEGADA',
+                          '09605892748',
+                        ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF288F13),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                          bottomLeft: Radius.circular(15),
-                          bottomRight: Radius.circular(15),
+                    const SizedBox(height: 20),
+                    // ZALDIVAR, BUENAVISTA
+                    _buildLocationCard(
+                      'ZALDIVAR, BUENAVISTA',
+                      Icons.location_city,
+                      [
+                        _buildAgencyRow(
+                          'ANGELY TRAVEL AND TOURS',
+                          'FACEBOOK NAME: DAN ANGELO DANG',
+                          '',
                         ),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'Cherald Travel and Tours     Mr. Cherald Padojeng',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 135), // Adjust padding as needed
-                              child: Text(
-                                '09084748122 / 09179647934',
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Marriane Gelaraga             Ms. Marianne Galaraga',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 0),
-                            Text(
-                              'Travel and Tours       0997439011 / 09484127873',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Genned-Up Travel Events       Ms. Gennel Segovia',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 0),
-                            Text(
-                              'and Seminars, Inc.    09257589553 / 09228025200',
-                              style: TextStyle(
-                                fontSize: 13.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Juzlen Travel and Tours    Ms. Justine Kenneth Legada',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 220), // Adjust padding as needed
-                              child: Text(
-                                '09605892748',
-                                style: TextStyle(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 20), // Adding some space between the boxes
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF83E6F4),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                          bottomLeft: Radius.circular(0),
-                          bottomRight: Radius.circular(0),
+                    const SizedBox(height: 20),
+                    // HOSKYN, JORDAN
+                    _buildLocationCard(
+                      'HOSKYN, JORDAN',
+                      Icons.map,
+                      [
+                        _buildAgencyRow(
+                          'AVA TRAVEL AND TOURS',
+                          'MR. VINCENT ABAWAN',
+                          '09084748122 / 09179647934',
                         ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'ZALDIVAR, BUENAVISTA',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF288F13),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                          bottomLeft: Radius.circular(15),
-                          bottomRight: Radius.circular(15),
+                    const SizedBox(height: 20),
+                    // BALCON MELLIZA, JORDAN
+                    _buildLocationCard(
+                      'BALCON MELLIZA, JORDAN',
+                      Icons.location_pin,
+                      [
+                        _buildAgencyRow(
+                          'YESHUA TRAVEL AND TOURS',
+                          'MS. RICHEL MALIMIT',
+                          '09171451937',
                         ),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'ANGELY TRAVEL AND TOURS        FACEBOOK NAME:',
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 0),
-                            Text(
-                              '                                                  DAN ANGELO DANG',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     ),
-                     const SizedBox(height: 20), // Adding some space between the boxes
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF83E6F4),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                          bottomLeft: Radius.circular(0),
-                          bottomRight: Radius.circular(0),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'HOSKYN, JORDAN',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF288F13),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                          bottomLeft: Radius.circular(15),
-                          bottomRight: Radius.circular(15),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'AVA TRAVEL AND TOURS           MR. VINCENT ABAWAN',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 0),
-                            Text(
-                              '                                  09084748122 / 09179647934',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 20), // Adding some space between the boxes
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF83E6F4),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                          bottomLeft: Radius.circular(0),
-                          bottomRight: Radius.circular(0),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'BALCON MELLIZA, JORDAN',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF288F13),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                          bottomLeft: Radius.circular(15),
-                          bottomRight: Radius.circular(15),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'YESHUA TRAVEL AND TOURS          MS. RICHEL MALIMIT',
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 0),
-                            Text(
-                              '                                                             09171451937',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),  
                   ],
                 ),
               ),
               const SizedBox(height: 70),
-              // Add more content here if needed
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLocationCard(String location, IconData icon, List<Widget> agencies) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          decoration: const BoxDecoration(
+            color: Color(0xFF83E6F4),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.redAccent, size: 24), // Icon for location
+              const SizedBox(width: 8),
+              Text(
+                location,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          decoration: const BoxDecoration(
+            color: Color(0xFF288F13),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(15),
+              bottomRight: Radius.circular(15),
+            ),
+          ),
+          child: Column(
+            children: agencies,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAgencyRow(String agencyName, String contactPerson, String phoneNumber) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  agencyName,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              if (phoneNumber.isNotEmpty)
+                Text(
+                  phoneNumber,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+            ],
+          ),
+          Text(
+            contactPerson,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -102,7 +102,7 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        Navigator.pop(context); // Navigate back to the previous page
+                        Navigator.pop(context);
                       },
                       child: const CircleAvatar(
                         radius: 24,
@@ -129,164 +129,93 @@ class _EmergencyHotlineState extends State<EmergencyHotline> {
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF83E6F4),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                          bottomLeft: Radius.circular(0),
-                          bottomRight: Radius.circular(0),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          '4K PDRRM RESCUE',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF288F13),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                          bottomLeft: Radius.circular(15),
-                          bottomRight: Radius.circular(15),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'SMART                       09983693844',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'GLOBE                        09267131372',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 55), // Adding some space between the boxes
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF83E6F4),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                          bottomLeft: Radius.circular(0),
-                          bottomRight: Radius.circular(0),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'BUREAU OF FIRE PROTECTION',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF288F13),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                          bottomLeft: Radius.circular(15),
-                          bottomRight: Radius.circular(15),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'PROVINCIAL OFFICE          09517377816',
-                              style: TextStyle(
-                                fontSize: 16.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'BUENAVISTA                       09127229852',
-                              style: TextStyle(
-                                fontSize: 16.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'JORDAN                               09198158111',
-                              style: TextStyle(
-                                fontSize: 16.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'NUEVA VALENCIA              09318334491',
-                              style: TextStyle(
-                                fontSize: 16.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'SAN LORENZO                    09150262425',
-                              style: TextStyle(
-                                fontSize: 16.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'SIBUNAG                             09171122170',
-                              style: TextStyle(
-                                fontSize: 16.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    _buildContactCard('4K PDRRM RESCUE', [
+                      _buildContactRow('SMART', '09983693844'),
+                      _buildContactRow('GLOBE', '09267131372'),
+                    ]),
+                    const SizedBox(height: 55),
+                    _buildContactCard('BUREAU OF FIRE PROTECTION', [
+                      _buildContactRow('PROVINCIAL OFFICE', '09517377816'),
+                      _buildContactRow('BUENAVISTA', '09127229852'),
+                      _buildContactRow('JORDAN', '09198158111'),
+                      _buildContactRow('NUEVA VALENCIA', '09318334491'),
+                      _buildContactRow('SAN LORENZO', '09150262425'),
+                      _buildContactRow('SIBUNAG', '09171122170'),
+                    ]),
                   ],
                 ),
               ),
-              // Add more content here if needed
+              const SizedBox(height: 30),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildContactCard(String title, List<Widget> contacts) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          decoration: const BoxDecoration(
+            color: Color(0xFF83E6F4),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          decoration: const BoxDecoration(
+            color: Color(0xFF288F13),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(15),
+              bottomRight: Radius.circular(15),
+            ),
+          ),
+          child: Column(
+            children: contacts,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContactRow(String label, String number) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          Text(
+            number,
+            style: const TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }

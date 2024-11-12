@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/EstablishmentDetails/Directions.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
@@ -11,67 +14,77 @@ class DetailsPage extends StatefulWidget {
   final String establishmentName;
   final String barangay;
   final String city;
+  final String establishmentId; // Add this line
 
   const DetailsPage({
     super.key,
     required this.establishmentName,
     required this.barangay,
     required this.city,
+    required this.establishmentId, // Add this parameter here
   });
 
   @override
   _DetailsPageState createState() => _DetailsPageState();
 }
 
+
 class _DetailsPageState extends State<DetailsPage> {
   int _selectedIndex = 0;
   bool _isBookmarked = false;
   String? barangayName;
   String? cityName;
+  String? profileImageUrl;
 
   @override
   void initState() {
     super.initState();
     _loadLocationNames();
+    _fetchEstablishmentImage();
   }
 
- Future<void> _loadLocationNames() async {
-  // Load barangay and city JSON data
-  final String barangayData = await rootBundle.loadString('assets/barangay.json');
-  final String cityData = await rootBundle.loadString('assets/city.json');
+  Future<void> _fetchEstablishmentImage() async {
+    try {
+      // Use the provided establishmentId to fetch the profile image
+      String filePath = 'Establishment/${widget.establishmentId}/profile_image/latest_image.jpg';
+      Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
+      String downloadUrl = await storageRef.getDownloadURL();
+      setState(() {
+        profileImageUrl = downloadUrl;
+      });
+    } catch (e) {
+      print('Error fetching profile image: $e');
+    }
+  }
 
-  // Decode JSON data
-  final List<dynamic> barangays = json.decode(barangayData);
-  final List<dynamic> cities = json.decode(cityData);
+  Future<void> _loadLocationNames() async {
+    final String barangayData = await rootBundle.loadString('assets/barangay.json');
+    final String cityData = await rootBundle.loadString('assets/city.json');
 
-  // Find the names matching the provided codes
-  final barangay = barangays.firstWhere(
-    (b) => b['brgy_code'].toString() == widget.barangay, // Adjusted to 'brgy_code'
-    orElse: () {
-      print('No matching barangay found for code: ${widget.barangay}');
-      return null;
-    },
-  );
+    final List<dynamic> barangays = json.decode(barangayData);
+    final List<dynamic> cities = json.decode(cityData);
 
-  final city = cities.firstWhere(
-    (c) => c['city_code'].toString() == widget.city, // Ensure code is a String
-    orElse: () {
-      print('No matching city found for code: ${widget.city}');
-      return null;
-    },
-  );
+    final barangay = barangays.firstWhere(
+      (b) => b['brgy_code'].toString() == widget.barangay,
+      orElse: () {
+        print('No matching barangay found for code: ${widget.barangay}');
+        return null;
+      },
+    );
 
-  // Update the state with the names
-  setState(() {
-    barangayName = barangay?['brgy_name']; // Adjusted to use 'brgy_name'
-    cityName = city?['city_name'];
-  });
+    final city = cities.firstWhere(
+      (c) => c['city_code'].toString() == widget.city,
+      orElse: () {
+        print('No matching city found for code: ${widget.city}');
+        return null;
+      },
+    );
 
-  // Print debug information
-  print('Barangay name loaded: $barangayName');
-  print('City name loaded: $cityName');
-}
-
+    setState(() {
+      barangayName = barangay?['brgy_name'];
+      cityName = city?['city_name'];
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -82,13 +95,13 @@ class _DetailsPageState extends State<DetailsPage> {
       case 0:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
+          MaterialPageRoute(builder: (context) => const UserdashboardPageState()),
         );
         break;
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => QRPage()),
+          MaterialPageRoute(builder: (context) => const QRPage()),
         );
         break;
       case 2:
@@ -210,11 +223,26 @@ class _DetailsPageState extends State<DetailsPage> {
                         widthFactor: 0.9,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            'assets/Pension.png',
-                            fit: BoxFit.cover,
-                            height: 400,
-                          ),
+                          child: profileImageUrl != null
+                              ? Image.network(
+                                  profileImageUrl!,
+                                  fit: BoxFit.cover,
+                                  height: 400,
+                                )
+                              : Container(
+                                  height: 400,
+                                  color: Colors.grey[300],
+                                  child: Center(
+                                    child: Text(
+                                      widget.establishmentName[0],
+                                      style: const TextStyle(
+                                        fontSize: 100,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black45,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                     ),

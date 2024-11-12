@@ -129,209 +129,106 @@ class _TourguidesState extends State<Tourguides> {
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF83E6F4),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                          bottomLeft: Radius.circular(0),
-                          bottomRight: Radius.circular(0),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'COMMUNITY GUIDE',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
+                    _buildGuideSection(
+                      'COMMUNITY GUIDE',
+                      [
+                        _buildGuideRow('RUSSEL LINGAT', '09776044669'),
+                        _buildGuideRow('SHAMER JOY GAYLON', '09772509634'),
+                        _buildGuideRow('TOMMY MARTIR', '09472038466'),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF288F13),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                          bottomLeft: Radius.circular(15),
-                          bottomRight: Radius.circular(15),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'RUSSEL LINGAT                      09776044669',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'SHAMER JOY GAYLON          09772509634',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                             SizedBox(height: 5),
-                            Text(
-                              'TOMMY MARTIR                     09472038466',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 55), // Adding some space between the boxes
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF83E6F4),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                          bottomLeft: Radius.circular(0),
-                          bottomRight: Radius.circular(0),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'REGIONAL GUIDE',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF288F13),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                          bottomLeft: Radius.circular(15),
-                          bottomRight: Radius.circular(15),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'APRIL ROSE ALCORAN          09076485279',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'ARLENE TORRES                     09506078178',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'ASTERLYN NAVA                     09096741465',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'CHERALD PADOJENG               0908474122',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'EMELYN GAITAN    09291222136 / 09174769676',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'FELLY ELEVENCIONE             09309736262',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'GENELLE SEGOVIA                 09257589553',
-                              style: TextStyle( 
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'GIRLIE GAQUIT                        09127814938',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'LEMON MAGOLIMAN              09105006617',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'MARIBETH GALGO                  09105006617',
-                              style: TextStyle(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    const SizedBox(height: 55),
+                    _buildGuideSection(
+                      'REGIONAL GUIDE',
+                      [
+                        _buildGuideRow('APRIL ROSE ALCORAN', '09076485279'),
+                        _buildGuideRow('ARLENE TORRES', '09506078178'),
+                        _buildGuideRow('ASTERLYN NAVA', '09096741465'),
+                        _buildGuideRow('CHERALD PADOJENG', '0908474122'),
+                        _buildGuideRow('EMELYN GAITAN', '09291222136'),
+                        _buildGuideRow('FELLY ELEVENCIONE', '09309736262'),
+                        _buildGuideRow('GENELLE SEGOVIA', '09257589553'),
+                        _buildGuideRow('GIRLIE GAQUIT', '09127814938'),
+                        _buildGuideRow('LEMON MAGOLIMAN', '09105006617'),
+                        _buildGuideRow('MARIBETH GALGO', '09105006617'),
+                      ],
                     ),
                   ],
                 ),
               ),
-              // Add more content here if needed
+              const SizedBox(height: 70),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGuideSection(String title, List<Widget> guides) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          decoration: const BoxDecoration(
+            color: Color(0xFF83E6F4),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          decoration: const BoxDecoration(
+            color: Color(0xFF288F13),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(15),
+              bottomRight: Radius.circular(15),
+            ),
+          ),
+          child: Column(
+            children: guides,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGuideRow(String name, String phoneNumber) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              name,
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Text(
+            phoneNumber,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }

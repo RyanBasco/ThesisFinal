@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:math';
 import 'package:testing/Authentication/TouristLogin.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
@@ -11,7 +10,6 @@ import 'package:testing/UserProfile/Changepassword.dart';
 import 'package:testing/UserProfile/Editprofile.dart';
 import 'package:testing/UserProfile/HelpCenter.dart';
 import 'package:testing/UserProfile/Mybookmarks.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class TouristprofilePage extends StatefulWidget {
@@ -28,51 +26,15 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
   String? _profileImageUrl;
   int _selectedIndex = 3; // Set initial index to 'Profile'
   File? _profileImage;
-  final ImagePicker _picker = ImagePicker();
+
 
   @override
   void initState() {
     super.initState();
     _fetchUserData();
-    _generateUserId();
+    fetchProfileImageUrl();
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
-      _uploadProfileImage(pickedFile); // Upload image to Firebase
-    }
-  }
-
-  Future<void> _uploadProfileImage(XFile imageFile) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        // Use the specified path
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('User Profile/${user.email}/profile_image');
-
-        await ref.putFile(File(imageFile.path));
-
-        String downloadUrl = await ref.getDownloadURL();
-
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .update({'profile_image': downloadUrl});
-
-        setState(() {
-          _profileImageUrl = downloadUrl;
-        });
-      } catch (error) {
-        print('Failed to upload profile image: $error');
-      }
-    }
-  }
 
   void _fetchUserData() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -99,20 +61,22 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
     }
   }
 
-  void _generateUserId() {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Generate a hash code from the user's email
-      final emailHash = user.email?.hashCode ?? 0;
-
-      // Map the hash code to a 4-digit number
-      final userId = (emailHash.abs() % 9000 + 1000).toString();
-
+  Future<void> fetchProfileImageUrl() async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      String filePath = 'UserProfile/${user.uid}/profile_image/latest_image.jpg';
+      Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
+      String downloadUrl = await storageRef.getDownloadURL();
       setState(() {
-        _userId = userId;
+        _profileImageUrl = downloadUrl; // Use _profileImageUrl here
       });
+    } catch (e) {
+      print('Error fetching profile image: $e');
     }
   }
+}
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -265,7 +229,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                       ),
                       Positioned(
                         top: 30,
-                        left: 115,
+                        left: 125,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -276,15 +240,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'User ID: $_userId',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                              ),
-                            ),
+                            ),                          
                           ],
                         ),
                       ),

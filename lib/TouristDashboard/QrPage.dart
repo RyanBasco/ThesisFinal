@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:testing/TouristDashboard/GenerateQR.dart';
+import 'package:testing/TouristDashboard/Purposeoftravel.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
@@ -72,8 +73,8 @@ class _QRPageState extends State<QRPage> {
               label: 'My QR',
             ),
             BottomNavigationBarItem(
-               icon: Icon(Icons.attach_money),
-               label: 'Expense Tracker',
+              icon: Icon(Icons.attach_money),
+              label: 'Expense Tracker',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
@@ -130,7 +131,13 @@ class _QRPageState extends State<QRPage> {
               ),
               const SizedBox(height: 20),
               Center(
-                child: _buildThirdInfoContainer(), // Center the "Generate QR" container
+                child: Column(
+                  children: [
+                    _buildQRInfoContainer(), // First container for "Generate QR"
+                    const SizedBox(height: 20), // Space between containers
+                    _buildPurposeInfoContainer(), // Second container for "Purpose of Travel"
+                  ],
+                ),
               ),
             ],
           ),
@@ -139,7 +146,8 @@ class _QRPageState extends State<QRPage> {
     );
   }
 
-  Widget _buildThirdInfoContainer() {
+  // Container for "Generate QR"
+  Widget _buildQRInfoContainer() {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -181,6 +189,54 @@ class _QRPageState extends State<QRPage> {
               ),
             ),      
           ],      
+        ),
+      ),
+    );
+  }
+
+  // Container for "Purpose of Travel"
+  Widget _buildPurposeInfoContainer() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Purposeoftravel()), // Navigate to GenerateQR page
+        );
+      },
+      child: Container(
+        height: 250,
+        width: 280,
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(9), // Curved edges
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5), // Shadow color
+              spreadRadius: 2, // Spread radius
+              blurRadius: 5, // Blur radius
+              offset: const Offset(0, 7), // Shadow offset
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.travel_explore, // Icon for "Purpose of Travel"
+              size: 130,
+              color: Color(0xFF288F13),
+            ),
+            const SizedBox(height: 25),
+            const Text(
+              'Purpose of Travel',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
         ),
       ),
     );
