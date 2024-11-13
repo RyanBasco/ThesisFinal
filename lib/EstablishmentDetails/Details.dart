@@ -14,20 +14,19 @@ class DetailsPage extends StatefulWidget {
   final String establishmentName;
   final String barangay;
   final String city;
-  final String establishmentId; // Add this line
+  final String establishmentId;
 
   const DetailsPage({
     super.key,
     required this.establishmentName,
     required this.barangay,
     required this.city,
-    required this.establishmentId, // Add this parameter here
+    required this.establishmentId,
   });
 
   @override
   _DetailsPageState createState() => _DetailsPageState();
 }
-
 
 class _DetailsPageState extends State<DetailsPage> {
   int _selectedIndex = 0;
@@ -35,17 +34,18 @@ class _DetailsPageState extends State<DetailsPage> {
   String? barangayName;
   String? cityName;
   String? profileImageUrl;
+  String aboutText = 'Loading...';
 
   @override
   void initState() {
     super.initState();
     _loadLocationNames();
     _fetchEstablishmentImage();
+    _fetchAboutText();
   }
 
   Future<void> _fetchEstablishmentImage() async {
     try {
-      // Use the provided establishmentId to fetch the profile image
       String filePath = 'Establishment/${widget.establishmentId}/profile_image/latest_image.jpg';
       Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
       String downloadUrl = await storageRef.getDownloadURL();
@@ -54,6 +54,23 @@ class _DetailsPageState extends State<DetailsPage> {
       });
     } catch (e) {
       print('Error fetching profile image: $e');
+    }
+  }
+
+  Future<void> _fetchAboutText() async {
+    try {
+      DatabaseReference dbRef = FirebaseDatabase.instance.ref('establishments/${widget.establishmentId}');
+      final snapshot = await dbRef.child('About').get();
+
+      if (snapshot.exists) {
+        setState(() {
+          aboutText = snapshot.value as String;
+        });
+      } else {
+        print('No About text found for this establishment.');
+      }
+    } catch (e) {
+      print('Error fetching About text: $e');
     }
   }
 
@@ -123,13 +140,6 @@ class _DetailsPageState extends State<DetailsPage> {
     setState(() {
       _isBookmarked = !_isBookmarked;
     });
-  }
-
-  void _navigateToDirectionsPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => TouristServiceApp()),
-    );
   }
 
   @override
@@ -348,35 +358,13 @@ class _DetailsPageState extends State<DetailsPage> {
                           ),
                         ],
                       ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
                         child: Text(
-                          'Detailed description about the place goes here...',
-                          style: TextStyle(
+                          aboutText,
+                          style: const TextStyle(
                             fontSize: 16,
                             color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: _navigateToDirectionsPage,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2C812A),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        ),
-                        icon: const Icon(Icons.directions, color: Colors.white),
-                        label: const Text(
-                          'Directions',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -384,6 +372,7 @@ class _DetailsPageState extends State<DetailsPage> {
                   ],
                 ),
               ),
+             const SizedBox(height: 20,)
             ],
           ),
         ),

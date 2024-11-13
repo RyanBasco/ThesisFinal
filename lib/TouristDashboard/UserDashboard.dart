@@ -158,48 +158,82 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   Future<void> _fetchEstablishments() async {
-    try {
-      DatabaseReference establishmentsRef =
-          FirebaseDatabase.instance.ref().child('establishments');
-      DataSnapshot snapshot = await establishmentsRef.get();
+  try {
+    DatabaseReference establishmentsRef =
+        FirebaseDatabase.instance.ref().child('establishments');
+    DataSnapshot snapshot = await establishmentsRef.get();
 
-      if (snapshot.exists) {
-        List<Map<String, dynamic>> establishmentsList = [];
+    if (snapshot.exists) {
+      List<Map<String, dynamic>> establishmentsList = [];
 
-        for (var establishmentSnapshot in snapshot.children) {
-          Map<String, dynamic> establishmentData =
-              Map<String, dynamic>.from(establishmentSnapshot.value as Map);
-          String establishmentId = establishmentSnapshot.key ?? '';
+      for (var establishmentSnapshot in snapshot.children) {
+        Map<String, dynamic> establishmentData =
+            Map<String, dynamic>.from(establishmentSnapshot.value as Map);
+        String establishmentId = establishmentSnapshot.key ?? '';
 
-          // Add establishment data with ID to the list
-          establishmentsList.add({
-            ...establishmentData,
-            'establishmentId': establishmentId,
-          });
-
-          // Fetch image for each establishment
-          try {
-            String imagePath =
-                'Establishment/$establishmentId/profile_image/latest_image.jpg';
-            String downloadUrl = await FirebaseStorage.instance
-                .ref()
-                .child(imagePath)
-                .getDownloadURL();
-            establishmentImageUrls[establishmentId] = downloadUrl;
-          } catch (e) {
-            print("No image found for $establishmentId: $e");
-          }
-        }
-
-        setState(() {
-          _establishments = establishmentsList;
-          _filteredEstablishments = _establishments;
+        establishmentsList.add({
+          ...establishmentData,
+          'establishmentId': establishmentId,
         });
+
+        // Fetch image for each establishment
+        try {
+          String imagePath =
+              'Establishment/$establishmentId/profile_image/latest_image.jpg';
+          String downloadUrl = await FirebaseStorage.instance
+              .ref()
+              .child(imagePath)
+              .getDownloadURL();
+          establishmentImageUrls[establishmentId] = downloadUrl;
+        } catch (e) {
+          print("No image found for $establishmentId: $e");
+        }
       }
-    } catch (error) {
-      print('Failed to fetch establishments: $error');
+
+      // Initialize _isBookmarked based on the number of establishments fetched
+      setState(() {
+        _establishments = establishmentsList;
+        _filteredEstablishments = _establishments;
+        _isBookmarked.clear();
+        _isBookmarked.addAll(List<bool>.filled(_establishments.length, false));
+      });
+
+      // Load user bookmarks after establishments are loaded
+      await _loadUserBookmarks();
     }
+  } catch (error) {
+    print('Failed to fetch establishments: $error');
   }
+}
+
+Future<void> _loadUserBookmarks() async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    DatabaseReference bookmarksRef = FirebaseDatabase.instance
+        .ref()
+        .child('Users')
+        .child(user.uid)
+        .child('Bookmarks');
+    DataSnapshot bookmarksSnapshot = await bookmarksRef.get();
+
+    if (bookmarksSnapshot.exists) {
+      // Clear and reinitialize _isBookmarked
+      _isBookmarked.clear();
+      _isBookmarked.addAll(List<bool>.filled(_establishments.length, false));
+
+      for (var bookmark in bookmarksSnapshot.children) {
+        String bookmarkKey = bookmark.key ?? '';
+        int index = int.tryParse(bookmarkKey.split('_')[1] ?? '') ?? -1;
+        if (index >= 0 && index < _isBookmarked.length) {
+          _isBookmarked[index] = true;
+        }
+      }
+    }
+
+    setState(() {}); // Refresh UI with updated bookmarks
+  }
+}
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -236,42 +270,45 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   void _toggleBookmark(int index) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        DatabaseReference bookmarkRef = FirebaseDatabase.instance
-            .ref()
-            .child('Users')
-            .child(user.uid)
-            .child('Bookmarks')
-            .child('bookmark_$index');
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      DatabaseReference bookmarkRef = FirebaseDatabase.instance
+          .ref()
+          .child('Users')
+          .child(user.uid)
+          .child('Bookmarks')
+          .child('bookmark_$index');
 
-        String barangayCode = _establishments[index]['barangay'] ?? 'Unknown';
-        String cityCode = _establishments[index]['city'] ?? 'Unknown';
-        String barangay = barangayMap[barangayCode] ?? 'Unknown';
-        String city = cityMap[cityCode] ?? 'Unknown';
+      String barangayCode = _establishments[index]['barangay'] ?? 'Unknown';
+      String cityCode = _establishments[index]['city'] ?? 'Unknown';
+      String barangay = barangayMap[barangayCode] ?? 'Unknown';
+      String city = cityMap[cityCode] ?? 'Unknown';
+      String establishmentId = _establishments[index]['establishmentId'];
+      String? imageUrl = establishmentImageUrls[establishmentId];
 
-        if (_isBookmarked[index]) {
-          await bookmarkRef.remove();
-          print('Bookmark removed');
-        } else {
-          String title =
-              _establishments[index]['establishmentName'] ?? 'Unknown';
-          await bookmarkRef.set({
-            'title': title,
-            'location': '$barangay, $city',
-          });
-          print('Bookmark added');
-        }
-
-        setState(() {
-          _isBookmarked[index] = !_isBookmarked[index];
+      if (_isBookmarked[index]) {
+        await bookmarkRef.remove();
+        print('Bookmark removed');
+      } else {
+        String title = _establishments[index]['establishmentName'] ?? 'Unknown';
+        await bookmarkRef.set({
+          'title': title,
+          'location': '$barangay, $city',
+          'imageUrl': imageUrl, // Save image URL in the bookmark
         });
-      } catch (error) {
-        print('Failed to update bookmark: $error');
+        print('Bookmark added');
       }
+
+      setState(() {
+        _isBookmarked[index] = !_isBookmarked[index];
+      });
+    } catch (error) {
+      print('Failed to update bookmark: $error');
     }
   }
+}
+
 
   void _onLocationSelected(int index) {
     setState(() {

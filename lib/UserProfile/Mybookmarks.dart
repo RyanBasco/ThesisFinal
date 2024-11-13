@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -15,7 +16,20 @@ class BookmarkPage extends StatefulWidget {
 class _BookmarkPageState extends State<BookmarkPage> {
   List<Map<String, dynamic>> _bookmarkedItems = [];
   int _selectedIndex = 3;
-  String _selectedCategory = "";
+  int? _selectedCategoryIndex;
+
+  final List<Map<String, dynamic>> _categories = [
+    {'name': 'Accommodation', 'icon': Icons.hotel},
+    {'name': 'Food and Beverages', 'icon': Icons.restaurant_menu},
+    {'name': 'Transportation', 'icon': Icons.directions_car},
+    {'name': 'Attractions and Activities', 'icon': Icons.local_activity},
+    {'name': 'Shopping', 'icon': Icons.shopping_bag},
+    {'name': 'Entertainment', 'icon': Icons.theater_comedy},
+    {'name': 'Wellness and Spa Services', 'icon': Icons.spa},
+    {'name': 'Adventure and Outdoor Activities', 'icon': Icons.terrain},
+    {'name': 'Travel Insurance', 'icon': Icons.shield},
+    {'name': 'Local Tours and Guides', 'icon': Icons.tour},
+  ];
 
   @override
   void initState() {
@@ -23,36 +37,36 @@ class _BookmarkPageState extends State<BookmarkPage> {
     _fetchBookmarkedItems();
   }
 
-  void _fetchBookmarkedItems() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      DatabaseReference bookmarksRef = FirebaseDatabase.instance.ref()
-          .child('Users')
-          .child(user.uid)
-          .child('Bookmarks');
-      
-      DataSnapshot snapshot = await bookmarksRef.get();
+  Future<void> _fetchBookmarkedItems() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        DatabaseReference bookmarksRef = FirebaseDatabase.instance
+            .ref()
+            .child('Users')
+            .child(user.uid)
+            .child('Bookmarks');
 
-      setState(() {
-        _bookmarkedItems = [];
-        for (var bookmark in snapshot.children) {
-          Map<dynamic, dynamic>? bookmarkData = bookmark.value as Map<dynamic, dynamic>?;
-          if (bookmarkData != null) {
-            _bookmarkedItems.add({
-              'id': bookmark.key, // Use key as ID
-              ...Map<String, dynamic>.from(bookmarkData),
-            });
+        DataSnapshot snapshot = await bookmarksRef.get();
+
+        setState(() {
+          _bookmarkedItems = [];
+          for (var bookmark in snapshot.children) {
+            Map<dynamic, dynamic>? bookmarkData =
+                bookmark.value as Map<dynamic, dynamic>?;
+            if (bookmarkData != null) {
+              _bookmarkedItems.add({
+                'id': bookmark.key,
+                ...Map<String, dynamic>.from(bookmarkData),
+              });
+            }
           }
-        }
-      });
-    } catch (error) {
-      print('Failed to fetch bookmarked items: $error');
+        });
+      } catch (error) {
+        print('Failed to fetch bookmarked items: $error');
+      }
     }
   }
-}
-
-
 
   void _showConfirmationDialog(String docId) {
     showDialog(
@@ -60,7 +74,8 @@ class _BookmarkPageState extends State<BookmarkPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Remove from bookmarks'),
-          content: const Text('Are you sure you want to remove this item from bookmarks?'),
+          content: const Text(
+              'Are you sure you want to remove this item from bookmarks?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -82,189 +97,136 @@ class _BookmarkPageState extends State<BookmarkPage> {
   }
 
   void _removeBookmarkedItem(String docId) async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      await FirebaseDatabase.instance
-          .ref()
-          .child('Users')
-          .child(user.uid)
-          .child('Bookmarks')
-          .child(docId)
-          .remove();
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseDatabase.instance
+            .ref()
+            .child('Users')
+            .child(user.uid)
+            .child('Bookmarks')
+            .child(docId)
+            .remove();
 
-      setState(() {
-        _bookmarkedItems.removeWhere((item) => item['id'] == docId);
-      });
-    } catch (error) {
-      print('Failed to delete bookmarked item: $error');
-    }
-  }
-}
-
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-        );
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => QRPage()),
-        );
-        break;
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
-        );
-        break;
-      case 3:
-        break;
+        setState(() {
+          _bookmarkedItems.removeWhere((item) => item['id'] == docId);
+        });
+      } catch (error) {
+        print('Failed to delete bookmarked item: $error');
+      }
     }
   }
 
-  void _onCategoryTap(String category) {
+  void _onCategorySelected(int index) {
     setState(() {
-      _selectedCategory = _selectedCategory == category ? "" : category;
+      _selectedCategoryIndex = index;
     });
+    _filterBookmarkedItems();
   }
 
-  Widget _buildCategoryBox(String category) {
-    bool isSelected = _selectedCategory == category;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _onCategoryTap(category),
-        child: Container(
-          margin: const EdgeInsets.only(right: 15),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF2C812A) : Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              category,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  void _filterBookmarkedItems() {
+    String? selectedCategory =
+        _selectedCategoryIndex != null ? _categories[_selectedCategoryIndex!]['name'] : null;
+
+    setState(() {
+      _bookmarkedItems = _bookmarkedItems.where((item) {
+        String itemCategory = item['category'] ?? '';
+        return selectedCategory == null || itemCategory == selectedCategory;
+      }).toList();
+    });
   }
 
   Widget _buildBookmarkedItem(Map<String, dynamic> item) {
-  // Get the image path, default to null if not present
-  String? imagePath = item['imagePath'];
-  String title = item['title'] ?? 'No Title';
-  String location = item['location'] ?? 'No Location';
+    String title = item['title'] ?? 'No Title';
+    String location = item['location'] ?? 'No Location';
+    String? imageUrl = item['imageUrl'];
+    String firstInitial = title.isNotEmpty ? title[0].toUpperCase() : '?';
 
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-    child: Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: imagePath != null && imagePath.isNotEmpty
-                ? Container(
-                    decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: imageUrl != null && imageUrl.isNotEmpty
+                  ? ClipRRect(
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(20),
                         bottomLeft: Radius.circular(20),
                       ),
-                      image: DecorationImage(
-                        image: AssetImage(imagePath),
+                      child: Image.network(
+                        imageUrl,
                         fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    )
+                  : CircleAvatar(
+                      radius: 55,
+                      backgroundColor: Colors.grey.shade300,
+                      child: Text(
+                        firstInitial,
+                        style: const TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
-                  )
-                : CircleAvatar(
-                    radius: 55, // Adjust size as needed
-                    backgroundColor: Colors.grey.shade300,
-                    child: Text(
-                      title.isNotEmpty ? title[0].toUpperCase() : '?', // Use the first letter of the title
-                      style: TextStyle(
-                        fontSize: 40,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              flex: 3,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      location,
+                      style: const TextStyle(
+                        fontSize: 14,
                         color: Colors.black,
                       ),
                     ),
-                  ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            flex: 3,
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    location,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => _showConfirmationDialog(item['id']),
-          ),
-        ],
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => _showConfirmationDialog(item['id']),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +238,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
         child: BottomNavigationBar(
           backgroundColor: Colors.white,
           currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+          onTap: (index) => setState(() => _selectedIndex = index),
           selectedItemColor: const Color(0xFF2C812A),
           unselectedItemColor: Colors.black,
           showSelectedLabels: true,
@@ -361,15 +323,63 @@ class _BookmarkPageState extends State<BookmarkPage> {
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  _buildCategoryBox('Places'),
-                  const SizedBox(width: 5),
-                  _buildCategoryBox('Food'),
-                  const SizedBox(width: 5),
-                  _buildCategoryBox('Other'),
-                ],
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 2.5,
+                ),
+                itemCount: _categories.length,
+                itemBuilder: (context, index) {
+                  Map<String, dynamic> category = _categories[index];
+                  bool isSelected = _selectedCategoryIndex == index;
+
+                  return GestureDetector(
+                    onTap: () => _onCategorySelected(index),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFF288F13) : Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            category['icon'],
+                            color: isSelected ? Colors.white : const Color(0xFF2C812A),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              category['name'],
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected ? Colors.white : Colors.black,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             Expanded(

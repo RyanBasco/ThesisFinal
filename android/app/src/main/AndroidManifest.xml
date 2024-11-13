@@ -2,7 +2,7 @@
 
     <application
         android:requestLegacyExternalStorage="true"
-        android:label="testing"
+        android:label="Isla G"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

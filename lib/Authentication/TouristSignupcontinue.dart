@@ -695,7 +695,7 @@ class _SignupContinueState extends State<SignupContinue> {
                         ),
                       ),
 // Conditionally show the "Please Specify" input field if "Others" is selected
-                      if (_selectedPurpose == 'OTHERS') ...[
+                      if (_selectedPurpose == 'Other') ...[
                         const SizedBox(
                             height:
                                 10), // Add space between the dropdown and the new container
@@ -1119,7 +1119,7 @@ class _SignupContinueState extends State<SignupContinue> {
       'sex': widget.sex,
       'civil_status': widget.civilStatus,
       'purpose_of_travel': _selectedPurpose ?? '', // Use _selectedPurpose from dropdown
-      'otherPurpose': _selectedPurpose == 'OTHERS' ? _specifyController.text : null,
+      'otherPurpose': _selectedPurpose == 'Other' ? _specifyController.text : null,
       'contact_number': _contactNumberController.text,
       'region': _selectedRegionCode != null
           ? _allRegions

@@ -11,7 +11,7 @@ class Agriecofarm extends StatefulWidget {
 }
 
 class _AgriecofarmState extends State<Agriecofarm> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 3;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -118,7 +118,7 @@ class _AgriecofarmState extends State<Agriecofarm> {
                 child: Text(
                   'Agri-Eco Farm\nSites',
                   style: TextStyle(
-                    fontSize: 30,
+                    fontSize: 28, // Reduced font size for closer match
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -126,484 +126,167 @@ class _AgriecofarmState extends State<Agriecofarm> {
               ),
               const SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF83E6F4),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                                bottomLeft: Radius.circular(0),
-                                bottomRight: Radius.circular(0),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'ORACON SUR, NUEVA VALENCIA',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 15), // Space between the boxes
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF83E6F4),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                                bottomLeft: Radius.circular(0),
-                                bottomRight: Radius.circular(0),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'SAN ENRIQUE, SAN LORENZO',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    _buildFarmSite(
+                      title1: 'ORACON SUR, NUEVA VALENCIA',
+                      subtitle1: 'DOM’S FARM AND THE \n RIDERS CAMP',
+                      contact1: '092050500 / 09778049860',
+                      title2: 'SAN ENRIQUE, SAN LORENZO',
+                      subtitle2: 'FATIMA FARM \nRESORT',
+                      contact2: '09171250016',
                     ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF288F13),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(0),
-                                topRight: Radius.circular(0),
-                                bottomLeft: Radius.circular(15),
-                                bottomRight: Radius.circular(15),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'DOM’S FARM AND THE \n RIDERS CAMP',
-                                    style: TextStyle(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    '092050500 / 09778049860',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 15,), // Space between the boxes
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 25.8, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF288F13),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(0),
-                                topRight: Radius.circular(0),
-                                bottomLeft: Radius.circular(15),
-                                bottomRight: Radius.circular(15),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'FATIMA FARM \nRESORT',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    '09171250016',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                    _buildFarmSite(
+                      title1: 'MILLIAN, SIBUNAG',
+                      subtitle1: 'JEM HOME FARM ECO \n ADVENTURES',
+                      contact1: '09189659525 / 09209464522',
+                      title2: 'OLD POBLACION, BUENAVISTA',
+                      subtitle2: 'MAE’S FARM',
+                      contact2: '09177191929 / 09207991929',
                     ),
-                    const SizedBox(height: 15), // Adding some space between the boxes
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 26.5, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF83E6F4),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                                bottomLeft: Radius.circular(0),
-                                bottomRight: Radius.circular(0),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'MILLIAN, SIBUNAG',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 15), // Space between the boxes
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF83E6F4),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                                bottomLeft: Radius.circular(0),
-                                bottomRight: Radius.circular(0),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'OLD POBLACION, BUENAVISTA',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                    _buildFarmSite(
+                      title1: 'CONCORDIA NORTE, SIBUNAG',
+                      subtitle1: 'SPRING BLOOM \nAGRI -FARM',
+                      contact1: '09307122209',
+                      title2: 'CABANO, SAN LORENZO',
+                      subtitle2: 'SUNRISE VALLEY \nOCEAN VIEW RESORT',
+                      contact2: '09171175735 / 09287491710',
                     ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF288F13),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(0),
-                                topRight: Radius.circular(0),
-                                bottomLeft: Radius.circular(15),
-                                bottomRight: Radius.circular(15),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'JEM HOME FARM ECO \n ADVENTURES',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    '09189659525 / 09209464522',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 15), // Space between the boxes
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 35, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF288F13),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(0),
-                                topRight: Radius.circular(0),
-                                bottomLeft: Radius.circular(15),
-                                bottomRight: Radius.circular(15),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'MAE’S FARM',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    '09177191929 / 09207991929',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                    _buildSingleFarmSite(
+                      title: 'ALAGUISOC, JORDAN',
+                      subtitle: 'WONDER’S FARM',
+                      contact: '09173261142 / 09177071142',
                     ),
-                    const SizedBox(height: 15), // Adding some space between the boxes
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF83E6F4),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                                bottomLeft: Radius.circular(0),
-                                bottomRight: Radius.circular(0),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'CONCORDIA NORTE, SIBUNAG',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 15), // Space between the boxes
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF83E6F4),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                                bottomLeft: Radius.circular(0),
-                                bottomRight: Radius.circular(0),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'CABANO, SAN LORENZO',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 33, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF288F13),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(0),
-                                topRight: Radius.circular(0),
-                                bottomLeft: Radius.circular(15),
-                                bottomRight: Radius.circular(15),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'SPRING BLOOM \nAGRI -FARM',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    '09307122209',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 15), // Space between the boxes
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF288F13),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(0),
-                                topRight: Radius.circular(0),
-                                bottomLeft: Radius.circular(15),
-                                bottomRight: Radius.circular(15),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'SUNRISE VALLEY \nOCEAN VIEW RESORT',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    '09171175735 / 09287491710',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-
-                      ],
-                    ),
-                    const SizedBox(height: 15,),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF83E6F4), // Color matching other boxes
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                                bottomLeft: Radius.circular(0),
-                                bottomRight: Radius.circular(0),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'ALAGUISOC, JORDAN',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),                       
-                      ],
-                    ),
-                    Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 10),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF288F13), // Green color matching other boxes
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(0),
-                            topRight: Radius.circular(0),
-                            bottomLeft: Radius.circular(15),
-                            bottomRight: Radius.circular(15),
-                          ),
-                        ),
-                        child: const Center(
-                          child: Column(
-                            children: [
-                              Text(
-                                'WONDER’S FARM',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                '09173261142 / 09177071142',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                  ],
-                ),
                   ],
                 ),
               ),
-              const SizedBox(height: 70,)
-              // Add more content here if needed
+              const SizedBox(height: 70),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFarmSite({
+    required String title1,
+    required String subtitle1,
+    required String contact1,
+    required String title2,
+    required String subtitle2,
+    required String contact2,
+  }) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            _buildTitleBox(title1, height: 50), // Adjust height as needed
+            const SizedBox(width: 10),
+            _buildTitleBox(title2, height: 50), // Adjust height as needed
+          ],
+        ),
+        Row(
+          children: [
+            _buildDetailBox(subtitle1, contact1, height: 100), // Adjust height as needed
+            const SizedBox(width: 10),
+            _buildDetailBox(subtitle2, contact2, height: 100), // Adjust height as needed
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSingleFarmSite({
+    required String title,
+    required String subtitle,
+    required String contact,
+  }) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            _buildTitleBox(title, height: 50), // Adjust height as needed
+          ],
+        ),
+        Row(
+          children: [
+            _buildDetailBox(subtitle, contact, height: 60), // Adjust height as needed
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTitleBox(String title, {double height = 40}) {
+    return Expanded(
+      child: Container(
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: const BoxDecoration(
+          color: Color(0xFF83E6F4),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15),
+            topRight: Radius.circular(15),
+            bottomLeft: Radius.circular(0),
+            bottomRight: Radius.circular(0),
+          ),
+        ),
+        child: Center(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailBox(String subtitle, String contact, {double height = 60}) {
+    return Expanded(
+      child: Container(
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: const BoxDecoration(
+          color: Color(0xFF288F13),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(0),
+            topRight: Radius.circular(0),
+            bottomLeft: Radius.circular(15),
+            bottomRight: Radius.circular(15),
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 13, // Reduced font size
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                contact,
+                style: const TextStyle(
+                  fontSize: 13, // Reduced font size
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),

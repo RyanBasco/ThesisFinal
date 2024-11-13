@@ -27,56 +27,41 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
   int _selectedIndex = 3; // Set initial index to 'Profile'
   File? _profileImage;
 
-
   @override
   void initState() {
     super.initState();
-    _fetchUserData();
-    fetchProfileImageUrl();
+    fetchUserData();
   }
 
-
-  void _fetchUserData() async {
+  // Fetches user data and image URL from Firestore and Firebase Storage
+  Future<void> fetchUserData() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        var userDoc = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .get();
-
+        // Fetch user name from Firestore
+        var userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
         if (userDoc.exists) {
           var userData = userDoc.data();
           setState(() {
             _firstName = userData?['first_name'] ?? '';
             _lastName = userData?['last_name'] ?? '';
-            _profileImageUrl = userData?['profile_image']; // Get image URL
           });
         } else {
           print('User data not found for UID: ${user.uid}');
         }
+
+        // Fetch profile image URL directly from Firebase Storage
+        String filePath = 'UserProfile/${user.uid}/profile_image/latest_image.jpg';
+        Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
+        String downloadUrl = await storageRef.getDownloadURL();
+        setState(() {
+          _profileImageUrl = downloadUrl;
+        });
       } catch (error) {
-        print('Failed to fetch user data: $error');
+        print('Failed to fetch user data or image: $error');
       }
     }
   }
-
-  Future<void> fetchProfileImageUrl() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      String filePath = 'UserProfile/${user.uid}/profile_image/latest_image.jpg';
-      Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
-      String downloadUrl = await storageRef.getDownloadURL();
-      setState(() {
-        _profileImageUrl = downloadUrl; // Use _profileImageUrl here
-      });
-    } catch (e) {
-      print('Error fetching profile image: $e');
-    }
-  }
-}
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -85,27 +70,23 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
 
     switch (index) {
       case 0:
-        // Handle "Home"
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => UserdashboardPageState()),
         );
         break;
       case 1:
-        // Handle "My QR"
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => QRPage()),
         );
         break;
       case 2:
-        // Handle "Wallet"
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => RegistrationPage()),
         );
         break;
-      // case 3: // No need to navigate to the same page (Profile)
     }
   }
 
@@ -194,7 +175,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
               Center(
                 child: Container(
                   width: 300,
-                  height: 550, // Adjusted height if needed
+                  height: 550,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -424,10 +405,12 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         top: 360,
                         left: 20,
                         child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
+                          onTap: () async {
+                            await FirebaseAuth.instance.signOut();
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(builder: (context) => LoginPageScreen()),
+                              (Route<dynamic> route) => false,
                             );
                           },
                           child: Row(

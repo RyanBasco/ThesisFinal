@@ -19,6 +19,9 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
   bool _isQRCodeUseExpanded = false;
   bool _isIntellectualPropertyExpanded = false;
   bool _isNoWarrantyExpanded = false;
+  bool _isTerminationExpanded = false;
+  bool _isGoverningLawExpanded = false;
+  bool _isEntireAgreementExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +43,9 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 const SizedBox(height: 20),
                 Row(
                   children: [
@@ -78,13 +81,26 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-               const SizedBox(height: 10),
-                const Text(
-                  'We value your privacy and are committed to protecting your personal data. This Privacy Policy outlines how we collect, use, and protect your information when you use the APP.',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14.5,
-                    fontFamily: 'Poppins',
+                const SizedBox(height: 10),
+                RichText(
+                  text: const TextSpan(
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14.5,
+                      fontFamily: 'Poppins',
+                    ),
+                    children: [
+                      TextSpan(
+                        text:
+                            'We value your privacy and are committed to protecting your personal data. This Privacy Policy outlines how we collect, use, and protect your information when you use ',
+                      ),
+                      TextSpan(
+                        text: 'Isla G.',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -96,33 +112,75 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isInformationExpanded = !_isInformationExpanded;
                     });
                   },
-                  content: const Column(
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'We collect personal information to provide, personalize, and improve our services. The types of information we collect include:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Personal Information: ',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                            TextSpan(
+                              text:
+                                  'When you register for Isla G, we collect personal information such as your name, age, gender, nationality, email address, travel documents (e.g., passport, visa), and travel history.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '1. Personal Identification Information: Such as your name, email address, contact information, and date of birth, which are necessary for account creation, customer support, and enhancing user experience.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Itinerary and Spending Data: ',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                            TextSpan(
+                              text:
+                                  'We collect details about your itinerary transactions, including destinations, activities, accommodations, transportation modes, and spending records.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '2. Feedback and Communication: If you choose to provide feedback or communicate with us, we collect and store those messages to respond to your inquiries, improve our services, and ensure a better user experience.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'QR Code Data: ',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                            TextSpan(
+                              text:
+                                  'Information related to QR codes generated by tourists and scanned by establishments.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 10),
@@ -138,33 +196,98 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isUsageExpanded = !_isUsageExpanded;
                     });
                   },
-                  content: const Column(
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'We use your personal information to enhance your experience with our app, provide necessary services, and improve our offerings. Specifically, we use the information we collect for the following purposes:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'To Provide and Improve Services: ',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                            TextSpan(
+                              text:
+                                  'We use your information to provide the services offered by Isla G, including itinerary transactions and spending tracking.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '1. Improvement and Development: To analyze usage patterns, gather feedback, and make data-driven improvements to our app, products, and services.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Data Analysis: ',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                            TextSpan(
+                              text:
+                                  'We analyze data to understand tourism spending patterns and generate reports for improving tourism services.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '2. Security and Fraud Prevention: To monitor and enhance security, detect potential fraud, and ensure the safety of all users.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Communication: ',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                            TextSpan(
+                              text:
+                                  'We use your information to communicate with you regarding your account, validation status, and other relevant updates.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Compliance and Legal Obligations: ',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                            TextSpan(
+                              text:
+                                  'We may use your information to comply with legal obligations and enforce our terms and conditions.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins'),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 10),
@@ -180,33 +303,84 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isDataSharingExpanded = !_isDataSharingExpanded;
                     });
                   },
-                  content: const Column(
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'We prioritize your privacy and are committed to handling your data with care. We only share your personal information in the following cases:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'With Establishments: ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'Your QR code, which is only limited to your full name, is shared with registered tourism-related establishments for transaction validation purposes.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '1. Service Providers: We may share your data with trusted third-party providers who assist us in delivering our services, such as cloud storage, customer support, or data analysis. These providers have access only to the information necessary to perform their tasks and are bound by confidentiality agreements.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'With PEDO and Port Officers: ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'Your personal information and transactions may be accessed by the officers to ensure compliance with local regulations.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '2. With Your Consent: We may share your information with third parties when you give us explicit permission to do so.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Legal Requirements: ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'We may disclose your information if required by law or in response to legal processes.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 10),
@@ -222,11 +396,11 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isSecurityExpanded = !_isSecurityExpanded;
                     });
                   },
-                  content: const Column(
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'We are committed to ensuring the security of your personal information and protecting it from unauthorized access, disclosure, alteration, or destruction. To achieve this, we implement a combination of technical, administrative, and physical safeguards:',
+                      const Text(
+                        'We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction.',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -234,30 +408,28 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                         ),
                       ),
                       SizedBox(height: 10),
-                      Text(
-                        '1. Encryption: All sensitive data transmitted through our app is encrypted both in transit and at rest, helping to prevent unauthorized access.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        '2. Access Controls: Access to your personal information is restricted to authorized personnel only, and we employ strict access controls and authentication protocols to maintain data privacy.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                       SizedBox(height: 10),
-                      Text(
-                        '3. User Responsibility: While we implement security measures, we encourage you to help keep your information secure by choosing strong passwords, keeping your credentials confidential, and logging out after using the app on shared devices.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Data Retention: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'We retain your personal data for as long as necessary to provide our services, comply with legal obligations, resolve disputes, and enforce our policies.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 10),
@@ -273,45 +445,84 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isRightsExpanded = !_isRightsExpanded;
                     });
                   },
-                  content: const Column(
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'We respect your privacy rights and strive to provide you with control over your personal information. Depending on your location and applicable laws, you may have the following rights:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Access and Update: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'You have the right to access and update your personal information through Isla G.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '1. Access: You can request access to the personal information we hold about you and receive a copy in a commonly used format.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Delete: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'You may request the deletion of your account and personal data by contacting us.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '2. Correction: If your information is inaccurate or incomplete, you have the right to request that we correct or update it.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Object: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'You may object to the processing of your personal data under certain circumstances.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '3. Restrict Processing: You have the right to ask us to restrict the processing of your data in certain circumstances, such as if you contest the accuracy of the data.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -328,27 +539,29 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'We may update this Privacy Policy periodically to reflect changes in our practices, legal requirements, or for other operational reasons. When we make significant changes, we will notify you by posting a prominent notice within the app or by other appropriate means, such as email.',
+                        'We may update this Privacy Policy from time to time. We will notify you of any significant changes by posting the new Privacy Policy on Isla G and updating the date at the top.',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        'We encourage you to review this policy regularly to stay informed about how we are protecting your personal information. Your continued use of our app following any updates constitutes your acceptance of the revised Privacy Policy.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: 10,)
+                      SizedBox(
+                        height: 10,
+                      )
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+                const Text(
+                  'If you have any questions or concerns about this Privacy Policy, please contact us at [islag@gmail.com].',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14.5,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                const SizedBox(height: 30),
                 const Text(
                   'Terms and Conditions',
                   style: TextStyle(
@@ -360,7 +573,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'Welcome to the [APP NAME]. By accessing and using the app, you agree to comply with and be bound by these Terms and Conditions.',
+                  'Welcome to Isla G. By accessing and using Isla G, you agree to comply with and be bound by these Terms and Conditions.',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 14.5,
@@ -369,52 +582,91 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                 ),
                 const SizedBox(height: 20),
                 buildExpandableSection(
-                  title: 'Use of the App',
+                  title: 'Use of Isla G',
                   isExpanded: _isUseAppExpanded,
                   onPressed: () {
                     setState(() {
                       _isUseAppExpanded = !_isUseAppExpanded;
                     });
                   },
-                  content: const Column(
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'By using this app, you agree to comply with the following guidelines to ensure a safe, respectful, and lawful experience for all users:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Eligibility: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'You must be at least 18 years old to use Isla G. By using the app, you represent and warrant that you meet this eligibility requirement.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '1. Authorized Use: You are permitted to use this app only for its intended purposes as outlined in these Terms and Conditions. Unauthorized use of the app or its content is strictly prohibited.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Account Registration: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'To access certain features of Isla G, you must register for an account. You agree to provide accurate and complete information during registration and to update your information as necessary.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                       SizedBox(height: 10),
-                      Text(
-                        '2. Account Responsibility: You are responsible for maintaining the confidentiality of your account details and for all activities that occur under your account. Notify us immediately if you suspect any unauthorized access or security breach.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Prohibited Conduct: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'You agree not to use Isla G for any unlawful or prohibited activities, including but not limited to violating intellectual property rights, transmitting harmful software, or engaging in fraudulent activities.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                       SizedBox(height: 10),
-                      Text(
-                        '3. Accurate Information: You agree to provide accurate, current, and complete information when creating an account or interacting with app features.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: 10,)
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -424,39 +676,63 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                   isExpanded: _isUserResponsibilitiesExpanded,
                   onPressed: () {
                     setState(() {
-                      _isUserResponsibilitiesExpanded = !_isUserResponsibilitiesExpanded;
+                      _isUserResponsibilitiesExpanded =
+                          !_isUserResponsibilitiesExpanded;
                     });
                   },
-                  content: const Column(
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'As a user of this app, you agree to the following responsibilities to ensure a safe, compliant, and enjoyable experience for all:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Security: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '1. Provide Accurate Information: You are responsible for ensuring that all information you provide within the app is accurate, complete, and up-to-date.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Compliance: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'You agree to comply with all applicable laws and regulations when using Isla G.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                       SizedBox(height: 10),
-                      Text(
-                        '2. Protect Your Account: Safeguard your account information, including your password, and avoid sharing it with others. You are accountable for all actions taken under your account. ',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: 10,)
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -469,36 +745,34 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       _isQRCodeUseExpanded = !_isQRCodeUseExpanded;
                     });
                   },
-                  content: const Column(
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Our app may include QR code features designed to streamline interactions, verify identity, and enhance user experience. By using the QR code feature, you agree to the following guidelines:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Generation and Scanning: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'Tourists can generate QR codes for their profiles and itineraries, which establishments can scan for spending record purposes. You agree to use this feature responsibly and in accordance with Isla G’s guidelines.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '1. Authorized Use Only: QR codes generated or provided by this app are for personal use only and must not be shared, duplicated, or tampered with for unauthorized purposes.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        '2. Responsibility for Use: You are responsible for QR codes generated by your account. Any actions taken using your QR code are considered your responsibility.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: 10,)
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -508,45 +782,69 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                   isExpanded: _isIntellectualPropertyExpanded,
                   onPressed: () {
                     setState(() {
-                      _isIntellectualPropertyExpanded = !_isIntellectualPropertyExpanded;
+                      _isIntellectualPropertyExpanded =
+                          !_isIntellectualPropertyExpanded;
                     });
                   },
-                  content: const Column(
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'All content, features, and functionality within this app—including but not limited to text, graphics, logos, icons, images, videos, software, and any other material—are the exclusive property of [App Name] and its licensors, protected by copyright, trademark, patent, trade secret, and other intellectual property laws.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Ownership: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'All content, features, and functionalities of Isla G are owned by our licensors and are protected by intellectual property laws.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        '1. Intellectual Property Infringement: We respect the intellectual property rights of others and expect our users to do the same. If you believe that any content in the app infringes upon your intellectual property rights, please contact us with the relevant details.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'License: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'We grant you a limited, non-exclusive, non-transferable license to use Isla G for its intended purposes.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                       SizedBox(height: 10),
-                      Text(
-                        '2. User-Generated Content: By submitting content to the app (e.g., reviews, comments, or feedback), you grant us a worldwide, non-exclusive, royalty-free license to use, display, reproduce, modify, or distribute your content as part of the app or our marketing materials.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: 10,)
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
                 const SizedBox(height: 7.5),
                 buildExpandableSection(
-                  title: 'No Warranty',
+                  title: 'Disclaimers and Limitation of Liability',
                   isExpanded: _isNoWarrantyExpanded,
                   onPressed: () {
                     setState(() {
@@ -557,7 +855,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'This app and all its features are provided on an "as-is" and "as-available" basis without any warranties of any kind, either express or implied. By using the app, you acknowledge and agree to the following:',
+                        'No Warranty: Isla G is provided "as is" and "as available" without any warranties of any kind, either express or implied.',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -566,27 +864,144 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        '1. Service Availability: We do not guarantee that the app will be available, uninterrupted, secure, or error-free at all times. Downtime may occur due to maintenance, updates, technical issues, or other reasons beyond our control.',
+                        'Limitation of Liability: To the maximum extent permitted by law, we are not liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses resulting from your use of Isla G.',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
                       ),
-                      Text(
-                        '2. No Guarantees: We make no warranties or guarantees regarding the accuracy, completeness, or reliability of any content, information, or features provided through the app.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      SizedBox(height: 10,)
+                      SizedBox(
+                        height: 10,
+                      )
                     ],
                   ),
                 ),
-              ],
-            ),
+                const SizedBox(height: 7.5),
+                buildExpandableSection(
+                  title: 'Termination',
+                  isExpanded: _isGoverningLawExpanded,
+                  onPressed: () {
+                    setState(() {
+                      _isGoverningLawExpanded = !_isGoverningLawExpanded;
+                    });
+                  },
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Termination by You: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'You may terminate your account at any time by contacting us.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Termination by Us: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  'We may suspend or terminate your access to Isla G if you violate these Terms and Conditions or for any other reason at our discretion.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 7.5),
+                buildExpandableSection(
+                  title: 'Changes to These Terms',
+                  isExpanded: _isTerminationExpanded,
+                  onPressed: () {
+                    setState(() {
+                      _isTerminationExpanded = !_isTerminationExpanded;
+                    });
+                  },
+                  content: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'We may modify these Terms and Conditions from time to time. We will notify you of any significant changes by posting the new Terms and Conditions on Isla G and updating the date at the top.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 7.5),
+                buildExpandableSection(
+                  title: 'Governing Law',
+                  isExpanded: _isEntireAgreementExpanded,
+                  onPressed: () {
+                    setState(() {
+                      _isEntireAgreementExpanded = !_isEntireAgreementExpanded;
+                    });
+                  },
+                  content: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'These Terms and Conditions are governed by the laws of the Philippines, without regard to its conflict of law principles.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'If you have any questions or concerns about these Terms and Conditions, please contact us at [islag@gmail.com].',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14.5,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                SizedBox(height: 30,)
+              ]
+            )
           ),
         ),
       ),
@@ -636,7 +1051,8 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
               GestureDetector(
                 onTap: onPressed,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
