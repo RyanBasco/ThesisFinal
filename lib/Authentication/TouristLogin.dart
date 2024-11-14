@@ -127,16 +127,15 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                 children: [
                   Center(
                     child: SizedBox(
-                      width: 250,
-                      height: 250,
+                      width: 230,
+                      height: 230,
                       child: Image.asset(
-                        'assets/Newlogo.png',
+                        'assets/IslaG.png',
                         fit: BoxFit.contain,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 0),
-
+                  const SizedBox(height: 10),
                   // "Login" Text
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0),

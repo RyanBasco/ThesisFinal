@@ -35,6 +35,8 @@ class _DetailsPageState extends State<DetailsPage> {
   String? cityName;
   String? profileImageUrl;
   String aboutText = 'Loading...';
+  double averageRating = 0.0;
+  int totalReviews = 0;
 
   @override
   void initState() {
@@ -42,11 +44,13 @@ class _DetailsPageState extends State<DetailsPage> {
     _loadLocationNames();
     _fetchEstablishmentImage();
     _fetchAboutText();
+    _fetchAverageRating();
   }
 
   Future<void> _fetchEstablishmentImage() async {
     try {
-      String filePath = 'Establishment/${widget.establishmentId}/profile_image/latest_image.jpg';
+      String filePath =
+          'Establishment/${widget.establishmentId}/profile_image/latest_image.jpg';
       Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
       String downloadUrl = await storageRef.getDownloadURL();
       setState(() {
@@ -59,7 +63,8 @@ class _DetailsPageState extends State<DetailsPage> {
 
   Future<void> _fetchAboutText() async {
     try {
-      DatabaseReference dbRef = FirebaseDatabase.instance.ref('establishments/${widget.establishmentId}');
+      DatabaseReference dbRef =
+          FirebaseDatabase.instance.ref('establishments/${widget.establishmentId}');
       final snapshot = await dbRef.child('About').get();
 
       if (snapshot.exists) {
@@ -71,6 +76,32 @@ class _DetailsPageState extends State<DetailsPage> {
       }
     } catch (e) {
       print('Error fetching About text: $e');
+    }
+  }
+
+  Future<void> _fetchAverageRating() async {
+    DatabaseReference reviewsRef =
+        FirebaseDatabase.instance.ref().child('reviews');
+    DataSnapshot snapshot = await reviewsRef.get();
+    int totalStars = 0;
+    int count = 0;
+
+    if (snapshot.exists) {
+      Map data = snapshot.value as Map;
+
+      data.forEach((key, value) {
+        final review = Map<String, dynamic>.from(value);
+        if (review['establishment_id'] == widget.establishmentId) {
+          int rating = review['rating'];
+          totalStars += rating;
+          count++;
+        }
+      });
+
+      setState(() {
+        totalReviews = count;
+        averageRating = count > 0 ? totalStars / count : 0.0;
+      });
     }
   }
 
@@ -262,7 +293,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         alignment: Alignment.bottomLeft,
                         child: Container(
                           width: 290,
-                          height: 155,
+                          height: 160,
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -296,35 +327,44 @@ class _DetailsPageState extends State<DetailsPage> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              const Row(
+                              Row(
                                 children: [
-                                  Icon(Icons.star, color: Colors.yellow, size: 20),
-                                  Icon(Icons.star, color: Colors.yellow, size: 20),
-                                  Icon(Icons.star, color: Colors.yellow, size: 20),
-                                  Icon(Icons.star, color: Colors.yellow, size: 20),
-                                  Icon(Icons.star_border, color: Colors.yellow, size: 20),
+                                  Row(
+                                    children: List.generate(5, (index) {
+                                      return Icon(
+                                        index < averageRating.floor()
+                                            ? Icons.star
+                                            : (index < averageRating
+                                                ? Icons.star_half
+                                                : Icons.star_border),
+                                        color: Colors.yellow,
+                                        size: 20,
+                                      );
+                                    }),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${averageRating.toStringAsFixed(1)}',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '($totalReviews reviews)',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: _contactButton('Contact', Icons.phone),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 80),
-                      child: _contactButton('Facebook', Icons.facebook),
                     ),
                   ],
                 ),
@@ -372,45 +412,10 @@ class _DetailsPageState extends State<DetailsPage> {
                   ],
                 ),
               ),
-             const SizedBox(height: 20,)
+              const SizedBox(height: 20),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _contactButton(String label, IconData icon) {
-    return Container(
-      width: 120,
-      height: 40,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.black, size: 20),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ],
       ),
     );
   }

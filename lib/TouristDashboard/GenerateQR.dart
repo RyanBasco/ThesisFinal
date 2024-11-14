@@ -1,10 +1,11 @@
 import 'dart:typed_data';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -21,6 +22,7 @@ class _GenerateQRState extends State<GenerateQR> {
   int _selectedIndex = 1;
   String qrData = '';
   Map<String, dynamic>? userData;
+  final ScreenshotController screenshotController = ScreenshotController();
 
   @override
   void initState() {
@@ -29,40 +31,69 @@ class _GenerateQRState extends State<GenerateQR> {
   }
 
   void _fetchUserData() async {
-  String? userEmail = FirebaseAuth.instance.currentUser?.email;
+    String? userEmail = FirebaseAuth.instance.currentUser?.email;
 
-  if (userEmail != null) {
-    try {
-      final ref = FirebaseDatabase.instance.ref().child('Users');
-      final snapshot = await ref.get();
+    if (userEmail != null) {
+      try {
+        final ref = FirebaseDatabase.instance.ref().child('Users');
+        final snapshot = await ref.get();
 
-      if (snapshot.exists && snapshot.value != null) {
-        for (var entry in (snapshot.value as Map).entries) {
-          final Map<String, dynamic> user = Map<String, dynamic>.from(entry.value);
-          String emailFromDatabase = user['email'] ?? '';
+        if (snapshot.exists && snapshot.value != null) {
+          for (var entry in (snapshot.value as Map).entries) {
+            final Map<String, dynamic> user = Map<String, dynamic>.from(entry.value);
+            String emailFromDatabase = user['email'] ?? '';
 
-          if (emailFromDatabase.toLowerCase() == userEmail.toLowerCase()) {
-            userData = user;
-            String documentId = entry.key;
+            if (emailFromDatabase.toLowerCase() == userEmail.toLowerCase()) {
+              userData = user;
+              String documentId = entry.key;
 
-            setState(() {
-              qrData = documentId;
-            });
-            return;
+              setState(() {
+                qrData = documentId;
+              });
+              return;
+            }
           }
+          print('User data not found for email: $userEmail');
+        } else {
+          print('No data found in Realtime Database');
         }
-        print('User data not found for email: $userEmail');
-      } else {
-        print('No data found in Realtime Database');
+      } catch (error) {
+        print('Failed to fetch user data: $error');
       }
-    } catch (error) {
-      print('Failed to fetch user data: $error');
+    } else {
+      print('User email is null');
     }
-  } else {
-    print('User email is null');
   }
-}
 
+  Future<void> _saveQrToGallery() async {
+    final status = await Permission.storage.request();
+
+    if (status.isGranted) {
+      final Uint8List? image = await screenshotController.capture();
+
+      if (image != null) {
+        final result = await ImageGallerySaver.saveImage(
+          Uint8List.fromList(image),
+          quality: 100,
+          name: "QR_Code_${DateTime.now().millisecondsSinceEpoch}",
+        );
+
+        if (result['isSuccess']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("QR code saved to gallery!")),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to save QR code.")),
+          );
+        }
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Storage permission denied.")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +120,8 @@ class _GenerateQRState extends State<GenerateQR> {
               label: 'My QR',
             ),
             BottomNavigationBarItem(
-               icon: Icon(Icons.attach_money),
-               label: 'Expense Tracker',
+              icon: Icon(Icons.attach_money),
+              label: 'Expense Tracker',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
@@ -148,7 +179,22 @@ class _GenerateQRState extends State<GenerateQR> {
                     ),
                   ),
                   _buildWhiteContainer(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
+                  ElevatedButton.icon(
+                    onPressed: _saveQrToGallery,
+                    icon: const Icon(Icons.save_alt, color: Colors.white),
+                    label: const Text(
+                      "Save to Gallery",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2C812A),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -166,43 +212,44 @@ class _GenerateQRState extends State<GenerateQR> {
     String firstName = userData!['first_name'] ?? '';
     String lastName = userData!['last_name'] ?? '';
 
-    return Container(
-      margin: const EdgeInsets.only(top: 100, left: 20, right: 20),
-      padding: const EdgeInsets.all(20),
-      width: 280,
-      height: 380,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(
-            child: QrImageView(
+    return Screenshot(
+      controller: screenshotController,
+      child: Container(
+        margin: const EdgeInsets.only(top: 100, left: 20, right: 20),
+        padding: const EdgeInsets.all(20),
+        width: 280,
+        height: 330,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            QrImageView(
               data: qrData,
               version: QrVersions.auto,
               size: 200.0,
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            '$firstName $lastName',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+            const SizedBox(height: 20),
+            Text(
+              '$firstName $lastName',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

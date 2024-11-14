@@ -209,7 +209,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 30,
+                        top: 50,
                         left: 125,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

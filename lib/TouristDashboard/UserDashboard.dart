@@ -88,26 +88,33 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   void _filterEstablishments() {
-    String query = _searchController.text.toLowerCase();
-    String? selectedCategory = _selectedCategoryIndex != null
-        ? _categories[_selectedCategoryIndex!]['name']
-        : null;
+  String query = _searchController.text.toLowerCase();
+  String? selectedCategory = _selectedCategoryIndex != null
+      ? _categories[_selectedCategoryIndex!]['name']
+      : null;
+  String? selectedLocation = _selectedLocationIndex != null
+      ? _locations[_selectedLocationIndex!]
+      : null;
 
-    setState(() {
-      _filteredEstablishments = _establishments.where((establishment) {
-        String name = establishment['establishmentName']?.toLowerCase() ?? '';
-        bool matchesQuery = name.contains(query);
+  setState(() {
+    _filteredEstablishments = _establishments.where((establishment) {
+      String name = establishment['establishmentName']?.toLowerCase() ?? '';
+      bool matchesQuery = name.contains(query);
 
-        bool matchesCategory = selectedCategory == null ||
-            (establishment['Services'] != null &&
-                establishment['Services'] is List &&
-                (establishment['Services'] as List<dynamic>)
-                    .contains(selectedCategory));
+      bool matchesCategory = selectedCategory == null ||
+          (establishment['Services'] != null &&
+              establishment['Services'] is List &&
+              (establishment['Services'] as List<dynamic>)
+                  .contains(selectedCategory));
 
-        return matchesQuery && matchesCategory;
-      }).toList();
-    });
-  }
+      bool matchesLocation = selectedLocation == null ||
+          cityMap[establishment['city']] ==
+              (cityNameMapping[selectedLocation] ?? selectedLocation);
+
+      return matchesQuery && matchesCategory && matchesLocation;
+    }).toList();
+  });
+}
 
   void _fetchUserData() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -310,18 +317,22 @@ Future<void> _loadUserBookmarks() async {
 }
 
 
-  void _onLocationSelected(int index) {
-    setState(() {
-      _selectedLocationIndex = index;
-    });
-  }
+ void _onLocationSelected(int index) {
+  setState(() {
+    // Toggle location selection
+    _selectedLocationIndex = (_selectedLocationIndex == index) ? null : index;
+  });
+  _filterEstablishments(); // Apply or remove the location filter
+}
 
   void _onCategorySelected(int index) {
-    setState(() {
-      _selectedCategoryIndex = index;
-    });
-    _filterEstablishments();
-  }
+  setState(() {
+    // Toggle category selection
+    _selectedCategoryIndex = (_selectedCategoryIndex == index) ? null : index;
+  });
+  _filterEstablishments(); // Apply or remove the category filter
+}
+
 
   @override
   Widget build(BuildContext context) {
