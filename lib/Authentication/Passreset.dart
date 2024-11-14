@@ -1,63 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class PasswordResetPage extends StatefulWidget {
+class ManualPasswordResetPage extends StatefulWidget {
+  const ManualPasswordResetPage({Key? key}) : super(key: key);
+
   @override
-  _PasswordResetPageState createState() => _PasswordResetPageState();
+  _ManualPasswordResetPageState createState() => _ManualPasswordResetPageState();
 }
 
-class _PasswordResetPageState extends State<PasswordResetPage> {
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+class _ManualPasswordResetPageState extends State<ManualPasswordResetPage> {
+  final _emailController = TextEditingController();
 
-  Future<void> _resetPassword() async {
-    if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
-      );
-      return;
-    }
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
+  // Manually triggers Firebase to send a password reset email
+  Future<void> manualSendPasswordReset() async {
+    String email = _emailController.text.trim();
+    
     try {
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.updatePassword(_newPasswordController.text);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Password updated successfully")),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to update password: $e")),
-      );
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showMessage("Password reset email sent to $email");
+    } on FirebaseAuthException catch (e) {
+      _showMessage("Error: ${e.message}");
     }
+  }
+
+  // Helper function to show messages in a dialog
+  void _showMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(message),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Create New Password")),
+      appBar: AppBar(title: const Text("Manual Password Reset")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: _newPasswordController,
-              decoration: const InputDecoration(labelText: 'New Password', border: OutlineInputBorder()),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _confirmPasswordController,
-              decoration: const InputDecoration(labelText: 'Confirm New Password', border: OutlineInputBorder()),
-              obscureText: true,
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: 'Enter Email',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _resetPassword,
-              child: const Text("Update Password"),
+              onPressed: manualSendPasswordReset,
+              child: const Text("Send Password Reset Email"),
             ),
           ],
         ),

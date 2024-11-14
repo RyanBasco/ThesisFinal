@@ -9,6 +9,7 @@ import 'package:testing/TouristDashboard/Notifications.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class UserdashboardPageState extends StatefulWidget {
   const UserdashboardPageState({super.key});
@@ -88,33 +89,33 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   void _filterEstablishments() {
-  String query = _searchController.text.toLowerCase();
-  String? selectedCategory = _selectedCategoryIndex != null
-      ? _categories[_selectedCategoryIndex!]['name']
-      : null;
-  String? selectedLocation = _selectedLocationIndex != null
-      ? _locations[_selectedLocationIndex!]
-      : null;
+    String query = _searchController.text.toLowerCase();
+    String? selectedCategory = _selectedCategoryIndex != null
+        ? _categories[_selectedCategoryIndex!]['name']
+        : null;
+    String? selectedLocation = _selectedLocationIndex != null
+        ? _locations[_selectedLocationIndex!]
+        : null;
 
-  setState(() {
-    _filteredEstablishments = _establishments.where((establishment) {
-      String name = establishment['establishmentName']?.toLowerCase() ?? '';
-      bool matchesQuery = name.contains(query);
+    setState(() {
+      _filteredEstablishments = _establishments.where((establishment) {
+        String name = establishment['establishmentName']?.toLowerCase() ?? '';
+        bool matchesQuery = name.contains(query);
 
-      bool matchesCategory = selectedCategory == null ||
-          (establishment['Services'] != null &&
-              establishment['Services'] is List &&
-              (establishment['Services'] as List<dynamic>)
-                  .contains(selectedCategory));
+        bool matchesCategory = selectedCategory == null ||
+            (establishment['Services'] != null &&
+                establishment['Services'] is List &&
+                (establishment['Services'] as List<dynamic>)
+                    .contains(selectedCategory));
 
-      bool matchesLocation = selectedLocation == null ||
-          cityMap[establishment['city']] ==
-              (cityNameMapping[selectedLocation] ?? selectedLocation);
+        bool matchesLocation = selectedLocation == null ||
+            cityMap[establishment['city']] ==
+                (cityNameMapping[selectedLocation] ?? selectedLocation);
 
-      return matchesQuery && matchesCategory && matchesLocation;
-    }).toList();
-  });
-}
+        return matchesQuery && matchesCategory && matchesLocation;
+      }).toList();
+    });
+  }
 
   void _fetchUserData() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -165,82 +166,79 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   Future<void> _fetchEstablishments() async {
-  try {
-    DatabaseReference establishmentsRef =
-        FirebaseDatabase.instance.ref().child('establishments');
-    DataSnapshot snapshot = await establishmentsRef.get();
+    try {
+      DatabaseReference establishmentsRef =
+          FirebaseDatabase.instance.ref().child('establishments');
+      DataSnapshot snapshot = await establishmentsRef.get();
 
-    if (snapshot.exists) {
-      List<Map<String, dynamic>> establishmentsList = [];
+      if (snapshot.exists) {
+        List<Map<String, dynamic>> establishmentsList = [];
 
-      for (var establishmentSnapshot in snapshot.children) {
-        Map<String, dynamic> establishmentData =
-            Map<String, dynamic>.from(establishmentSnapshot.value as Map);
-        String establishmentId = establishmentSnapshot.key ?? '';
+        for (var establishmentSnapshot in snapshot.children) {
+          Map<String, dynamic> establishmentData =
+              Map<String, dynamic>.from(establishmentSnapshot.value as Map);
+          String establishmentId = establishmentSnapshot.key ?? '';
 
-        establishmentsList.add({
-          ...establishmentData,
-          'establishmentId': establishmentId,
+          establishmentsList.add({
+            ...establishmentData,
+            'establishmentId': establishmentId,
+          });
+
+          // Fetch image for each establishment
+          try {
+            String imagePath =
+                'Establishment/$establishmentId/profile_image/latest_image.jpg';
+            String downloadUrl = await FirebaseStorage.instance
+                .ref()
+                .child(imagePath)
+                .getDownloadURL();
+            establishmentImageUrls[establishmentId] = downloadUrl;
+          } catch (e) {
+            print("No image found for $establishmentId: $e");
+          }
+        }
+
+        setState(() {
+          _establishments = establishmentsList;
+          _filteredEstablishments = _establishments;
+          _isBookmarked.clear();
+          _isBookmarked
+              .addAll(List<bool>.filled(_establishments.length, false));
         });
 
-        // Fetch image for each establishment
-        try {
-          String imagePath =
-              'Establishment/$establishmentId/profile_image/latest_image.jpg';
-          String downloadUrl = await FirebaseStorage.instance
-              .ref()
-              .child(imagePath)
-              .getDownloadURL();
-          establishmentImageUrls[establishmentId] = downloadUrl;
-        } catch (e) {
-          print("No image found for $establishmentId: $e");
-        }
+        await _loadUserBookmarks();
       }
+    } catch (error) {
+      print('Failed to fetch establishments: $error');
+    }
+  }
 
-      // Initialize _isBookmarked based on the number of establishments fetched
-      setState(() {
-        _establishments = establishmentsList;
-        _filteredEstablishments = _establishments;
+  Future<void> _loadUserBookmarks() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DatabaseReference bookmarksRef = FirebaseDatabase.instance
+          .ref()
+          .child('Users')
+          .child(user.uid)
+          .child('Bookmarks');
+      DataSnapshot bookmarksSnapshot = await bookmarksRef.get();
+
+      if (bookmarksSnapshot.exists) {
         _isBookmarked.clear();
         _isBookmarked.addAll(List<bool>.filled(_establishments.length, false));
-      });
 
-      // Load user bookmarks after establishments are loaded
-      await _loadUserBookmarks();
-    }
-  } catch (error) {
-    print('Failed to fetch establishments: $error');
-  }
-}
-
-Future<void> _loadUserBookmarks() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    DatabaseReference bookmarksRef = FirebaseDatabase.instance
-        .ref()
-        .child('Users')
-        .child(user.uid)
-        .child('Bookmarks');
-    DataSnapshot bookmarksSnapshot = await bookmarksRef.get();
-
-    if (bookmarksSnapshot.exists) {
-      // Clear and reinitialize _isBookmarked
-      _isBookmarked.clear();
-      _isBookmarked.addAll(List<bool>.filled(_establishments.length, false));
-
-      for (var bookmark in bookmarksSnapshot.children) {
-        String bookmarkKey = bookmark.key ?? '';
-        int index = int.tryParse(bookmarkKey.split('_')[1] ?? '') ?? -1;
-        if (index >= 0 && index < _isBookmarked.length) {
-          _isBookmarked[index] = true;
+        for (var bookmark in bookmarksSnapshot.children) {
+          String bookmarkKey = bookmark.key ?? '';
+          int index = int.tryParse(bookmarkKey.split('_')[1] ?? '') ?? -1;
+          if (index >= 0 && index < _isBookmarked.length) {
+            _isBookmarked[index] = true;
+          }
         }
       }
+
+      setState(() {}); // Refresh UI with updated bookmarks
     }
-
-    setState(() {}); // Refresh UI with updated bookmarks
   }
-}
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -277,62 +275,59 @@ Future<void> _loadUserBookmarks() async {
   }
 
   void _toggleBookmark(int index) async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      DatabaseReference bookmarkRef = FirebaseDatabase.instance
-          .ref()
-          .child('Users')
-          .child(user.uid)
-          .child('Bookmarks')
-          .child('bookmark_$index');
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        DatabaseReference bookmarkRef = FirebaseDatabase.instance
+            .ref()
+            .child('Users')
+            .child(user.uid)
+            .child('Bookmarks')
+            .child('bookmark_$index');
 
-      String barangayCode = _establishments[index]['barangay'] ?? 'Unknown';
-      String cityCode = _establishments[index]['city'] ?? 'Unknown';
-      String barangay = barangayMap[barangayCode] ?? 'Unknown';
-      String city = cityMap[cityCode] ?? 'Unknown';
-      String establishmentId = _establishments[index]['establishmentId'];
-      String? imageUrl = establishmentImageUrls[establishmentId];
+        String barangayCode = _establishments[index]['barangay'] ?? 'Unknown';
+        String cityCode = _establishments[index]['city'] ?? 'Unknown';
+        String barangay = barangayMap[barangayCode] ?? 'Unknown';
+        String city = cityMap[cityCode] ?? 'Unknown';
+        String establishmentId = _establishments[index]['establishmentId'];
+        String? imageUrl = establishmentImageUrls[establishmentId];
 
-      if (_isBookmarked[index]) {
-        await bookmarkRef.remove();
-        print('Bookmark removed');
-      } else {
-        String title = _establishments[index]['establishmentName'] ?? 'Unknown';
-        await bookmarkRef.set({
-          'title': title,
-          'location': '$barangay, $city',
-          'imageUrl': imageUrl, // Save image URL in the bookmark
+        if (_isBookmarked[index]) {
+          await bookmarkRef.remove();
+          print('Bookmark removed');
+        } else {
+          String title =
+              _establishments[index]['establishmentName'] ?? 'Unknown';
+          await bookmarkRef.set({
+            'title': title,
+            'location': '$barangay, $city',
+            'imageUrl': imageUrl,
+          });
+          print('Bookmark added');
+        }
+
+        setState(() {
+          _isBookmarked[index] = !_isBookmarked[index];
         });
-        print('Bookmark added');
+      } catch (error) {
+        print('Failed to update bookmark: $error');
       }
-
-      setState(() {
-        _isBookmarked[index] = !_isBookmarked[index];
-      });
-    } catch (error) {
-      print('Failed to update bookmark: $error');
     }
   }
-}
 
-
- void _onLocationSelected(int index) {
-  setState(() {
-    // Toggle location selection
-    _selectedLocationIndex = (_selectedLocationIndex == index) ? null : index;
-  });
-  _filterEstablishments(); // Apply or remove the location filter
-}
+  void _onLocationSelected(int index) {
+    setState(() {
+      _selectedLocationIndex = (_selectedLocationIndex == index) ? null : index;
+    });
+    _filterEstablishments();
+  }
 
   void _onCategorySelected(int index) {
-  setState(() {
-    // Toggle category selection
-    _selectedCategoryIndex = (_selectedCategoryIndex == index) ? null : index;
-  });
-  _filterEstablishments(); // Apply or remove the category filter
-}
-
+    setState(() {
+      _selectedCategoryIndex = (_selectedCategoryIndex == index) ? null : index;
+    });
+    _filterEstablishments();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -474,7 +469,8 @@ Future<void> _loadUserBookmarks() async {
                           onTap: () => _onLocationSelected(index),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
+                                horizontal: 10,
+                                vertical: 10), // Adjusted for larger padding
                             decoration: BoxDecoration(
                               color: _selectedLocationIndex == index
                                   ? const Color(0xFF288F13)
@@ -492,7 +488,7 @@ Future<void> _loadUserBookmarks() async {
                             child: Text(
                               _locations[index],
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 16, // Increased font size
                                 color: _selectedLocationIndex == index
                                     ? Colors.white
                                     : Colors.black,
@@ -512,7 +508,8 @@ Future<void> _loadUserBookmarks() async {
                           onTap: () => _onLocationSelected(locationIndex),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
+                                horizontal: 10,
+                                vertical: 10), // Adjusted for larger padding
                             decoration: BoxDecoration(
                               color: _selectedLocationIndex == locationIndex
                                   ? const Color(0xFF288F13)
@@ -530,7 +527,7 @@ Future<void> _loadUserBookmarks() async {
                             child: Text(
                               _locations[locationIndex],
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 16, // Increased font size
                                 color: _selectedLocationIndex == locationIndex
                                     ? Colors.white
                                     : Colors.black,
@@ -557,70 +554,66 @@ Future<void> _loadUserBookmarks() async {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    childAspectRatio: 2.5,
+                child: CarouselSlider(
+                  options: CarouselOptions(
+                    height: 90, // Adjust to control card height
+                    enlargeCenterPage: true, // Emphasizes the current card
+                    enableInfiniteScroll: false,
+                    viewportFraction: 0.8, // Controls the width of each card
                   ),
-                  itemCount: _categories.length,
-                  itemBuilder: (context, index) {
-                    Map<String, dynamic> category = _categories[index];
+                  items: _categories.map((category) {
+                    int index = _categories.indexOf(category);
                     bool isSelected = _selectedCategoryIndex == index;
 
                     return GestureDetector(
-                      onTap: () {
-                        _onCategorySelected(index);
-                      },
+                      onTap: () => _onCategorySelected(index),
                       child: Container(
-                        padding: const EdgeInsets.all(10),
+                        width: double.infinity,
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? const Color(0xFF288F13)
                               : Colors.white,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.grey.withOpacity(0.4),
                               spreadRadius: 2,
-                              blurRadius: 5,
+                              blurRadius: 6,
                               offset: const Offset(0, 3),
                             ),
                           ],
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               category['icon'],
                               color: isSelected
                                   ? Colors.white
                                   : const Color(0xFF2C812A),
-                              size: 20,
+                              size: 30,
                             ),
-                            const SizedBox(width: 5),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 category['name'],
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color:
                                       isSelected ? Colors.white : Colors.black,
                                 ),
-                                maxLines: 1,
+                                maxLines: 2, // Text wraps within each card
                                 overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                           ],
                         ),
                       ),
                     );
-                  },
+                  }).toList(),
                 ),
               ),
               const Padding(
@@ -688,9 +681,9 @@ Future<void> _loadUserBookmarks() async {
                   flex: 2,
                   child: Container(
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.green,
-                      borderRadius: const BorderRadius.only(
+                      borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(20),
                         bottomLeft: Radius.circular(20),
                       ),
@@ -782,7 +775,6 @@ Future<void> _loadUserBookmarks() async {
               ],
             ),
           ),
-          // Green arrow icon
           Positioned(
             right: 10,
             bottom: 10,
@@ -792,10 +784,10 @@ Future<void> _loadUserBookmarks() async {
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailsPage(
-                      establishmentName: resultText, // Pass the name here
-                      barangay: barangayCode, // Pass barangay here
-                      city: cityCode, // Pass city here
-                      establishmentId: docId, // Pass the establishment ID here
+                      establishmentName: resultText,
+                      barangay: barangayCode,
+                      city: cityCode,
+                      establishmentId: docId,
                     ),
                   ),
                 );

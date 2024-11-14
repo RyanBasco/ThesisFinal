@@ -5,7 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:saver_gallery/saver_gallery.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -66,34 +66,36 @@ class _GenerateQRState extends State<GenerateQR> {
   }
 
   Future<void> _saveQrToGallery() async {
-    final status = await Permission.storage.request();
+  final status = await Permission.storage.request();
 
-    if (status.isGranted) {
-      final Uint8List? image = await screenshotController.capture();
+  if (status.isGranted) {
+    final Uint8List? image = await screenshotController.capture();
 
-      if (image != null) {
-        final result = await ImageGallerySaver.saveImage(
-          Uint8List.fromList(image),
-          quality: 100,
-          name: "QR_Code_${DateTime.now().millisecondsSinceEpoch}",
-        );
-
-        if (result['isSuccess']) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("QR code saved to gallery!")),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to save QR code.")),
-          );
-        }
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Storage permission denied.")),
+    if (image != null) {
+      final result = await SaverGallery.saveImage(
+        image,
+        quality: 100,
+        fileName: "QR_Code_${DateTime.now().millisecondsSinceEpoch}",  // Required parameter
+        skipIfExists: false,  // Required parameter, set to `false` to always save
       );
+
+      if (result.isSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("QR code saved to gallery!")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to save QR code.")),
+        );
+      }
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Storage permission denied.")),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

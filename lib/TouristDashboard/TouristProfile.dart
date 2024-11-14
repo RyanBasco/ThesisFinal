@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/Authentication/TouristLogin.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
@@ -10,7 +9,8 @@ import 'package:testing/UserProfile/Changepassword.dart';
 import 'package:testing/UserProfile/Editprofile.dart';
 import 'package:testing/UserProfile/HelpCenter.dart';
 import 'package:testing/UserProfile/Mybookmarks.dart';
-import 'dart:io';
+import 'package:testing/UserProfile/PrivacyPolicy.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class TouristprofilePage extends StatefulWidget {
   const TouristprofilePage({super.key});
@@ -25,7 +25,6 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
   String _userId = '';
   String? _profileImageUrl;
   int _selectedIndex = 3; // Set initial index to 'Profile'
-  File? _profileImage;
 
   @override
   void initState() {
@@ -33,24 +32,25 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
     fetchUserData();
   }
 
-  // Fetches user data and image URL from Firestore and Firebase Storage
   Future<void> fetchUserData() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        // Fetch user name from Firestore
-        var userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
-        if (userDoc.exists) {
-          var userData = userDoc.data();
+        // Fetch user name from Firebase Realtime Database
+        DatabaseReference userRef = FirebaseDatabase.instance.ref('Users/${user.uid}');
+        DatabaseEvent event = await userRef.once();
+
+        if (event.snapshot.exists) {
+          var userData = event.snapshot.value as Map;
           setState(() {
-            _firstName = userData?['first_name'] ?? '';
-            _lastName = userData?['last_name'] ?? '';
+            _firstName = userData['first_name'] ?? '';
+            _lastName = userData['last_name'] ?? '';
           });
         } else {
           print('User data not found for UID: ${user.uid}');
         }
 
-        // Fetch profile image URL directly from Firebase Storage
+        // Try to fetch profile image URL from Firebase Storage
         String filePath = 'UserProfile/${user.uid}/profile_image/latest_image.jpg';
         Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
         String downloadUrl = await storageRef.getDownloadURL();
@@ -143,21 +143,12 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+              const Padding(
+                padding:  EdgeInsets.symmetric(vertical: 40, horizontal: 15),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.arrow_back, color: Colors.black),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
+                     SizedBox(width: 10),
+                     Expanded(
                       child: Text(
                         'Profile',
                         style: TextStyle(
@@ -171,7 +162,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Center(
                 child: Container(
                   width: 300,
@@ -221,7 +212,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
-                            ),                          
+                            ),
                           ],
                         ),
                       ),
@@ -402,7 +393,51 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 360,
+                        top: 340,
+                        left: 20,
+                        bottom: 130,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Privacypolicy()),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFF2C812A),
+                                ),
+                                child: const Icon(
+                                  Icons.privacy_tip_outlined,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 25),
+                              const Text(
+                                'Privacy Policy',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(width: 70),
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.black,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 415,
                         left: 20,
                         child: GestureDetector(
                           onTap: () async {

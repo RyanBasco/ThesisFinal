@@ -255,13 +255,17 @@ class _NotificationsState extends State<Notifications> {
                       ),
                     ],
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.notifications, color: Colors.amber),
-                      SizedBox(width: 12),
-                      Text(
-                        'You have a pending review to complete',
-                        style: TextStyle(fontSize: 16, color: Colors.black),
+                      const Icon(Icons.notifications, color: Colors.amber),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          'You have a pending review to complete',
+                          style: const TextStyle(fontSize: 16, color: Colors.black),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1, // Ensures the text stays on a single line
+                        ),
                       ),
                     ],
                   ),
@@ -270,7 +274,7 @@ class _NotificationsState extends State<Notifications> {
             else
               const Expanded(
                 child: Center(
-                  child: const Text(
+                  child: Text(
                     'No Notifications Available',
                     style: TextStyle(
                       fontSize: 21, // Increase font size for emphasis

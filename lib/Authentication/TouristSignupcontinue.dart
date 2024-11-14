@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'dart:math';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart'; // Import for TapGestureRecognizer
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:testing/Authentication/TermsandConditions.dart';
 import 'package:testing/Authentication/TouristLogin.dart';
 import '../models/region.dart';
@@ -85,6 +84,7 @@ class _SignupContinueState extends State<SignupContinue> {
   bool _isLoadingProvinces = false;
   bool _isLoadingCities = false;
   bool _isLoadingBarangays = false;
+
 
   @override
   void initState() {
@@ -1105,58 +1105,53 @@ class _SignupContinueState extends State<SignupContinue> {
     }
   }
 
-  Future<void> saveUserData(String userId) async {
-    // Realtime Database reference
-    DatabaseReference userRef =
-        FirebaseDatabase.instance.ref().child('Users').child(userId);
-
-    Map<String, dynamic> userData = {
-      'last_name': widget.lastName,
-      'first_name': widget.firstName,
-      'email': _emailController.text,
-      'nationality':  widget.selectedNationality, // Directly using selected nationality
-      'birthday': widget.birthday,
-      'sex': widget.sex,
-      'civil_status': widget.civilStatus,
-      'purpose_of_travel': _selectedPurpose ?? '', // Use _selectedPurpose from dropdown
-      'otherPurpose': _selectedPurpose == 'Other' ? _specifyController.text : null,
-      'contact_number': _contactNumberController.text,
-      'region': _selectedRegionCode != null
-          ? _allRegions
-              .firstWhere((region) => region.regionCode == _selectedRegionCode)
-              .regionName
-          : '',
-      'province': _selectedProvinceCode != null
-          ? _filteredProvinces
-              .firstWhere(
-                  (province) => province.provinceCode == _selectedProvinceCode)
-              .provinceName
-          : '',
-      'city': _selectedCityCode != null
-          ? _filteredCities
-              .firstWhere((city) => city.cityCode == _selectedCityCode)
-              .cityName
-          : '',
-      'barangay': _selectedBarangayCode != null
-          ? _filteredBarangays
-              .firstWhere(
-                  (barangay) => barangay.barangayCode == _selectedBarangayCode)
-              .barangayName
-          : '',
-    };
-
-    print("Nationality being saved: ${widget.selectedNationality}");
-    print("Purpose of Travel being saved: ${_selectedPurpose}");
-
-    try {
-      // Save to Realtime Database
-      await userRef.set(userData);
-      print('User data saved successfully to Realtime Database.');
-    } catch (error) {
-      print('Failed to save user data: $error');
-      setState(() {
-        _passwordWarning = 'Failed to save user data: $error';
-      });
-    }
+ Future<void> saveUserData(String userId) async {
+  // Define a formattedBirthday with the correct format for database storage.
+  String formattedBirthday;
+  try {
+    final parsedDate = DateFormat('MM/dd/yyyy').parse(widget.birthday);
+    formattedBirthday = DateFormat('MMMM dd, yyyy').format(parsedDate);
+  } catch (e) {
+    print('Error parsing birthday: $e');
+    // Use the original format if parsing fails.
+    formattedBirthday = widget.birthday;
   }
+
+  // Define the user data to be saved in the database, using formattedBirthday.
+  Map<String, dynamic> userData = {
+    'last_name': widget.lastName,
+    'first_name': widget.firstName,
+    'email': _emailController.text,
+    'nationality': widget.selectedNationality,
+    'birthday': formattedBirthday,  // Store birthday in text format
+    'sex': widget.sex,
+    'civil_status': widget.civilStatus,
+    'purpose_of_travel': _selectedPurpose ?? '',
+    'otherPurpose': _selectedPurpose == 'Other' ? _specifyController.text : null,
+    'contact_number': _contactNumberController.text,
+    'countryOfResidence': _selectedCountry ?? '',
+    'region': _selectedRegionCode != null
+        ? _allRegions.firstWhere((region) => region.regionCode == _selectedRegionCode).regionName
+        : '',
+    'province': _selectedProvinceCode != null
+        ? _filteredProvinces.firstWhere((province) => province.provinceCode == _selectedProvinceCode).provinceName
+        : '',
+    'city': _selectedCityCode != null
+        ? _filteredCities.firstWhere((city) => city.cityCode == _selectedCityCode).cityName
+        : '',
+    'barangay': _selectedBarangayCode != null
+        ? _filteredBarangays.firstWhere((barangay) => barangay.barangayCode == _selectedBarangayCode).barangayName
+        : '',
+  };
+
+  try {
+    await FirebaseDatabase.instance.ref().child('Users').child(userId).set(userData);
+    print('User data saved successfully to Realtime Database.');
+  } catch (error) {
+    print('Failed to save user data: $error');
+    setState(() {
+      _passwordWarning = 'Failed to save user data: $error';
+    });
+  }
+}
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:testing/Authentication/Forgetpass.dart';
+import 'package:testing/Authentication/Passreset.dart';
 import 'package:testing/Authentication/TouristSignup.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -233,7 +233,7 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => PhoneAuthPage()),
+                              builder: (context) => ManualPasswordResetPage()),
                         );
                       },
                       child: const Text(

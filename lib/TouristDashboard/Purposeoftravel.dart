@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class Purposeoftravel extends StatefulWidget {
   @override
@@ -61,7 +62,6 @@ class _PurposeoftravelState extends State<Purposeoftravel> {
         await userRef.update({
           'purpose_of_travel': _purposeOfTravel,
         });
-        // Remove 'otherPurpose' from the database if it's not needed
         userRef.child('otherPurpose').remove();
       }
 
@@ -80,7 +80,7 @@ class _PurposeoftravelState extends State<Purposeoftravel> {
   void _cancelEdit() {
     setState(() {
       _isEditing = false;
-      _fetchPurposeOfTravel(); // Re-fetch to reset any unsaved changes
+      _fetchPurposeOfTravel();
     });
   }
 
@@ -97,7 +97,7 @@ class _PurposeoftravelState extends State<Purposeoftravel> {
         );
         break;
       case 1:
-        break; // Current page
+        break;
       case 2:
         Navigator.push(
           context,
@@ -164,159 +164,177 @@ class _PurposeoftravelState extends State<Purposeoftravel> {
           ),
         ),
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.arrow_back, color: Colors.black),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 45.0, top: 10.0),
-                        child: Text(
-                          'Purpose of Travel',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ],
+          child: AnimationLimiter(
+            child: Column(
+              children: AnimationConfiguration.toStaggeredList(
+                duration: const Duration(milliseconds: 375),
+                childAnimationBuilder: (widget) => SlideAnimation(
+                  verticalOffset: 50.0,
+                  child: FadeInAnimation(
+                    child: widget,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(20),
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      blurRadius: 5,
-                      spreadRadius: 2,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Purpose of Travel',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    if (_isEditing)
-                      Column(
-                        children: [
-                          DropdownButtonFormField<String>(
-                            value: _purposeOfTravel,
-                            items: ['Business', 'Leisure', 'MICE', 'Other'].map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                _purposeOfTravel = newValue;
-                                _isOtherSelected = newValue == 'Other';
-                                if (!_isOtherSelected) {
-                                  _otherPurposeController.clear();
-                                }
-                              });
-                            },
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Select Purpose of Travel',
-                            ),
-                          ),
-                          if (_isOtherSelected)
-                            const SizedBox(height: 10),
-                          if (_isOtherSelected)
-                            TextFormField(
-                              controller: _otherPurposeController,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: 'Enter other purpose',
-                                labelText: 'Other Purpose',
-                              ),
-                            ),
-                        ],
-                      )
-                    else
-                      Text(
-                        _purposeOfTravel ?? 'Not specified',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                    child: Row(
                       children: [
-                        if (_isEditing)
-                          ElevatedButton(
-                            onPressed: _cancelEdit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF2C812A),
-                            ),
-                            child: const Text(
-                              'Cancel',
-                              style: TextStyle(color: Colors.white),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: const CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(Icons.arrow_back, color: Colors.black),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: 45.0, top: 10.0),
+                            child: Text(
+                              'Purpose of Travel',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
-                        if (_isEditing)
-                          const SizedBox(width: 10),
-                        if (_isEditing)
-                          ElevatedButton(
-                            onPressed: _savePurposeOfTravel,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF2C812A),
-                            ),
-                            child: const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        if (!_isEditing)
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _isEditing = true;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2C812A),
-                            ),
-                            child: const Text(
-                              'Edit',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 20),
+                  Card(
+                    elevation: 4,
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Purpose of Travel',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          if (_isEditing)
+                            Column(
+                              children: [
+                                DropdownButtonFormField<String>(
+                                  value: _purposeOfTravel,
+                                  items: ['Business', 'Leisure', 'MICE', 'Other'].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      _purposeOfTravel = newValue;
+                                      _isOtherSelected = newValue == 'Other';
+                                      if (!_isOtherSelected) {
+                                        _otherPurposeController.clear();
+                                      }
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Select Purpose of Travel',
+                                  ),
+                                ),
+                                if (_isOtherSelected)
+                                  const SizedBox(height: 10),
+                                if (_isOtherSelected)
+                                  TextFormField(
+                                    controller: _otherPurposeController,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Enter other purpose',
+                                      labelText: 'Other Purpose',
+                                    ),
+                                  ),
+                              ],
+                            )
+                          else
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                _purposeOfTravel ?? 'Not specified',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (_isEditing)
+                                ElevatedButton(
+                                  onPressed: _cancelEdit,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.redAccent,
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Cancel',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              if (_isEditing)
+                                ElevatedButton(
+                                  onPressed: _savePurposeOfTravel,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFF2C812A),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Save',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              if (!_isEditing)
+                                ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isEditing = true;
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFF2C812A),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Edit',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

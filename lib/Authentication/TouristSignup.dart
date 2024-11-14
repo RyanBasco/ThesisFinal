@@ -1,4 +1,4 @@
-import 'dart:convert'; // For JSON decoding
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import for input formatters
 import 'package:firebase_database/firebase_database.dart';
@@ -44,198 +44,26 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _contactNumberController =
       TextEditingController();
+  final TextEditingController _birthdayController = TextEditingController();
 
   DateTime? _selectedDate;
   String? _selectedSex;
   String? _selectedCivilStatus;
   String? _selectedNationality;
 
-  List<CountryCode> _countryCodes = [];
+  // Restrict _countryCodes to only Philippines
+  List<CountryCode> _countryCodes = [
+    CountryCode(
+        name: "Philippines", code: "+63", abbreviation: "PH", maxDigits: 10),
+  ];
   CountryCode? _selectedCountry;
 
   @override
   void initState() {
     super.initState();
-    _initializeCountryCodes();
+    _selectedCountry = _countryCodes[0];
   }
 
-  void _initializeCountryCodes() {
-  _countryCodes = [
-  CountryCode(name: "Philippines", code: "+63", abbreviation: "PH", maxDigits: 10),
-  CountryCode(name: "Afghanistan", code: "+93", abbreviation: "AF", maxDigits: 9),
-  CountryCode(name: "Albania", code: "+355", abbreviation: "AL", maxDigits: 9),
-  CountryCode(name: "Algeria", code: "+213", abbreviation: "DZ", maxDigits: 9),
-  CountryCode(name: "Andorra", code: "+376", abbreviation: "AD", maxDigits: 6),
-  CountryCode(name: "Angola", code: "+244", abbreviation: "AO", maxDigits: 9),
-  CountryCode(name: "Argentina", code: "+54", abbreviation: "AR", maxDigits: 10),
-  CountryCode(name: "Armenia", code: "+374", abbreviation: "AM", maxDigits: 8),
-  CountryCode(name: "Australia", code: "+61", abbreviation: "AU", maxDigits: 9),
-  CountryCode(name: "Austria", code: "+43", abbreviation: "AT", maxDigits: 10),
-  CountryCode(name: "Azerbaijan", code: "+994", abbreviation: "AZ", maxDigits: 9),
-  CountryCode(name: "Bahamas", code: "+1-242", abbreviation: "BS", maxDigits: 10),
-  CountryCode(name: "Bahrain", code: "+973", abbreviation: "BH", maxDigits: 8),
-  CountryCode(name: "Bangladesh", code: "+880", abbreviation: "BD", maxDigits: 10),
-  CountryCode(name: "Belarus", code: "+375", abbreviation: "BY", maxDigits: 9),
-  CountryCode(name: "Belgium", code: "+32", abbreviation: "BE", maxDigits: 9),
-  CountryCode(name: "Belize", code: "+501", abbreviation: "BZ", maxDigits: 7),
-  CountryCode(name: "Benin", code: "+229", abbreviation: "BJ", maxDigits: 8),
-  CountryCode(name: "Bhutan", code: "+975", abbreviation: "BT", maxDigits: 8),
-  CountryCode(name: "Bolivia", code: "+591", abbreviation: "BO", maxDigits: 8),
-  CountryCode(name: "Bosnia and Herzegovina", code: "+387", abbreviation: "BA", maxDigits: 8),
-  CountryCode(name: "Botswana", code: "+267", abbreviation: "BW", maxDigits: 7),
-  CountryCode(name: "Brazil", code: "+55", abbreviation: "BR", maxDigits: 11),
-  CountryCode(name: "Brunei", code: "+673", abbreviation: "BN", maxDigits: 7),
-  CountryCode(name: "Bulgaria", code: "+359", abbreviation: "BG", maxDigits: 9),
-  CountryCode(name: "Burkina Faso", code: "+226", abbreviation: "BF", maxDigits: 8),
-  CountryCode(name: "Burundi", code: "+257", abbreviation: "BI", maxDigits: 8),
-  CountryCode(name: "Cambodia", code: "+855", abbreviation: "KH", maxDigits: 9),
-  CountryCode(name: "Cameroon", code: "+237", abbreviation: "CM", maxDigits: 9),
-  CountryCode(name: "Canada", code: "+1", abbreviation: "CA", maxDigits: 10),
-  CountryCode(name: "Cape Verde", code: "+238", abbreviation: "CV", maxDigits: 7),
-  CountryCode(name: "Central African Republic", code: "+236", abbreviation: "CF", maxDigits: 8),
-  CountryCode(name: "Chad", code: "+235", abbreviation: "TD", maxDigits: 8),
-  CountryCode(name: "Chile", code: "+56", abbreviation: "CL", maxDigits: 9),
-  CountryCode(name: "China", code: "+86", abbreviation: "CN", maxDigits: 11),
-  CountryCode(name: "Colombia", code: "+57", abbreviation: "CO", maxDigits: 10),
-  CountryCode(name: "Comoros", code: "+269", abbreviation: "KM", maxDigits: 7),
-  CountryCode(name: "Congo", code: "+242", abbreviation: "CG", maxDigits: 9),
-  CountryCode(name: "Congo, Democratic Republic", code: "+243", abbreviation: "CD", maxDigits: 9),
-  CountryCode(name: "Costa Rica", code: "+506", abbreviation: "CR", maxDigits: 8),
-  CountryCode(name: "Croatia", code: "+385", abbreviation: "HR", maxDigits: 9),
-  CountryCode(name: "Cuba", code: "+53", abbreviation: "CU", maxDigits: 8),
-  CountryCode(name: "Cyprus", code: "+357", abbreviation: "CY", maxDigits: 8),
-  CountryCode(name: "Czech Republic", code: "+420", abbreviation: "CZ", maxDigits: 9),
-  CountryCode(name: "Denmark", code: "+45", abbreviation: "DK", maxDigits: 8),
-  CountryCode(name: "Djibouti", code: "+253", abbreviation: "DJ", maxDigits: 8),
-  CountryCode(name: "Dominica", code: "+1-767", abbreviation: "DM", maxDigits: 10),
-  CountryCode(name: "Dominican Republic", code: "+1-809", abbreviation: "DO", maxDigits: 10),
-  CountryCode(name: "Ecuador", code: "+593", abbreviation: "EC", maxDigits: 9),
-  CountryCode(name: "Egypt", code: "+20", abbreviation: "EG", maxDigits: 10),
-  CountryCode(name: "El Salvador", code: "+503", abbreviation: "SV", maxDigits: 8),
-  CountryCode(name: "Equatorial Guinea", code: "+240", abbreviation: "GQ", maxDigits: 9),
-  CountryCode(name: "Eritrea", code: "+291", abbreviation: "ER", maxDigits: 7),
-  CountryCode(name: "Estonia", code: "+372", abbreviation: "EE", maxDigits: 8),
-  CountryCode(name: "Eswatini", code: "+268", abbreviation: "SZ", maxDigits: 7),
-  CountryCode(name: "Ethiopia", code: "+251", abbreviation: "ET", maxDigits: 9),
-  CountryCode(name: "Fiji", code: "+679", abbreviation: "FJ", maxDigits: 7),
-  CountryCode(name: "Finland", code: "+358", abbreviation: "FI", maxDigits: 10),
-  CountryCode(name: "France", code: "+33", abbreviation: "FR", maxDigits: 9),
-  CountryCode(name: "Gabon", code: "+241", abbreviation: "GA", maxDigits: 7),
-  CountryCode(name: "Gambia", code: "+220", abbreviation: "GM", maxDigits: 7),
-  CountryCode(name: "Georgia", code: "+995", abbreviation: "GE", maxDigits: 9),
-  CountryCode(name: "Germany", code: "+49", abbreviation: "DE", maxDigits: 11),
-  CountryCode(name: "Ghana", code: "+233", abbreviation: "GH", maxDigits: 9),
-  CountryCode(name: "Greece", code: "+30", abbreviation: "GR", maxDigits: 10),
-  CountryCode(name: "Grenada", code: "+1-473", abbreviation: "GD", maxDigits: 10),
-  CountryCode(name: "Guatemala", code: "+502", abbreviation: "GT", maxDigits: 8),
-  CountryCode(name: "Guinea", code: "+224", abbreviation: "GN", maxDigits: 9),
-  CountryCode(name: "Guinea-Bissau", code: "+245", abbreviation: "GW", maxDigits: 7),
-  CountryCode(name: "Guyana", code: "+592", abbreviation: "GY", maxDigits: 7),
-  CountryCode(name: "Haiti", code: "+509", abbreviation: "HT", maxDigits: 8),
-  CountryCode(name: "Honduras", code: "+504", abbreviation: "HN", maxDigits: 8),
-  CountryCode(name: "Hungary", code: "+36", abbreviation: "HU", maxDigits: 9),
-  CountryCode(name: "Iceland", code: "+354", abbreviation: "IS", maxDigits: 7),
-  CountryCode(name: "India", code: "+91", abbreviation: "IN", maxDigits: 10),
-  CountryCode(name: "Indonesia", code: "+62", abbreviation: "ID", maxDigits: 10),
-  CountryCode(name: "Iran", code: "+98", abbreviation: "IR", maxDigits: 10),
-  CountryCode(name: "Iraq", code: "+964", abbreviation: "IQ", maxDigits: 10),
-  CountryCode(name: "Ireland", code: "+353", abbreviation: "IE", maxDigits: 9),
-  CountryCode(name: "Israel", code: "+972", abbreviation: "IL", maxDigits: 9),
-  CountryCode(name: "Italy", code: "+39", abbreviation: "IT", maxDigits: 10),
-  CountryCode(name: "Jamaica", code: "+1-876", abbreviation: "JM", maxDigits: 10),
-  CountryCode(name: "Japan", code: "+81", abbreviation: "JP", maxDigits: 10),
-  CountryCode(name: "Jordan", code: "+962", abbreviation: "JO", maxDigits: 9),
-  CountryCode(name: "Kazakhstan", code: "+7", abbreviation: "KZ", maxDigits: 10),
-  CountryCode(name: "Kenya", code: "+254", abbreviation: "KE", maxDigits: 10),
-  CountryCode(name: "South Korea", code: "+82", abbreviation: "KR", maxDigits: 10),
-  CountryCode(name: "Kuwait", code: "+965", abbreviation: "KW", maxDigits: 8),
-  CountryCode(name: "Kyrgyzstan", code: "+996", abbreviation: "KG", maxDigits: 9),
-  CountryCode(name: "Laos", code: "+856", abbreviation: "LA", maxDigits: 9),
-  CountryCode(name: "Latvia", code: "+371", abbreviation: "LV", maxDigits: 8),
-  CountryCode(name: "Lebanon", code: "+961", abbreviation: "LB", maxDigits: 8),
-  CountryCode(name: "Lesotho", code: "+266", abbreviation: "LS", maxDigits: 8),
-  CountryCode(name: "Liberia", code: "+231", abbreviation: "LR", maxDigits: 8),
-  CountryCode(name: "Libya", code: "+218", abbreviation: "LY", maxDigits: 9),
-  CountryCode(name: "Liechtenstein", code: "+423", abbreviation: "LI", maxDigits: 9),
-  CountryCode(name: "Lithuania", code: "+370", abbreviation: "LT", maxDigits: 8),
-  CountryCode(name: "Luxembourg", code: "+352", abbreviation: "LU", maxDigits: 9),
-  CountryCode(name: "Madagascar", code: "+261", abbreviation: "MG", maxDigits: 9),
-  CountryCode(name: "Malawi", code: "+265", abbreviation: "MW", maxDigits: 9),
-  CountryCode(name: "Malaysia", code: "+60", abbreviation: "MY", maxDigits: 10),
-  CountryCode(name: "Maldives", code: "+960", abbreviation: "MV", maxDigits: 7),
-  CountryCode(name: "Mali", code: "+223", abbreviation: "ML", maxDigits: 8),
-  CountryCode(name: "Malta", code: "+356", abbreviation: "MT", maxDigits: 8),
-  CountryCode(name: "Marshall Islands", code: "+692", abbreviation: "MH", maxDigits: 7),
-  CountryCode(name: "Mauritania", code: "+222", abbreviation: "MR", maxDigits: 8),
-  CountryCode(name: "Mauritius", code: "+230", abbreviation: "MU", maxDigits: 8),
-  CountryCode(name: "Mexico", code: "+52", abbreviation: "MX", maxDigits: 10),
-  CountryCode(name: "Micronesia", code: "+691", abbreviation: "FM", maxDigits: 7),
-  CountryCode(name: "Moldova", code: "+373", abbreviation: "MD", maxDigits: 8),
-  CountryCode(name: "Monaco", code: "+377", abbreviation: "MC", maxDigits: 9),
-  CountryCode(name: "Mongolia", code: "+976", abbreviation: "MN", maxDigits: 8),
-  CountryCode(name: "Montenegro", code: "+382", abbreviation: "ME", maxDigits: 8),
-  CountryCode(name: "Morocco", code: "+212", abbreviation: "MA", maxDigits: 9),
-  CountryCode(name: "Mozambique", code: "+258", abbreviation: "MZ", maxDigits: 9),
-  CountryCode(name: "Myanmar", code: "+95", abbreviation: "MM", maxDigits: 10),
-  CountryCode(name: "Namibia", code: "+264", abbreviation: "NA", maxDigits: 9),
-  CountryCode(name: "Nepal", code: "+977", abbreviation: "NP", maxDigits: 10),
-  CountryCode(name: "Netherlands", code: "+31", abbreviation: "NL", maxDigits: 9),
-  CountryCode(name: "New Zealand", code: "+64", abbreviation: "NZ", maxDigits: 9),
-  CountryCode(name: "Nicaragua", code: "+505", abbreviation: "NI", maxDigits: 8),
-  CountryCode(name: "Niger", code: "+227", abbreviation: "NE", maxDigits: 8),
-  CountryCode(name: "Nigeria", code: "+234", abbreviation: "NG", maxDigits: 10),
-  CountryCode(name: "North Macedonia", code: "+389", abbreviation: "MK", maxDigits: 8),
-  CountryCode(name: "Norway", code: "+47", abbreviation: "NO", maxDigits: 8),
-  CountryCode(name: "Oman", code: "+968", abbreviation: "OM", maxDigits: 8),
-  CountryCode(name: "Pakistan", code: "+92", abbreviation: "PK", maxDigits: 10),
-  CountryCode(name: "Palau", code: "+680", abbreviation: "PW", maxDigits: 7),
-  CountryCode(name: "Panama", code: "+507", abbreviation: "PA", maxDigits: 8),
-  CountryCode(name: "Papua New Guinea", code: "+675", abbreviation: "PG", maxDigits: 8),
-  CountryCode(name: "Paraguay", code: "+595", abbreviation: "PY", maxDigits: 9),
-  CountryCode(name: "Peru", code: "+51", abbreviation: "PE", maxDigits: 9),
-  CountryCode(name: "Poland", code: "+48", abbreviation: "PL", maxDigits: 9),
-  CountryCode(name: "Portugal", code: "+351", abbreviation: "PT", maxDigits: 9),
-  CountryCode(name: "Qatar", code: "+974", abbreviation: "QA", maxDigits: 8),
-  CountryCode(name: "Romania", code: "+40", abbreviation: "RO", maxDigits: 9),
-  CountryCode(name: "Russia", code: "+7", abbreviation: "RU", maxDigits: 10),
-  CountryCode(name: "Rwanda", code: "+250", abbreviation: "RW", maxDigits: 9),
-  CountryCode(name: "Saudi Arabia", code: "+966", abbreviation: "SA", maxDigits: 9),
-  CountryCode(name: "Senegal", code: "+221", abbreviation: "SN", maxDigits: 9),
-  CountryCode(name: "Serbia", code: "+381", abbreviation: "RS", maxDigits: 9),
-  CountryCode(name: "Sierra Leone", code: "+232", abbreviation: "SL", maxDigits: 8),
-  CountryCode(name: "Singapore", code: "+65", abbreviation: "SG", maxDigits: 8),
-  CountryCode(name: "Slovakia", code: "+421", abbreviation: "SK", maxDigits: 9),
-  CountryCode(name: "Slovenia", code: "+386", abbreviation: "SI", maxDigits: 9),
-  CountryCode(name: "South Africa", code: "+27", abbreviation: "ZA", maxDigits: 9),
-  CountryCode(name: "South Korea", code: "+82", abbreviation: "KR", maxDigits: 10),
-  CountryCode(name: "Spain", code: "+34", abbreviation: "ES", maxDigits: 9),
-  CountryCode(name: "Sri Lanka", code: "+94", abbreviation: "LK", maxDigits: 9),
-  CountryCode(name: "Sudan", code: "+249", abbreviation: "SD", maxDigits: 9),
-  CountryCode(name: "Sweden", code: "+46", abbreviation: "SE", maxDigits: 9),
-  CountryCode(name: "Switzerland", code: "+41", abbreviation: "CH", maxDigits: 9),
-  CountryCode(name: "Syria", code: "+963", abbreviation: "SY", maxDigits: 9),
-  CountryCode(name: "Taiwan", code: "+886", abbreviation: "TW", maxDigits: 9),
-  CountryCode(name: "Tanzania", code: "+255", abbreviation: "TZ", maxDigits: 9),
-  CountryCode(name: "Thailand", code: "+66", abbreviation: "TH", maxDigits: 9),
-  CountryCode(name: "Turkey", code: "+90", abbreviation: "TR", maxDigits: 10),
-  CountryCode(name: "Uganda", code: "+256", abbreviation: "UG", maxDigits: 9),
-  CountryCode(name: "Ukraine", code: "+380", abbreviation: "UA", maxDigits: 9),
-  CountryCode(name: "United Arab Emirates", code: "+971", abbreviation: "AE", maxDigits: 9),
-  CountryCode(name: "United Kingdom", code: "+44", abbreviation: "GB", maxDigits: 10),
-  CountryCode(name: "United States", code: "+1", abbreviation: "US", maxDigits: 10),
-  CountryCode(name: "Uruguay", code: "+598", abbreviation: "UY", maxDigits: 9),
-  CountryCode(name: "Uzbekistan", code: "+998", abbreviation: "UZ", maxDigits: 9),
-  CountryCode(name: "Vanuatu", code: "+678", abbreviation: "VU", maxDigits: 7),
-  CountryCode(name: "Vatican City", code: "+379", abbreviation: "VA", maxDigits: 10),
-  CountryCode(name: "Venezuela", code: "+58", abbreviation: "VE", maxDigits: 10),
-  CountryCode(name: "Vietnam", code: "+84", abbreviation: "VN", maxDigits: 9),
-  CountryCode(name: "Yemen", code: "+967", abbreviation: "YE", maxDigits: 9),
-  CountryCode(name: "Zambia", code: "+260", abbreviation: "ZM", maxDigits: 9),
-  CountryCode(name: "Zimbabwe", code: "+263", abbreviation: "ZW", maxDigits: 9),
-    ];
-    // Set default selected country
-    _selectedCountry = _countryCodes.firstWhere((country) => country.name == "Philippines");
-  }
   // Directly populated list of nationalities
   final List<String> _nationalities = [
     "Afghan",
@@ -531,8 +359,9 @@ class _SignupPageState extends State<SignupPage> {
                       'Birthday',
                       Icons.calendar_today,
                       TextEditingController(
+                        // Updated date format for display
                         text: _selectedDate != null
-                            ? DateFormat.yMMMMd().format(_selectedDate!)
+                            ? DateFormat('MMMM dd, yyyy').format(_selectedDate!)
                             : '',
                       ),
                       readOnly: true,
@@ -784,11 +613,11 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter contact number';
-                            }
-                            if (value.length < (_selectedCountry?.maxDigits ?? 10)) {
-                              return 'Contact number must be ${_selectedCountry?.maxDigits} digits';
+                            if (value != null && value.isNotEmpty) {
+                              if (value.length <
+                                  (_selectedCountry?.maxDigits ?? 10)) {
+                                return 'Contact number must be ${_selectedCountry?.maxDigits} digits';
+                              }
                             }
                             return null;
                           },
@@ -809,6 +638,12 @@ class _SignupPageState extends State<SignupPage> {
                     child: TextButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
+                          // Only prepend the country code if the contact number field is not empty
+                          final contactNumberWithCountryCode =
+                              _contactNumberController.text.isNotEmpty
+                                  ? '${_selectedCountry?.code}${_contactNumberController.text}'
+                                  : '';
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -817,9 +652,10 @@ class _SignupPageState extends State<SignupPage> {
                                 firstName: _firstNameController.text,
                                 email: _emailController.text,
                                 selectedNationality: _selectedNationality ?? '',
-                                contactNumber: _contactNumberController.text,
+                                contactNumber: contactNumberWithCountryCode,
                                 birthday: _selectedDate != null
-                                    ? DateFormat.yMMMMd().format(_selectedDate!)
+                                    ? DateFormat('MM/dd/yyyy').format(
+                                        _selectedDate!) // Save as MM/DD/YYYY
                                     : '',
                                 sex: _selectedSex ?? '',
                                 civilStatus: _selectedCivilStatus ?? '',
@@ -857,6 +693,9 @@ class _SignupPageState extends State<SignupPage> {
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
+        // Use 'MMMM dd, yyyy' format for display
+        _birthdayController.text =
+            DateFormat('MMMM dd, yyyy').format(_selectedDate!);
       });
     }
   }

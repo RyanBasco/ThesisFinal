@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
-import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class BookmarkPage extends StatefulWidget {
   const BookmarkPage({super.key});
@@ -16,20 +12,6 @@ class BookmarkPage extends StatefulWidget {
 class _BookmarkPageState extends State<BookmarkPage> {
   List<Map<String, dynamic>> _bookmarkedItems = [];
   int _selectedIndex = 3;
-  int? _selectedCategoryIndex;
-
-  final List<Map<String, dynamic>> _categories = [
-    {'name': 'Accommodation', 'icon': Icons.hotel},
-    {'name': 'Food and Beverages', 'icon': Icons.restaurant_menu},
-    {'name': 'Transportation', 'icon': Icons.directions_car},
-    {'name': 'Attractions and Activities', 'icon': Icons.local_activity},
-    {'name': 'Shopping', 'icon': Icons.shopping_bag},
-    {'name': 'Entertainment', 'icon': Icons.theater_comedy},
-    {'name': 'Wellness and Spa Services', 'icon': Icons.spa},
-    {'name': 'Adventure and Outdoor Activities', 'icon': Icons.terrain},
-    {'name': 'Travel Insurance', 'icon': Icons.shield},
-    {'name': 'Local Tours and Guides', 'icon': Icons.tour},
-  ];
 
   @override
   void initState() {
@@ -115,25 +97,6 @@ class _BookmarkPageState extends State<BookmarkPage> {
         print('Failed to delete bookmarked item: $error');
       }
     }
-  }
-
-  void _onCategorySelected(int index) {
-    setState(() {
-      _selectedCategoryIndex = index;
-    });
-    _filterBookmarkedItems();
-  }
-
-  void _filterBookmarkedItems() {
-    String? selectedCategory =
-        _selectedCategoryIndex != null ? _categories[_selectedCategoryIndex!]['name'] : null;
-
-    setState(() {
-      _bookmarkedItems = _bookmarkedItems.where((item) {
-        String itemCategory = item['category'] ?? '';
-        return selectedCategory == null || itemCategory == selectedCategory;
-      }).toList();
-    });
   }
 
   Widget _buildBookmarkedItem(Map<String, dynamic> item) {
@@ -307,79 +270,6 @@ class _BookmarkPageState extends State<BookmarkPage> {
                     ),
                   ),
                 ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.0),
-              child: Text(
-                'Categories',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C812A),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 2.5,
-                ),
-                itemCount: _categories.length,
-                itemBuilder: (context, index) {
-                  Map<String, dynamic> category = _categories[index];
-                  bool isSelected = _selectedCategoryIndex == index;
-
-                  return GestureDetector(
-                    onTap: () => _onCategorySelected(index),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF288F13) : Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            category['icon'],
-                            color: isSelected ? Colors.white : const Color(0xFF2C812A),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 5),
-                          Expanded(
-                            child: Text(
-                              category['name'],
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected ? Colors.white : Colors.black,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
               ),
             ),
             Expanded(

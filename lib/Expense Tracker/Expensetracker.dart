@@ -158,24 +158,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+              const Padding(
+                padding:  EdgeInsets.symmetric(vertical: 30, horizontal: 15),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context); // Navigate back to the previous page
-                      },
-                      child: const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.arrow_back, color: Colors.black),
-                      ),
-                    ),
-                   const Padding(
-                padding: const EdgeInsets.only(left: 40.0),
+                    Padding(
+                padding:  EdgeInsets.only(left: 75.0),
                 child: Text(
                   'Expense Tracker',
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                  style:  TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               ),
                   ],
