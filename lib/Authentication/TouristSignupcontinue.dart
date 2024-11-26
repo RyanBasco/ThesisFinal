@@ -1105,7 +1105,7 @@ class _SignupContinueState extends State<SignupContinue> {
     }
   }
 
- Future<void> saveUserData(String userId) async {
+Future<void> saveUserData(String userId) async {
   // Define a formattedBirthday with the correct format for database storage.
   String formattedBirthday;
   try {
@@ -1116,6 +1116,11 @@ class _SignupContinueState extends State<SignupContinue> {
     // Use the original format if parsing fails.
     formattedBirthday = widget.birthday;
   }
+
+  // Check if contact number is empty; if so, set it to "N/A".
+  String contactNumber = _contactNumberController.text.trim().isEmpty
+      ? 'N/A'
+      : _contactNumberController.text.trim();
 
   // Define the user data to be saved in the database, using formattedBirthday.
   Map<String, dynamic> userData = {
@@ -1128,7 +1133,7 @@ class _SignupContinueState extends State<SignupContinue> {
     'civil_status': widget.civilStatus,
     'purpose_of_travel': _selectedPurpose ?? '',
     'otherPurpose': _selectedPurpose == 'Other' ? _specifyController.text : null,
-    'contact_number': _contactNumberController.text,
+    'contact_number': contactNumber,
     'countryOfResidence': _selectedCountry ?? '',
     'region': _selectedRegionCode != null
         ? _allRegions.firstWhere((region) => region.regionCode == _selectedRegionCode).regionName

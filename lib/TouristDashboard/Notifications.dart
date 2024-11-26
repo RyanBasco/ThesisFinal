@@ -16,8 +16,8 @@ class Notifications extends StatefulWidget {
 class _NotificationsState extends State<Notifications> {
   int _selectedIndex = 0;
   final DatabaseReference _databaseRef = FirebaseDatabase.instance.ref();
-  bool _hasPendingReviewNotification = false; // Flag for pending review notification
-  String? _pendingReviewKey; // Stores the review key if a review is pending
+  bool _isDialogVisible = false;
+  List<Map<String, String?>> _pendingReviews = [];
 
   @override
   void initState() {
@@ -29,11 +29,12 @@ class _NotificationsState extends State<Notifications> {
     _databaseRef.child('pendingReviews').onChildAdded.listen((event) {
       final pendingReview = event.snapshot.value as Map<dynamic, dynamic>;
       if (pendingReview['status'] == 'pending') {
-        _pendingReviewKey = event.snapshot.key!;
         setState(() {
-          _hasPendingReviewNotification = true;
+          _pendingReviews.add({
+            'reviewKey': event.snapshot.key,
+            'establishmentId': pendingReview['establishment_id']
+          });
         });
-        _showReviewDialog(_pendingReviewKey!);
       }
     });
   }
@@ -42,6 +43,7 @@ class _NotificationsState extends State<Notifications> {
     double rating = 0.0;
     String comment = '';
 
+    _isDialogVisible = true;
     showDialog(
       context: context,
       builder: (context) {
@@ -57,56 +59,56 @@ class _NotificationsState extends State<Notifications> {
               GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
-                  setState(() {
-                    _hasPendingReviewNotification = true;
-                  });
+                  _isDialogVisible = false;
                 },
                 child: const Icon(Icons.close, color: Colors.grey),
               ),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Please provide your rating:'),
-              const SizedBox(height: 16),
-              RatingBar.builder(
-                initialRating: 0,
-                minRating: 1,
-                direction: Axis.horizontal,
-                allowHalfRating: true,
-                itemCount: 5,
-                itemBuilder: (context, _) => const Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                ),
-                onRatingUpdate: (newRating) {
-                  rating = newRating;
-                },
-              ),
-              const SizedBox(height: 16),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Add Comments, if any:',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: TextField(
-                  onChanged: (text) {
-                    comment = text;
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Please provide your rating:'),
+                const SizedBox(height: 16),
+                RatingBar.builder(
+                  initialRating: 0,
+                  minRating: 1,
+                  direction: Axis.horizontal,
+                  allowHalfRating: true,
+                  itemCount: 5,
+                  itemBuilder: (context, _) => const Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  onRatingUpdate: (newRating) {
+                    rating = newRating;
                   },
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter your comments here...',
+                ),
+                const SizedBox(height: 16),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Add Comments, if any:',
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: TextField(
+                    onChanged: (text) {
+                      comment = text;
+                    },
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Enter your comments here...',
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           actions: [
@@ -120,9 +122,7 @@ class _NotificationsState extends State<Notifications> {
                 onPressed: () {
                   _submitReview(reviewKey, rating, comment);
                   Navigator.of(context).pop();
-                  setState(() {
-                    _hasPendingReviewNotification = false;
-                  });
+                  _isDialogVisible = false;
                 },
                 child: const Text('Submit'),
               ),
@@ -130,14 +130,16 @@ class _NotificationsState extends State<Notifications> {
           ],
         );
       },
-    );
+    ).then((_) {
+      _isDialogVisible = false;
+    });
   }
 
   void _submitReview(String reviewKey, double rating, String comment) async {
     try {
       final pendingReviewSnapshot = await _databaseRef.child('pendingReviews/$reviewKey').get();
-      String? establishmentId = pendingReviewSnapshot.value != null 
-          ? (pendingReviewSnapshot.value as Map)['establishment_id'] 
+      String? establishmentId = pendingReviewSnapshot.value != null
+          ? (pendingReviewSnapshot.value as Map)['establishment_id']
           : null;
 
       if (establishmentId != null) {
@@ -157,6 +159,10 @@ class _NotificationsState extends State<Notifications> {
           });
 
           await _databaseRef.child('pendingReviews/$reviewKey').update({'status': 'completed'});
+
+          setState(() {
+            _pendingReviews.removeWhere((review) => review['reviewKey'] == reviewKey);
+          });
         }
       }
     } catch (e) {
@@ -200,91 +206,96 @@ class _NotificationsState extends State<Notifications> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFEEFFA9),
-              Color(0xFFDBFF4C),
-              Color(0xFF51F643),
-            ],
-            stops: [0.15, 0.54, 1.0],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const CircleAvatar(
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.arrow_back, color: Colors.black),
-                    ),
-                  ),
-                  const SizedBox(width: 80),
-                  const Text(
-                    'Notifications',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
+      body: SingleChildScrollView(
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFFEEFFA9),
+                Color(0xFFDBFF4C),
+                Color(0xFF51F643),
+              ],
+              stops: [0.15, 0.54, 1.0],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            if (_hasPendingReviewNotification)
-              GestureDetector(
-                onTap: () => _showReviewDialog(_pendingReviewKey!),
-                child: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4.0,
-                        offset: Offset(0, 2),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.arrow_back, color: Colors.black),
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.notifications, color: Colors.amber),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          'You have a pending review to complete',
-                          style: const TextStyle(fontSize: 16, color: Colors.black),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1, // Ensures the text stays on a single line
-                        ),
+                    ),
+                    const SizedBox(width: 80),
+                    const Text(
+                      'Notifications',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              )
-            else
-              const Expanded(
-                child: Center(
-                  child: Text(
-                    'No Notifications Available',
-                    style: TextStyle(
-                      fontSize: 21, // Increase font size for emphasis
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
+              ),
+              if (_pendingReviews.isNotEmpty)
+                ..._pendingReviews.map((review) {
+                  return GestureDetector(
+                    onTap: () => _showReviewDialog(review['reviewKey']!),
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8.0),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 4.0,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.notifications, color: Colors.amber),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              'You have a pending review to complete',
+                              style: const TextStyle(fontSize: 16, color: Colors.black),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList()
+              else
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      'No Notifications Available',
+                      style: TextStyle(
+                        fontSize: 21,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(

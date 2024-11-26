@@ -293,7 +293,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         alignment: Alignment.bottomLeft,
                         child: Container(
                           width: 290,
-                          height: 160,
+                          height: 170,
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             color: Colors.white,
