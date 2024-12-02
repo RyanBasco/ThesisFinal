@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:saver_gallery/saver_gallery.dart';
+import 'package:testing/Groups/Groups.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -19,7 +20,7 @@ class GenerateQR extends StatefulWidget {
 }
 
 class _GenerateQRState extends State<GenerateQR> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
   String qrData = '';
   Map<String, dynamic>? userData;
   final ScreenshotController screenshotController = ScreenshotController();
@@ -100,37 +101,41 @@ class _GenerateQRState extends State<GenerateQR> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: Colors.white,
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: const Color(0xFF2C812A),
-          unselectedItemColor: Colors.black,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code),
-              label: 'My QR',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.attach_money),
-              label: 'Expense Tracker',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-        ),
+     bottomNavigationBar: Theme(
+  data: Theme.of(context).copyWith(
+    canvasColor: Colors.white,
+  ),
+  child: BottomNavigationBar(
+    backgroundColor: Colors.white,
+    currentIndex: _selectedIndex,
+    onTap: _onItemTapped,
+    selectedItemColor: const Color(0xFF2C812A),
+    unselectedItemColor: Colors.black,
+    showSelectedLabels: true,
+    showUnselectedLabels: true,
+    items: const [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home),
+        label: 'Home',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.group),
+        label: 'Groups',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.attach_money),
+        label: 'Transactions',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.history),
+        label: 'History',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.person),
+        label: 'Profile',
+      ),
+    ],
+  ),
       ),
       body: Stack(
         children: [
@@ -257,35 +262,36 @@ class _GenerateQRState extends State<GenerateQR> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  setState(() {
+    _selectedIndex = index;
+  });
 
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-        );
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => QRPage()),
-        );
-        break;
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
-        );
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => TouristprofilePage()),
-        );
-        break;
-    }
+  Widget page;
+
+  switch (index) {
+    case 0:
+      page = UserdashboardPageState();
+      break;
+    case 1:
+      page = GroupPage();
+      break;
+    case 2:
+      page = QRPage();
+      break;
+    case 3:
+      page = RegistrationPage();
+      break;
+    case 4:
+      page = TouristprofilePage();
+      break;
+    default:
+      return;
   }
+
+  // Navigate to the new page without animation (direct transition)
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => page),
+  );
+}
 }

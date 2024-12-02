@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/Groups/Groups.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Categories.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -14,7 +15,7 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
-  int _selectedIndex = 2;
+  int _selectedIndex = 3;
   Map<String, double> spendingData = {};
   double totalSpending = 0.0;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -73,24 +74,38 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  setState(() {
+    _selectedIndex = index;
+  });
 
-    switch (index) {
-      case 0:
-        Navigator.push(context, MaterialPageRoute(builder: (context) => UserdashboardPageState()));
-        break;
-      case 1:
-        Navigator.push(context, MaterialPageRoute(builder: (context) => QRPage()));
-        break;
-      case 2:
-        break; // Current page
-      case 3:
-        Navigator.push(context, MaterialPageRoute(builder: (context) => TouristprofilePage()));
-        break;
-    }
+  Widget page;
+
+  switch (index) {
+    case 0:
+      page = UserdashboardPageState();
+      break;
+    case 1: 
+      page = GroupPage();
+      break;
+    case 2:
+      page = QRPage();
+      break;
+    case 3:
+      page = RegistrationPage();
+      break;
+    case 4:
+      page = TouristprofilePage();
+      break;
+    default:
+      return;
   }
+
+  // Navigate to the new page without animation (direct transition)
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => page),
+  );
+}
 
   Widget _buildLegendItem(String category) {
     double percentage = (spendingData[category] ?? 0) / totalSpending * 100;
@@ -124,25 +139,41 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: Colors.white,
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: const Color(0xFF2C812A),
-          unselectedItemColor: Colors.black,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.qr_code), label: 'My QR'),
-            BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: 'Expense Tracker'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          ],
-        ),
+     bottomNavigationBar: Theme(
+  data: Theme.of(context).copyWith(
+    canvasColor: Colors.white,
+  ),
+  child: BottomNavigationBar(
+    backgroundColor: Colors.white,
+    currentIndex: _selectedIndex,
+    onTap: _onItemTapped,
+    selectedItemColor: const Color(0xFF2C812A),
+    unselectedItemColor: Colors.black,
+    showSelectedLabels: true,
+    showUnselectedLabels: true,
+    items: const [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home),
+        label: 'Home',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.group),
+        label: 'Groups',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.attach_money),
+        label: 'Transactions',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.history),
+        label: 'History',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.person),
+        label: 'Profile',
+      ),
+    ],
+  ),
       ),
       body: Container(
         width: double.infinity,

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/EstablishmentDetails/Details.dart';
+import 'package:testing/Groups/Groups.dart';
 import 'package:testing/TouristDashboard/Notifications.dart';
 import 'package:testing/TouristDashboard/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
@@ -75,6 +76,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   Future<void> _loadLocationNames() async {
+  try {
     final String barangayData =
         await rootBundle.loadString('assets/barangay.json');
     final String cityData = await rootBundle.loadString('assets/city.json');
@@ -85,8 +87,15 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     barangayMap = {for (var b in barangays) b['brgy_code']: b['brgy_name']};
     cityMap = {for (var c in cities) c['city_code']: c['city_name']};
 
-    setState(() {});
+    if (mounted) { // Check if the widget is still mounted
+      setState(() {});
+    }
+  } catch (e) {
+    // Handle any errors here (e.g., file not found, json parsing errors)
+    print('Error loading data: $e');
   }
+}
+
 
   void _filterEstablishments() {
     String query = _searchController.text.toLowerCase();
@@ -241,38 +250,38 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  setState(() {
+    _selectedIndex = index;
+  });
 
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UserdashboardPageState()),
-        );
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => QRPage()),
-        );
-        break;
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
-        );
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => TouristprofilePage()),
-        );
-        break;
-    }
+  Widget page;
+
+  switch (index) {
+    case 0:
+      page = UserdashboardPageState();
+      break;
+    case 1:
+      page = GroupPage();
+      break;
+    case 2:
+      page = QRPage();
+      break;
+    case 3:
+      page = RegistrationPage();
+      break;
+    case 4:
+      page = TouristprofilePage();
+      break;
+    default:
+      return;
   }
+
+  // Navigate to the new page without animation (direct transition)
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => page),
+  );
+}
 
   void _toggleBookmark(int index) async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -333,36 +342,40 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: Colors.white,
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: const Color(0xFF2C812A),
-          unselectedItemColor: Colors.black,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code),
-              label: 'My QR',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.attach_money),
-              label: 'Expense Tracker',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-        ),
+  data: Theme.of(context).copyWith(
+    canvasColor: Colors.white,
+  ),
+  child: BottomNavigationBar(
+    backgroundColor: Colors.white,
+    currentIndex: _selectedIndex,
+    onTap: _onItemTapped,
+    selectedItemColor: const Color(0xFF2C812A),
+    unselectedItemColor: Colors.black,
+    showSelectedLabels: true,
+    showUnselectedLabels: true,
+    items: const [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home),
+        label: 'Home',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.group),
+        label: 'Groups',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.attach_money),
+        label: 'Transactions',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.history),
+        label: 'History',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.person),
+        label: 'Profile',
+      ),
+    ],
+  ),
       ),
       body: Container(
         width: double.infinity,

@@ -1,999 +1,1036 @@
 import 'dart:convert';
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart'; // Import for TapGestureRecognizer
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:testing/Authentication/TermsandConditions.dart';
-import 'package:testing/Authentication/TouristLogin.dart';
-import '../models/region.dart';
-import '../models/province.dart';
-import '../models/city.dart';
-import '../models/barangay.dart';
-import '../services/data_service.dart';
+import 'package:intl/intl.dart';
+import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class SignupContinue extends StatefulWidget {
-  final String lastName;
-  final String firstName;
-  final String email;
-  final String selectedNationality;
-  final String contactNumber; // New Required Parameter
-  final String birthday;
-  final String sex;
-  final String civilStatus;
-
-  const SignupContinue({
-    super.key,
-    required this.lastName,
-    required this.firstName,
-    required this.email,
-    required this.selectedNationality,
-    required this.contactNumber, // Added
-    required this.birthday,
-    required this.sex,
-    required this.civilStatus,
-  });
+  const SignupContinue({super.key});
 
   @override
   _SignupContinueState createState() => _SignupContinueState();
 }
 
 class _SignupContinueState extends State<SignupContinue> {
-  final TextEditingController _purposeController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _contactNumberController =
-      TextEditingController();
-  final TextEditingController _specifyController =
-      TextEditingController(); // New controller
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _contactController = TextEditingController();
+  final TextEditingController _specifyPurposeController =
+      TextEditingController();
+  final TextEditingController _birthdayController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Added
+  final DatabaseReference _database = FirebaseDatabase.instance.ref(); // Added
 
-  bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
-  bool _isPrivacyPolicyAccepted = false;
-  bool _isLoading = false; // New loading state
-  String _passwordWarning = '';
-  String _confirmPasswordWarning = '';
+  String? _firstName; // Added
+  String? _lastName;
+
+  // Dropdown data
   List<String> _countries = [];
   List<String> _purposeOptions = [];
+  List<String> _maritalStatusOptions = [
+    'Single',
+    'Married',
+    'Widowed',
+    'Divorced'
+  ];
+  List<String> _nationalities = [];
+  List<Map<String, dynamic>> _regions = [];
+  List<Map<String, dynamic>> _provinces = [];
+  List<Map<String, dynamic>> _cities = [];
+  List<Map<String, dynamic>> _barangays = [];
 
-  // Models Lists
-  List<Region> _allRegions = [];
-  List<Province> _allProvinces = [];
-  List<City> _allCities = [];
-  List<Barangay> _allBarangays = [];
-
-  // Filtered Lists
-  List<Province> _filteredProvinces = [];
-  List<City> _filteredCities = [];
-  List<Barangay> _filteredBarangays = [];
-
-  // Selected Values
-  String? _selectedPurpose;
+  // Selected values
   String? _selectedCountry;
+  String? _selectedPurpose;
   String? _selectedRegionCode;
   String? _selectedProvinceCode;
   String? _selectedCityCode;
   String? _selectedBarangayCode;
+  String? _selectedNationality;
+  String? _selectedMaritalStatus;
+  String? _selectedSex;
 
-  // Loading States
+  // Loading states
   bool _isLoadingRegions = false;
   bool _isLoadingProvinces = false;
   bool _isLoadingCities = false;
   bool _isLoadingBarangays = false;
-
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _emailController.text = widget.email;
-    _contactNumberController.text =
-        widget.contactNumber; // Initialize contact number controller
-    loadInitialData();
+    _loadDropdownData();
+    _fetchUserDetails();
   }
 
-  Future<void> loadInitialData() async {
-    await loadCountries();
-    await _loadPurposeOptions();
-    // Regions are loaded when 'Philippines' is selected
+  @override
+  void dispose() {
+    _specifyPurposeController.dispose();
+    _birthdayController.dispose();
+    super.dispose();
   }
 
-  Future<void> _loadPurposeOptions() async {
+  Future<void> _fetchUserDetails() async {
     try {
-      final String response =
-          await rootBundle.loadString('assets/purposeoftravel.json');
-      final data = json.decode(response);
-      setState(() {
-        _purposeOptions = List<String>.from(data['purpose_of_travel']);
-      });
+      User? user = _auth.currentUser;
+      if (user != null) {
+        DatabaseEvent event = await _database.child('Users/${user.uid}').once();
+
+        // Convert the data safely
+        Map<String, dynamic>? data =
+            Map<String, dynamic>.from(event.snapshot.value as Map);
+
+        setState(() {
+          _firstName = data['first_name'];
+          _lastName = data['last_name'];
+        });
+      }
     } catch (e) {
-      print('Error loading purposeoftravel.json: $e');
-      // Optionally, show an error message to the user
+      print('Error fetching user details: $e');
+      setState(() {
+        _firstName = 'Error';
+        _lastName = 'Error';
+      });
     }
   }
 
-  Future<void> loadCountries() async {
+  Future<void> _loadDropdownData() async {
     try {
-      String jsonString = await rootBundle.loadString('assets/countries.json');
-      final List<dynamic> jsonResponse = json.decode(jsonString);
+      // Load countries.json
+      String countriesJson =
+          await rootBundle.loadString('assets/countries.json');
+      List<dynamic> countriesList = json.decode(countriesJson);
+
+      // Load purposeoftravel.json
+      String purposeJson =
+          await rootBundle.loadString('assets/purposeoftravel.json');
+      Map<String, dynamic> purposeData = json.decode(purposeJson);
+
+      // Load nationalities.json
+      String nationalitiesJson =
+          await rootBundle.loadString('assets/nationalities.json');
+      Map<String, dynamic> nationalityData = json.decode(nationalitiesJson);
+
       setState(() {
-        _countries = jsonResponse.map((e) => e.toString()).toList();
+        _countries = List<String>.from(countriesList); // Parse countries
+        _purposeOptions = List<String>.from(
+            purposeData['purpose_of_travel']); // Parse purposes
+        _nationalities = List<String>.from(
+            nationalityData['nationalities']); // Parse nationalities
+
+        // Debugging output
+        print('Loaded Countries: $_countries');
+        print('Loaded Purpose Options: $_purposeOptions');
+        print('Loaded Nationalities: $_nationalities');
       });
     } catch (e) {
-      print('Error loading countries.json: $e');
-      // Optionally, show an error message to the user
+      print('Error loading dropdown data: $e');
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    // Added
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _birthdayController.text = DateFormat('MMMM dd, yyyy').format(picked);
+      });
     }
   }
 
   Future<void> _loadRegions() async {
-    if (_allRegions.isNotEmpty) return; // Avoid reloading
     setState(() {
       _isLoadingRegions = true;
     });
-    _allRegions = await DataService().loadRegions();
-    setState(() {
-      _isLoadingRegions = false;
-    });
+    try {
+      String regionsJson = await rootBundle.loadString('assets/region.json');
+      List<dynamic> regionsList = json.decode(regionsJson);
+
+      setState(() {
+        _regions = List<Map<String, dynamic>>.from(regionsList);
+      });
+    } catch (e) {
+      print('Error loading regions: $e');
+    } finally {
+      setState(() {
+        _isLoadingRegions = false;
+      });
+    }
   }
 
-  Future<void> _loadProvinces() async {
-    if (_selectedRegionCode == null) return;
+  Future<void> _loadProvinces(String regionCode) async {
     setState(() {
       _isLoadingProvinces = true;
     });
-    _allProvinces = await DataService().loadProvinces();
-    _filterProvinces(_selectedRegionCode!);
-    setState(() {
-      _isLoadingProvinces = false;
-    });
+    try {
+      String provincesJson =
+          await rootBundle.loadString('assets/province.json');
+      List<dynamic> provincesList = json.decode(provincesJson);
+
+      setState(() {
+        _provinces = provincesList
+            .where((province) => province['region_code'] == regionCode)
+            .toList()
+            .cast<Map<String, dynamic>>();
+      });
+    } catch (e) {
+      print('Error loading provinces: $e');
+    } finally {
+      setState(() {
+        _isLoadingProvinces = false;
+      });
+    }
   }
 
-  Future<void> _loadCities() async {
-    if (_selectedProvinceCode == null) return;
+  Future<void> _loadCities(String provinceCode) async {
     setState(() {
       _isLoadingCities = true;
     });
-    _allCities = await DataService().loadCities();
-    _filterCities(_selectedProvinceCode!);
-    setState(() {
-      _isLoadingCities = false;
-    });
+    try {
+      String citiesJson = await rootBundle.loadString('assets/city.json');
+      List<dynamic> citiesList = json.decode(citiesJson);
+
+      setState(() {
+        _cities = citiesList
+            .where((city) => city['province_code'] == provinceCode)
+            .toList()
+            .cast<Map<String, dynamic>>();
+      });
+    } catch (e) {
+      print('Error loading cities: $e');
+    } finally {
+      setState(() {
+        _isLoadingCities = false;
+      });
+    }
   }
 
-  Future<void> _loadBarangays() async {
-    if (_selectedCityCode == null) return;
+  Future<void> _loadBarangays(String cityCode) async {
     setState(() {
       _isLoadingBarangays = true;
     });
-    _allBarangays = await DataService().loadBarangays();
-    _filterBarangays(_selectedCityCode!);
-    setState(() {
-      _isLoadingBarangays = false;
-    });
-  }
-
-  void _filterProvinces(String regionCode) {
-    setState(() {
-      _filteredProvinces = _allProvinces
-          .where((province) => province.regionCode == regionCode)
-          .toList();
-      _selectedProvinceCode = null;
-      _filteredCities = [];
-      _selectedCityCode = null;
-      _filteredBarangays = [];
-      _selectedBarangayCode = null;
-    });
-  }
-
-  void _filterCities(String provinceCode) {
-    setState(() {
-      _filteredCities = _allCities
-          .where((city) => city.provinceCode == provinceCode)
-          .toList();
-      _selectedCityCode = null;
-      _filteredBarangays = [];
-      _selectedBarangayCode = null;
-    });
-  }
-
-  void _filterBarangays(String cityCode) {
-    setState(() {
-      _filteredBarangays = _allBarangays
-          .where((barangay) => barangay.cityCode == cityCode)
-          .toList();
-      _selectedBarangayCode = null;
-    });
-  }
-
-  void _onSignUpPressed() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true; // Start loading
-      });
-
-      await _registerUser();
+    try {
+      String barangaysJson =
+          await rootBundle.loadString('assets/barangay.json');
+      List<dynamic> barangaysList = json.decode(barangaysJson);
 
       setState(() {
-        _isLoading = false; // Stop loading
+        _barangays = barangaysList
+            .where((barangay) => barangay['city_code'] == cityCode)
+            .toList()
+            .cast<Map<String, dynamic>>();
+
+        print('Loaded Barangays: $_barangays'); // Debugging output
       });
+    } catch (e) {
+      print('Error loading barangays: $e');
+    } finally {
+      setState(() {
+        _isLoadingBarangays = false;
+      });
+    }
+  }
+
+  Future<void> saveFormData(String userId) async {
+    try {
+      // Decode the codes into human-readable names
+      String? decodedRegion = _regions.firstWhere(
+        (region) => region['region_code'] == _selectedRegionCode,
+        orElse: () => {'region_name': null},
+      )['region_name'];
+
+      String? decodedProvince = _provinces.firstWhere(
+        (province) => province['province_code'] == _selectedProvinceCode,
+        orElse: () => {'province_name': null},
+      )['province_name'];
+
+      String? decodedCity = _cities.firstWhere(
+        (city) => city['city_code'] == _selectedCityCode,
+        orElse: () => {'city_name': null},
+      )['city_name'];
+
+      String? decodedBarangay = _barangays.firstWhere(
+        (barangay) => barangay['brgy_code'] == _selectedBarangayCode,
+        orElse: () => {'brgy_name': null},
+      )['brgy_name'];
+
+      // Save form data to Firebase Realtime Database
+      await _database.child('Forms/$userId').set({
+        'birthday': _birthdayController.text,
+        'sex': _selectedSex,
+        'contact': _contactController.text,
+        'country': _selectedCountry,
+        'region': _selectedCountry == 'Philippines' ? decodedRegion : null,
+        'province': _selectedCountry == 'Philippines' ? decodedProvince : null,
+        'city': _selectedCountry == 'Philippines' ? decodedCity : null,
+        'barangay': _selectedCountry == 'Philippines' ? decodedBarangay : null,
+        'purpose_of_travel': _selectedPurpose,
+        'purpose_details':
+            _selectedPurpose == 'Other' ? _specifyPurposeController.text : null,
+        'marital_status': _selectedMaritalStatus,
+        'nationality': _selectedNationality,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Form submitted successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print('Error saving form data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error submitting form: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: false,
         body: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFEEFFA9),
-                  Color(0xFFDBFF4C),
-                  Color(0xFF51F643),
-                ],
-                stops: [0.15, 0.54, 1.0],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Form(
-                  // Wrap the form with Form widget
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(
-                          height: 20), // Adjusted height for top spacing
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Color(0xFF114F3A),
-                              size: 30,
-                            ),
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFFEEFFA9),
+            Color(0xFFDBFF4C),
+            Color(0xFF51F643),
+          ],
+          stops: [0.15, 0.54, 1.0],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Color(0xFF114F3A),
+                            size: 30,
                           ),
-                          const SizedBox(width: 10),
-                          const Text(
-                            'Sign Up',
-                            style: TextStyle(
-                              color: Color(0xFF114F3A),
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Residence Information',
-                        style: TextStyle(
-                          color: Color(0xFF114F3A),
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
-                      const SizedBox(height: 10),
-
-                      // Country Dropdown
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 10),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF5CA14E),
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.flag,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: DropdownButtonFormField<String>(
-                                value: _selectedCountry,
-                                items: _countries.map((country) {
-                                  return DropdownMenuItem<String>(
-                                    value: country,
-                                    child: Text(country,
-                                        style: const TextStyle(
-                                            color: Colors.white)),
-                                  );
-                                }).toList(),
-                                onChanged: (value) async {
-                                  setState(() {
-                                    _selectedCountry = value;
-                                    // Reset dependent dropdowns
-                                    _selectedRegionCode = null;
-                                    _selectedProvinceCode = null;
-                                    _selectedCityCode = null;
-                                    _selectedBarangayCode = null;
-                                    _filteredProvinces = [];
-                                    _filteredCities = [];
-                                    _filteredBarangays = [];
-                                  });
-
-                                  if (value == 'Philippines') {
-                                    await _loadRegions();
-                                  }
-                                },
-                                decoration: const InputDecoration(
-                                  hintText: 'Country of Residence',
-                                  hintStyle: TextStyle(color: Colors.white),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.only(
-                                    bottom: 8,
-                                  ), // Adjust top and bottom padding
-                                ),
-                                dropdownColor: const Color(0xFF5CA14E),
-                                style: const TextStyle(color: Colors.white),
-                                iconEnabledColor: Colors.white,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please select your country of residence';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Conditionally display region, province, and city if "Philippines" is selected
-                      if (_selectedCountry == 'Philippines') ...[
-                        const SizedBox(height: 10),
+                        const SizedBox(width: 60),
                         const Text(
-                          'Local Address',
+                          'Form Registration',
                           style: TextStyle(
                             color: Color(0xFF114F3A),
-                            fontSize: 22,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 10),
-
-                        // Region Dropdown
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF5CA14E),
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.map,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _isLoadingRegions
-                                    ? const Center(
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      )
-                                    : DropdownButtonFormField<String>(
-                                        isExpanded:
-                                            true, // Allows the dropdown to take up all available width
-                                        value: _selectedRegionCode,
-                                        items: _allRegions.map((region) {
-                                          return DropdownMenuItem<String>(
-                                            value: region.regionCode,
-                                            child: Text(
-                                              region.regionName,
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                              overflow: TextOverflow
-                                                  .ellipsis, // Handles long text
-                                              maxLines: 1,
-                                            ),
-                                          );
-                                        }).toList(),
-                                        onChanged: (value) async {
-                                          setState(() {
-                                            _selectedRegionCode = value;
-                                            _selectedProvinceCode = null;
-                                            _selectedCityCode = null;
-                                            _selectedBarangayCode = null;
-                                            _filteredProvinces = [];
-                                            _filteredCities = [];
-                                            _filteredBarangays = [];
-                                          });
-
-                                          if (value != null) {
-                                            await _loadProvinces();
-                                          }
-                                        },
-                                        decoration: const InputDecoration(
-                                          hintText: 'Region',
-                                          hintStyle:
-                                              TextStyle(color: Colors.white),
-                                          border: InputBorder.none,
-                                          contentPadding: EdgeInsets.only(
-                                              bottom: 9, top: 3.5),
-                                        ),
-                                        dropdownColor: const Color(0xFF5CA14E),
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                        iconEnabledColor: Colors.white,
-                                      ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Province Dropdown
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF5CA14E),
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.location_city,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _isLoadingProvinces
-                                    ? const Center(
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      )
-                                    : DropdownButtonFormField<String>(
-                                        value: _selectedProvinceCode,
-                                        items:
-                                            _filteredProvinces.map((province) {
-                                          return DropdownMenuItem<String>(
-                                            value: province.provinceCode,
-                                            child: Text(province.provinceName,
-                                                style: const TextStyle(
-                                                    color: Colors.white)),
-                                          );
-                                        }).toList(),
-                                        onChanged: (value) async {
-                                          setState(() {
-                                            _selectedProvinceCode = value;
-                                            _selectedCityCode = null;
-                                            _selectedBarangayCode = null;
-                                            _filteredCities = [];
-                                            _filteredBarangays = [];
-                                          });
-
-                                          if (value != null) {
-                                            await _loadCities();
-                                          }
-                                        },
-                                        decoration: const InputDecoration(
-                                          hintText: 'Province',
-                                          hintStyle:
-                                              TextStyle(color: Colors.white),
-                                          border: InputBorder.none,
-                                          contentPadding: EdgeInsets.only(
-                                              bottom: 9, top: 3.5),
-                                        ),
-                                        dropdownColor: const Color(0xFF5CA14E),
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                        iconEnabledColor: Colors.white,
-                                      ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // City Dropdown
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF5CA14E),
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _isLoadingCities
-                                    ? const Center(
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      )
-                                    : DropdownButtonFormField<String>(
-                                        value: _selectedCityCode,
-                                        items: _filteredCities.map((city) {
-                                          return DropdownMenuItem<String>(
-                                            value: city.cityCode,
-                                            child: Text(city.cityName,
-                                                style: const TextStyle(
-                                                    color: Colors.white)),
-                                          );
-                                        }).toList(),
-                                        onChanged: (value) async {
-                                          setState(() {
-                                            _selectedCityCode = value;
-                                            _selectedBarangayCode = null;
-                                            _filteredBarangays = [];
-                                          });
-
-                                          if (value != null) {
-                                            await _loadBarangays();
-                                          }
-                                        },
-                                        decoration: const InputDecoration(
-                                          hintText: 'City / Municipality',
-                                          hintStyle:
-                                              TextStyle(color: Colors.white),
-                                          border: InputBorder.none,
-                                          contentPadding: EdgeInsets.only(
-                                              bottom: 9, top: 2.5),
-                                        ),
-                                        dropdownColor: const Color(0xFF5CA14E),
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                        iconEnabledColor: Colors.white,
-                                      ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Barangay Dropdown
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF5CA14E),
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.home,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _isLoadingBarangays
-                                    ? const Center(
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      )
-                                    : DropdownButtonFormField<String>(
-                                        value: _selectedBarangayCode,
-                                        items:
-                                            _filteredBarangays.map((barangay) {
-                                          return DropdownMenuItem<String>(
-                                            value: barangay.barangayCode,
-                                            child: Text(barangay.barangayName,
-                                                style: const TextStyle(
-                                                    color: Colors.white)),
-                                          );
-                                        }).toList(),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _selectedBarangayCode = value;
-                                          });
-                                          // No further loading needed
-                                        },
-                                        decoration: const InputDecoration(
-                                          hintText: 'Barangay',
-                                          hintStyle:
-                                              TextStyle(color: Colors.white),
-                                          border: InputBorder.none,
-                                          contentPadding: EdgeInsets.only(
-                                              bottom: 9, top: 3.3),
-                                        ),
-                                        dropdownColor: const Color(0xFF5CA14E),
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                        iconEnabledColor: Colors.white,
-                                      ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
-                      const SizedBox(height: 10),
+                    ),
+                    const SizedBox(height: 20),
+                    if (_firstName != null && _lastName != null) ...[
+                      Text(
+                        'Full Name: $_firstName $_lastName', // Combined first and last name
+                        style: const TextStyle(
+                          color: Color(0xFF114F3A),
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       const Text(
-                        'Additional Information',
+                        // Added
+                        'Birthday',
                         style: TextStyle(
                           color: Color(0xFF114F3A),
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 10), // Added
+                      GestureDetector(
+                        // Added
+                        onTap: () => _selectDate(context),
+                        child: AbsorbPointer(
+                          child: TextFormField(
+                            controller: _birthdayController,
+                            decoration: InputDecoration(
+                              hintText: 'Select Birthday',
+                              filled: true,
+                              fillColor: const Color(0xFF5CA14E),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide.none,
+                              ),
+                              hintStyle: const TextStyle(color: Colors.white),
+                            ),
+                            style: const TextStyle(color: Colors.white),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select a birthday';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+
+                      // Sex dropdown
+                      const SizedBox(height: 20), // Added
+                      const Text(
+                        // Added
+                        'Sex',
+                        style: TextStyle(
+                          color: Color(0xFF114F3A),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10), // Added
                       Container(
-                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        // Added
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
                           color: const Color(0xFF5CA14E),
-                          border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.travel_explore_rounded,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Transform.translate(
-                                offset: const Offset(0, -5),
-                                child: DropdownButtonFormField<String>(
-                                  value: _selectedPurpose,
-                                  items: _purposeOptions.map((purpose) {
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedSex,
+                          items: const [
+                            DropdownMenuItem(
+                                value: 'Male', child: Text('Male')),
+                            DropdownMenuItem(
+                                value: 'Female', child: Text('Female')),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedSex = value;
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            hintText: 'Select Sex',
+                            hintStyle: TextStyle(color: Colors.white),
+                            border: InputBorder.none,
+                          ),
+                          dropdownColor: const Color(0xFF5CA14E),
+                          style: const TextStyle(color: Colors.white),
+                          iconEnabledColor: Colors.white,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select your sex';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Contact Field
+                      const Text(
+                        'Contact',
+                        style: TextStyle(
+                          color: Color(0xFF114F3A),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _contactController,
+                        decoration: InputDecoration(
+                          hintText: 'Enter Contact Number',
+                          filled: true,
+                          fillColor: const Color(0xFF5CA14E),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          hintStyle: const TextStyle(color: Colors.white),
+                        ),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Country Dropdown
+                      const Text(
+                        'Country of Residence',
+                        style: TextStyle(
+                          color: Color(0xFF114F3A),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF5CA14E),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedCountry,
+                          items: _countries.map((country) {
+                            return DropdownMenuItem<String>(
+                              value: country,
+                              child: Text(country,
+                                  style: const TextStyle(color: Colors.white)),
+                            );
+                          }).toList(),
+                          onChanged: (value) async {
+                            setState(() {
+                              _selectedCountry = value;
+
+                              // Reset dependent dropdowns
+                              _selectedRegionCode = null;
+                              _selectedProvinceCode = null;
+                              _selectedCityCode = null;
+                              _selectedBarangayCode = null;
+                              _regions = [];
+                              _provinces = [];
+                              _cities = [];
+                              _barangays = [];
+                            });
+
+                            if (value == 'Philippines') {
+                              await _loadRegions(); // Load regions if "Philippines" is selected
+                            }
+                          },
+                          decoration: const InputDecoration(
+                            hintText: 'Select Country',
+                            hintStyle: TextStyle(color: Colors.white),
+                            border: InputBorder.none,
+                          ),
+                          dropdownColor: const Color(0xFF5CA14E),
+                          style: const TextStyle(color: Colors.white),
+                          iconEnabledColor: Colors.white,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a country';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+
+                      if (_selectedCountry == 'Philippines') ...[
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF5CA14E),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: _isLoadingRegions
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : DropdownButtonFormField<String>(
+                                  value: _selectedRegionCode,
+                                  items: _regions.map((region) {
                                     return DropdownMenuItem<String>(
-                                      value: purpose,
-                                      child: Text(purpose,
+                                      value: region['region_code'],
+                                      child: Text(region['region_name'],
                                           style: const TextStyle(
                                               color: Colors.white)),
                                     );
                                   }).toList(),
-                                  onChanged: (value) {
+                                  onChanged: (value) async {
                                     setState(() {
-                                      _selectedPurpose = value;
+                                      _selectedRegionCode = value;
+
+                                      // Reset dependent dropdowns
+                                      _selectedProvinceCode = null;
+                                      _selectedCityCode = null;
+                                      _selectedBarangayCode = null;
+                                      _provinces = [];
+                                      _cities = [];
+                                      _barangays = [];
                                     });
+
+                                    if (value != null) {
+                                      await _loadProvinces(value);
+                                    }
                                   },
                                   decoration: const InputDecoration(
-                                    hintText: 'Purpose of Travel',
+                                    hintText: 'Select Region',
                                     hintStyle: TextStyle(color: Colors.white),
                                     border: InputBorder.none,
-                                    contentPadding:
-                                        EdgeInsets.only(bottom: 8, top: 12),
                                   ),
                                   dropdownColor: const Color(0xFF5CA14E),
                                   style: const TextStyle(color: Colors.white),
                                   iconEnabledColor: Colors.white,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'Please select your purpose of travel';
+                                      return 'Please select a region';
                                     }
                                     return null;
                                   },
                                 ),
-                              ),
-                            )
-                          ],
                         ),
-                      ),
-// Conditionally show the "Please Specify" input field if "Others" is selected
-                      if (_selectedPurpose == 'Other') ...[
-                        const SizedBox(
-                            height:
-                                10), // Add space between the dropdown and the new container
+
+                        // Province Dropdown
+                        const SizedBox(height: 20),
                         Container(
-                          margin: const EdgeInsets.symmetric(vertical: 0),
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           decoration: BoxDecoration(
                             color: const Color(0xFF5CA14E),
-                            border: Border.all(color: Colors.grey),
                             borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons
-                                    .edit, // You can change this icon to any other relevant one
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                  child: Transform.translate(
-                                offset: const Offset(
-                                    0, -5), // Moves the text upward by 5 pixels
-                                child: TextFormField(
-                                  controller: _specifyController,
+                          child: _isLoadingProvinces
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : DropdownButtonFormField<String>(
+                                  value: _selectedProvinceCode,
+                                  items: _provinces.map((province) {
+                                    return DropdownMenuItem<String>(
+                                      value: province['province_code'],
+                                      child: Text(province['province_name'],
+                                          style: const TextStyle(
+                                              color: Colors.white)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      _selectedProvinceCode = value;
+
+                                      // Reset dependent dropdowns
+                                      _selectedCityCode = null;
+                                      _selectedBarangayCode = null;
+                                      _cities = [];
+                                      _barangays = [];
+                                    });
+
+                                    if (value != null) {
+                                      await _loadCities(value);
+                                    }
+                                  },
                                   decoration: const InputDecoration(
-                                    hintText: 'Please Specify',
+                                    hintText: 'Select Province',
                                     hintStyle: TextStyle(color: Colors.white),
                                     border: InputBorder.none,
-                                    contentPadding: EdgeInsets.only(
-                                      top: 10,
-                                    ),
                                   ),
+                                  dropdownColor: const Color(0xFF5CA14E),
                                   style: const TextStyle(color: Colors.white),
+                                  iconEnabledColor: Colors.white,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'Please specify your purpose';
+                                      return 'Please select a province';
                                     }
                                     return null;
                                   },
                                 ),
-                              ))
-                            ],
-                          ),
                         ),
+
+                        // City Dropdown
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF5CA14E),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: _isLoadingCities
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : DropdownButtonFormField<String>(
+                                  value: _selectedCityCode,
+                                  items: _cities.map((city) {
+                                    return DropdownMenuItem<String>(
+                                      value: city['city_code'],
+                                      child: Text(city['city_name'],
+                                          style: const TextStyle(
+                                              color: Colors.white)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      _selectedCityCode = value;
+
+                                      // Reset dependent dropdowns
+                                      _selectedBarangayCode = null;
+                                      _barangays = [];
+                                    });
+
+                                    if (value != null) {
+                                      await _loadBarangays(value);
+                                    }
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'Select City / Municipality',
+                                    hintStyle: TextStyle(color: Colors.white),
+                                    border: InputBorder.none,
+                                  ),
+                                  dropdownColor: const Color(0xFF5CA14E),
+                                  style: const TextStyle(color: Colors.white),
+                                  iconEnabledColor: Colors.white,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please select a city';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                        ),
+
+                        // Barangay Dropdown
+                        const SizedBox(height: 20),
+                        Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF5CA14E),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: _isLoadingBarangays
+                                ? const Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    ),
+                                  )
+                                : DropdownButtonFormField<String>(
+                                    value: _selectedBarangayCode,
+                                    items: _barangays
+                                        .map((barangay) {
+                                          // Ensure you're using the correct keys: "brgy_code" and "brgy_name"
+                                          if (barangay['brgy_code'] != null &&
+                                              barangay['brgy_name'] != null) {
+                                            return DropdownMenuItem<String>(
+                                              value: barangay[
+                                                  'brgy_code'], // Correct key for brgy_code
+                                              child: Text(
+                                                barangay[
+                                                    'brgy_name'], // Correct key for brgy_name
+                                                style: const TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            );
+                                          } else {
+                                            return null; // Skip items with null values
+                                          }
+                                        })
+                                        .where((item) => item != null)
+                                        .cast<
+                                            DropdownMenuItem<
+                                                String>>() // Explicitly cast to List<DropdownMenuItem<String>>
+                                        .toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedBarangayCode = value;
+                                      });
+                                    },
+                                    decoration: const InputDecoration(
+                                      hintText: 'Select Barangay',
+                                      hintStyle: TextStyle(color: Colors.white),
+                                      border: InputBorder.none,
+                                    ),
+                                    dropdownColor: const Color(0xFF5CA14E),
+                                    style: const TextStyle(color: Colors.white),
+                                    iconEnabledColor: Colors.white,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please select a barangay';
+                                      }
+                                      return null;
+                                    },
+                                  ))
                       ],
-                      const SizedBox(height: 13),
+
+                      const SizedBox(height: 20),
+
+                      // Purpose of Travel Dropdown
                       const Text(
-                        'Credentials',
+                        'Purpose of Travel',
                         style: TextStyle(
                           color: Color(0xFF114F3A),
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 3),
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                          hintText: 'Email',
-                          filled: true,
-                          fillColor: const Color(0xFF5CA14E),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          hintStyle: const TextStyle(color: Colors.white),
-                          prefixIcon:
-                              const Icon(Icons.email, color: Colors.white),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF5CA14E),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
                         ),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: !_isPasswordVisible,
-                        decoration: InputDecoration(
-                          hintText: 'Password',
-                          filled: true,
-                          fillColor: const Color(0xFF5CA14E),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedPurpose,
+                          items: _purposeOptions.map((purpose) {
+                            return DropdownMenuItem<String>(
+                              value: purpose,
+                              child: Text(purpose,
+                                  style: const TextStyle(color: Colors.white)),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedPurpose = value;
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            hintText: 'Select Purpose',
+                            hintStyle: TextStyle(color: Colors.white),
+                            border: InputBorder.none,
                           ),
-                          hintStyle: const TextStyle(color: Colors.white),
-                          prefixIcon:
-                              const Icon(Icons.lock, color: Colors.white),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.white,
+                          dropdownColor: const Color(0xFF5CA14E),
+                          style: const TextStyle(color: Colors.white),
+                          iconEnabledColor: Colors.white,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a purpose';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+
+                      if (_selectedPurpose == 'Other') ...[
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Please Specify',
+                          style: TextStyle(
+                            color: Color(0xFF114F3A),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: _specifyPurposeController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter purpose',
+                            filled: true,
+                            fillColor: const Color(0xFF5CA14E),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _isPasswordVisible = !_isPasswordVisible;
-                              });
-                            },
+                            hintStyle: const TextStyle(color: Colors.white),
                           ),
+                          style: const TextStyle(color: Colors.white),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please specify your purpose';
+                            }
+                            return null;
+                          },
                         ),
-                        style: const TextStyle(color: Colors.white),
-                        onChanged: (value) {
-                          setState(() {
-                            _passwordWarning = value.length < 6
-                                ? 'Password should have a minimum of 6 characters'
-                                : '';
-                          });
-                        },
-                      ),
-                      if (_passwordWarning.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            _passwordWarning,
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        ),
+                      ],
                       const SizedBox(height: 20),
-                      TextFormField(
-                        controller: _confirmPasswordController,
-                        obscureText: !_isConfirmPasswordVisible,
-                        decoration: InputDecoration(
-                          hintText: 'Confirm Password',
-                          filled: true,
-                          fillColor: const Color(0xFF5CA14E),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          hintStyle: const TextStyle(color: Colors.white),
-                          prefixIcon:
-                              const Icon(Icons.lock, color: Colors.white),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                                _isConfirmPasswordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Colors.white),
-                            onPressed: () {
-                              setState(() {
-                                _isConfirmPasswordVisible =
-                                    !_isConfirmPasswordVisible;
-                              });
-                            },
-                          ),
-                        ),
-                        style: const TextStyle(color: Colors.white),
-                        onChanged: (value) {
-                          setState(() {
-                            _confirmPasswordWarning =
-                                value != _passwordController.text
-                                    ? 'Passwords do not match'
-                                    : '';
-                          });
-                        },
-                      ),
-                      if (_confirmPasswordWarning.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            _confirmPasswordWarning,
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      const SizedBox(height: 20),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.75,
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2C812A),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            children: [
-                              const Text(
-                                'DATA PRIVACY NOTICE',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 5),
-                              RichText(
-                                text: TextSpan(
-                                  text: 'In compliance with RA 10173 or Data \n'
-                                      'Privacy Act of the Philippines, the \n'
-                                      'personal information you will be \n'
-                                      'providing below shall only be used \n'
-                                      'for the purposes of tourism statistical \n'
-                                      'reporting as per Section 38 of the \n'
-                                      'Republic Act No. 9593 or the Tourism \n'
-                                      'Act of 2009 and Section 121 of its \n'
-                                      'Implementing Rules and Regulations.\n',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Agree to our ',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: 'Privacy Policy',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  TermsAndConditions(),
-                                            ),
-                                          );
-                                        },
-                                    ),
-                                    const TextSpan(text: ' and '),
-                                    TextSpan(
-                                      text: 'Terms and Conditions',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  TermsAndConditions(),
-                                            ),
-                                          );
-                                        },
-                                    ),
-                                    const TextSpan(text: '. View here.'),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+
+                      // Marital Status Dropdown
+                      const Text(
+                        'Marital Status',
+                        style: TextStyle(
+                          color: Color(0xFF114F3A),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _isPrivacyPolicyAccepted,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                _isPrivacyPolicyAccepted = newValue!;
-                              });
-                            },
-                            activeColor: const Color(0xFF2C812A),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF5CA14E),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedMaritalStatus,
+                          items: _maritalStatusOptions.map((status) {
+                            return DropdownMenuItem<String>(
+                              value: status,
+                              child: Text(status,
+                                  style: const TextStyle(color: Colors.white)),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedMaritalStatus = value;
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            hintText: 'Select Marital Status',
+                            hintStyle: TextStyle(color: Colors.white),
+                            border: InputBorder.none,
                           ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TermsAndConditions(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                'I agree to the Privacy Policy, Terms and Conditions.',
-                                style: TextStyle(
-                                  color: Color(0xFF114F3A),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                          dropdownColor: const Color(0xFF5CA14E),
+                          style: const TextStyle(color: Colors.white),
+                          iconEnabledColor: Colors.white,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select marital status';
+                            }
+                            return null;
+                          },
+                        ),
                       ),
+
                       const SizedBox(height: 20),
+
+                      // Nationality Dropdown
+                      const Text(
+                        'Nationality',
+                        style: TextStyle(
+                          color: Color(0xFF114F3A),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF5CA14E),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedNationality,
+                          items: _nationalities.map((nationality) {
+                            return DropdownMenuItem<String>(
+                              value: nationality,
+                              child: Text(nationality,
+                                  style: const TextStyle(color: Colors.white)),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedNationality = value;
+                              print(
+                                  'Selected Nationality: $_selectedNationality'); // Debug
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            hintText: 'Select Nationality',
+                            hintStyle: TextStyle(color: Colors.white),
+                            border: InputBorder.none,
+                          ),
+                          dropdownColor: const Color(0xFF5CA14E),
+                          style: const TextStyle(color: Colors.white),
+                          iconEnabledColor: Colors.white,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select nationality';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 40),
                       Center(
                         child: ElevatedButton(
-                          onPressed: (_isPrivacyPolicyAccepted && !_isLoading)
-                              ? _onSignUpPressed // Call the new method
-                              : null,
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  if (_formKey.currentState?.validate() ??
+                                      false) {
+                                    setState(() {
+                                      _isLoading = true; // Start loading
+                                    });
+                                    try {
+                                      String userId = FirebaseAuth
+                                              .instance.currentUser?.uid ??
+                                          'unknown_user';
+                                      await saveFormData(userId);
+                                      setState(() {
+                                        _isLoading = false; // Stop loading
+                                      });
+
+                                      // Show success dialog
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text('Success'),
+                                            content: const Text(
+                                                'Your form has been registered successfully.'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(); // Close dialog
+                                                  Navigator.of(context)
+                                                      .pushReplacement(
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          UserdashboardPageState(),
+                                                    ),
+                                                  );
+                                                },
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    } catch (e) {
+                                      setState(() {
+                                        _isLoading =
+                                            false; // Stop loading in case of error
+                                      });
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text('Error'),
+                                            content: Text(
+                                                'Failed to submit form: $e'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(); // Close dialog
+                                                },
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF288F13),
+                            backgroundColor: _isLoading
+                                ? Colors.grey
+                                : const Color(0xFF288F13),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -1001,10 +1038,11 @@ class _SignupContinueState extends State<SignupContinue> {
                           ),
                           child: _isLoading
                               ? const CircularProgressIndicator(
-                                  color: Colors.white,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
                                 )
                               : const Text(
-                                  'Sign Up',
+                                  'Submit',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -1012,151 +1050,12 @@ class _SignupContinueState extends State<SignupContinue> {
                                 ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Center(
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'Already have an account? ',
-                            style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 14.5), // Add font size here
-                            children: [
-                              TextSpan(
-                                text: 'Log in',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                  fontSize: 16, // Add font size here
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => LoginPageScreen(),
-                                      ),
-                                    );
-                                  },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 60),
                     ],
-                  ),
-                ),
-              ),
-            )));
+                  ]),
+            ),
+          ),
+        ),
+      ),
+    ));
   }
-
-  Future<void> _registerUser() async {
-    try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-
-      if (userCredential.user != null) {
-        await saveUserData(userCredential.user!.uid);
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Account Registered'),
-              content:
-                  const Text('Your account has been successfully registered.'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => LoginPageScreen()),
-                    );
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _isLoading = false; // Stop loading if there’s an error
-        if (e.code == 'weak-password') {
-          _passwordWarning = 'The password provided is too weak.';
-        } else if (e.code == 'email-already-in-use') {
-          _passwordWarning = 'The account already exists for that email.';
-        } else {
-          _passwordWarning = 'Failed to create account: ${e.message}';
-        }
-      });
-    } catch (e) {
-      print('Failed to create account: $e');
-      setState(() {
-        _isLoading = false; // Stop loading if there’s an error
-        _passwordWarning = 'Failed to create account. Please try again later.';
-      });
-    }
-  }
-
-Future<void> saveUserData(String userId) async {
-  // Define a formattedBirthday with the correct format for database storage.
-  String formattedBirthday;
-  try {
-    final parsedDate = DateFormat('MM/dd/yyyy').parse(widget.birthday);
-    formattedBirthday = DateFormat('MMMM dd, yyyy').format(parsedDate);
-  } catch (e) {
-    print('Error parsing birthday: $e');
-    // Use the original format if parsing fails.
-    formattedBirthday = widget.birthday;
-  }
-
-  // Check if contact number is empty; if so, set it to "N/A".
-  String contactNumber = _contactNumberController.text.trim().isEmpty
-      ? 'N/A'
-      : _contactNumberController.text.trim();
-
-  // Define the user data to be saved in the database, using formattedBirthday.
-  Map<String, dynamic> userData = {
-    'last_name': widget.lastName,
-    'first_name': widget.firstName,
-    'email': _emailController.text,
-    'nationality': widget.selectedNationality,
-    'birthday': formattedBirthday,  // Store birthday in text format
-    'sex': widget.sex,
-    'civil_status': widget.civilStatus,
-    'purpose_of_travel': _selectedPurpose ?? '',
-    'otherPurpose': _selectedPurpose == 'Other' ? _specifyController.text : null,
-    'contact_number': contactNumber,
-    'countryOfResidence': _selectedCountry ?? '',
-    'region': _selectedRegionCode != null
-        ? _allRegions.firstWhere((region) => region.regionCode == _selectedRegionCode).regionName
-        : '',
-    'province': _selectedProvinceCode != null
-        ? _filteredProvinces.firstWhere((province) => province.provinceCode == _selectedProvinceCode).provinceName
-        : '',
-    'city': _selectedCityCode != null
-        ? _filteredCities.firstWhere((city) => city.cityCode == _selectedCityCode).cityName
-        : '',
-    'barangay': _selectedBarangayCode != null
-        ? _filteredBarangays.firstWhere((barangay) => barangay.barangayCode == _selectedBarangayCode).barangayName
-        : '',
-  };
-
-  try {
-    await FirebaseDatabase.instance.ref().child('Users').child(userId).set(userData);
-    print('User data saved successfully to Realtime Database.');
-  } catch (error) {
-    print('Failed to save user data: $error');
-    setState(() {
-      _passwordWarning = 'Failed to save user data: $error';
-    });
-  }
-}
 }
