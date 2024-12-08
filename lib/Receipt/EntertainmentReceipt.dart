@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -53,6 +53,14 @@ class _EntertainmentDetailPageState
         );
         break;
     }
+  }
+
+  void someMethod() {
+    // Example usage of QRPage
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => QRPage()),
+    );
   }
 
   @override

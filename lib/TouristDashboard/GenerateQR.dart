@@ -7,7 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:testing/Groups/Groups.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';

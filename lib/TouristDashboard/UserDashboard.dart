@@ -7,10 +7,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/EstablishmentDetails/Details.dart';
 import 'package:testing/Groups/Groups.dart';
 import 'package:testing/TouristDashboard/Notifications.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class UserdashboardPageState extends StatefulWidget {
   const UserdashboardPageState({super.key});
@@ -250,38 +251,43 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   void _onItemTapped(int index) {
-  setState(() {
-    _selectedIndex = index;
-  });
+    setState(() {
+      _selectedIndex = index;
+    });
 
-  Widget page;
+    Widget page;
+    switch (index) {
+      case 0:
+        page = UserdashboardPageState();
+        break;
+      case 1:
+        page = GroupPage();
+        break;
+      case 2:
+        page = QRPage();
+        break;
+      case 3:
+        page = RegistrationPage();
+        break;
+      case 4:
+        page = TouristprofilePage();
+        break;
+      default:
+        return;
+    }
 
-  switch (index) {
-    case 0:
-      page = UserdashboardPageState();
-      break;
-    case 1:
-      page = GroupPage();
-      break;
-    case 2:
-      page = QRPage();
-      break;
-    case 3:
-      page = RegistrationPage();
-      break;
-    case 4:
-      page = TouristprofilePage();
-      break;
-    default:
-      return;
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => page,
+        transitionDuration: Duration.zero, // No transition animation
+        reverseTransitionDuration: Duration.zero, // No reverse transition animation
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return child; // Directly return the child without any transition
+        },
+      ),
+    );
   }
-
-  // Navigate to the new page without animation (direct transition)
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => page),
-  );
-}
 
   void _toggleBookmark(int index) async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -341,41 +347,52 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Theme(
-  data: Theme.of(context).copyWith(
-    canvasColor: Colors.white,
-  ),
-  child: BottomNavigationBar(
-    backgroundColor: Colors.white,
-    currentIndex: _selectedIndex,
-    onTap: _onItemTapped,
-    selectedItemColor: const Color(0xFF2C812A),
-    unselectedItemColor: Colors.black,
-    showSelectedLabels: true,
-    showUnselectedLabels: true,
-    items: const [
-      BottomNavigationBarItem(
-        icon: Icon(Icons.home),
-        label: 'Home',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.group),
-        label: 'Groups',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.attach_money),
-        label: 'Transactions',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.history),
-        label: 'History',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.person),
-        label: 'Profile',
-      ),
-    ],
-  ),
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: Color(0xFF51F643),
+        color: Colors.white,
+        buttonBackgroundColor: Colors.white,
+        height: 65,
+        index: _selectedIndex,
+        animationDuration: Duration(milliseconds: 600), // Slower animation duration
+        animationCurve: Curves.easeInOut, // Smooth curve animation for the nav bar
+        items: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? Color(0xFF27AE60) : Colors.grey),
+              Text('Home', style: TextStyle(color: _selectedIndex == 0 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.group, size: 24, color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey),
+              Text('Groups', style: TextStyle(color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? Color(0xFF27AE60) : Colors.grey),
+              Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? Color(0xFF27AE60) : Colors.grey),
+              Text('History', style: TextStyle(color: _selectedIndex == 3 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? Color(0xFF27AE60) : Colors.grey),
+              Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        ],
+        onTap: _onItemTapped,
       ),
       body: Container(
         width: double.infinity,

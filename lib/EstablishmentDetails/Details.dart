@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/EstablishmentDetails/Directions.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -331,15 +331,38 @@ class _DetailsPageState extends State<DetailsPage> {
                                 children: [
                                   Row(
                                     children: List.generate(5, (index) {
-                                      return Icon(
-                                        index < averageRating.floor()
-                                            ? Icons.star
-                                            : (index < averageRating
-                                                ? Icons.star_half
-                                                : Icons.star_border),
-                                        color: Colors.yellow,
-                                        size: 20,
-                                      );
+                                      double difference = averageRating - index;
+                                      if (difference >= 1) {
+                                        return const Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                          size: 20,
+                                        );
+                                      } else if (difference > 0) {
+                                        return Stack(
+                                          children: [
+                                            const Icon(
+                                              Icons.star,
+                                              color: Colors.grey,
+                                              size: 20,
+                                            ),
+                                            ClipRect(
+                                              clipper: _StarClipper(difference),
+                                              child: const Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                                 size: 20,
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      } else {
+                                        return const Icon(
+                                          Icons.star,
+                                          color: Colors.grey,
+                                          size: 20,
+                                        );
+                                      }
                                     }),
                                   ),
                                   const SizedBox(width: 8),
@@ -418,5 +441,21 @@ class _DetailsPageState extends State<DetailsPage> {
         ),
       ),
     );
+  }
+}
+
+class _StarClipper extends CustomClipper<Rect> {
+  final double percentage;
+
+  _StarClipper(this.percentage);
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTRB(0, 0, size.width * percentage, size.height);
+  }
+
+  @override
+  bool shouldReclip(_StarClipper oldClipper) {
+    return percentage != oldClipper.percentage;
   }
 }

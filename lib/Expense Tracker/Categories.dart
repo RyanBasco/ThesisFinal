@@ -9,7 +9,7 @@ import 'package:testing/Categories/Shopping.dart';
 import 'package:testing/Categories/Transportation.dart';
 import 'package:testing/Categories/TravelandInsurance.dart';
 import 'package:testing/Categories/WellnessandSpa.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 class CategoriesPage extends StatefulWidget {

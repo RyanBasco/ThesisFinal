@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/Receipt/Transportationreceipt.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -53,35 +53,46 @@ class _TransportationState extends State<Transportation> {
       DataSnapshot visitsSnapshot = await visitsRef.get();
 
       if (visitsSnapshot.exists) {
-        visitsSnapshot.children.forEach((document) {
-          final visitData = Map<String, dynamic>.from(document.value as Map);
-          if (visitData['User']['UID'] == uid && visitData['Category'] == 'Transportation') {
-            String barangayCode = visitData['Establishment']['barangay'] ?? 'Unknown';
-            String cityCode = visitData['Establishment']['city'] ?? 'Unknown';
-            String barangay = barangayMap[barangayCode] ?? 'Unknown';
-            String city = cityMap[cityCode] ?? 'Unknown';
+        setState(() {
+          transportationVisits.clear(); // Clear existing visits first
+        });
 
-            setState(() {
-              transportationVisits.add({
-                'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
-                'address': '$city, $barangay',
-                'date': visitData['Date'] ?? 'N/A',
-                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0, // Add TotalSpend field
+        visitsSnapshot.children.forEach((document) {
+          final visitData = document.value as Map?;
+          if (visitData != null && 
+              visitData['User'] is Map && 
+              visitData['User']['UID'] == uid && 
+              visitData['Category'] == 'Transportation') {
+            
+            final establishment = visitData['Establishment'] as Map?;
+            if (establishment != null) {
+              String barangayCode = establishment['barangay']?.toString() ?? 'Unknown';
+              String cityCode = establishment['city']?.toString() ?? 'Unknown';
+              String barangay = barangayMap[barangayCode] ?? 'Unknown';
+              String city = cityMap[cityCode] ?? 'Unknown';
+
+              setState(() {
+                transportationVisits.add({
+                  'establishmentName': establishment['establishmentName'] ?? 'N/A',
+                  'address': '$city, $barangay',
+                  'date': visitData['Date'] ?? 'N/A',
+                  'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0,
+                });
               });
-            });
+            }
           }
         });
-      }
 
-      if (transportationVisits.isEmpty) {
-        setState(() {
-          transportationVisits.add({
-            'establishmentName': 'Currently no expense in this Transportation category.',
-            'address': '',
-            'date': '',
-            'totalSpend': '', // Placeholder TotalSpend value
+        if (transportationVisits.isEmpty) {
+          setState(() {
+            transportationVisits.add({
+              'establishmentName': 'Currently no expense in this Transportation category.',
+              'address': '',
+              'date': '',
+              'totalSpend': 0.0,
+            });
           });
-        });
+        }
       }
     } catch (e) {
       print("Error fetching transportation visits: $e");

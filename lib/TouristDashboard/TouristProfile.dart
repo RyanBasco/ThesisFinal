@@ -3,8 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/Authentication/TouristLogin.dart';
 import 'package:testing/Groups/Groups.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/TouristDashboard/Notifications.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/UserProfile/Changepassword.dart';
 import 'package:testing/UserProfile/Editprofile.dart';
@@ -12,6 +13,7 @@ import 'package:testing/UserProfile/HelpCenter.dart';
 import 'package:testing/UserProfile/Mybookmarks.dart';
 import 'package:testing/UserProfile/PrivacyPolicy.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class TouristprofilePage extends StatefulWidget {
   const TouristprofilePage({super.key});
@@ -65,80 +67,95 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
   }
 
   void _onItemTapped(int index) {
-  setState(() {
-    _selectedIndex = index;
-  });
+    setState(() {
+      _selectedIndex = index;
+    });
 
-  Widget page;
+    Widget page;
 
-  switch (index) {
-    case 0:
-      page = UserdashboardPageState();
-      break;
-    case 1:
-      page = GroupPage();
-      break;
-    case 2:
-      page = QRPage();
-      break;
-    case 3:
-      page = RegistrationPage();
-      break;
-    case 4:
-      page = TouristprofilePage();
-      break;
-    default:
-      return;
+    switch (index) {
+      case 0:
+        page = UserdashboardPageState();
+        break;
+      case 1:
+        page = GroupPage();
+        break;
+      case 2:
+        page = QRPage();
+        break;
+      case 3:
+        page = RegistrationPage();
+        break;
+      case 4:
+        page = TouristprofilePage();
+        break;
+      default:
+        return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => page,
+        transitionDuration: Duration.zero, // No transition animation
+        reverseTransitionDuration: Duration.zero, // No reverse transition animation
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return child; // Directly return the child without any transition
+        },
+      ),
+    );
   }
-
-  // Navigate to the new page without animation (direct transition)
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => page),
-  );
-}
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     bottomNavigationBar: Theme(
-  data: Theme.of(context).copyWith(
-    canvasColor: Colors.white,
-  ),
-  child: BottomNavigationBar(
-    backgroundColor: Colors.white,
-    currentIndex: _selectedIndex,
-    onTap: _onItemTapped,
-    selectedItemColor: const Color(0xFF2C812A),
-    unselectedItemColor: Colors.black,
-    showSelectedLabels: true,
-    showUnselectedLabels: true,
-    items: const [
-      BottomNavigationBarItem(
-        icon: Icon(Icons.home),
-        label: 'Home',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.group),
-        label: 'Groups',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.attach_money),
-        label: 'Transactions',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.history),
-        label: 'History',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.person),
-        label: 'Profile',
-      ),
-    ],
-  ),
-      ),
+     bottomNavigationBar: CurvedNavigationBar(
+  backgroundColor: const Color(0xFF51F643),
+  color: Colors.white,
+  buttonBackgroundColor: Colors.white,
+  height: 65,
+  index: _selectedIndex,
+  animationDuration: Duration(milliseconds: 600), // Slower animation duration
+  animationCurve: Curves.easeInOut, // Smooth curve animation for the nav bar
+  items: <Widget>[
+    Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
+        Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+      ],
+    ),
+    Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.group, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
+        Text('Groups', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+      ],
+    ),
+    Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
+        Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+      ],
+    ),
+    Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
+        Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+      ],
+    ),
+    Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
+        Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+      ],
+    ),
+  ],
+  onTap: _onItemTapped,
+),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -363,9 +380,53 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 270,
+                        top: 300,
                         left: 20,
-                        bottom: 170,
+                        bottom: 210,
+                        child: GestureDetector(
+                          onTap: () {
+                             Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Notifications()),
+                             );
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFF2C812A),
+                                ),
+                                child: const Icon(
+                                  Icons.feedback,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 25),
+                              const Text(
+                                'Support',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(width: 113),
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.black,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 315,
+                        left: 20,
+                        bottom: 120,
                         child: GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -407,51 +468,7 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                         ),
                       ),
                       Positioned(
-                        top: 340,
-                        left: 20,
-                        bottom: 130,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Privacypolicy()),
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(0xFF2C812A),
-                                ),
-                                child: const Icon(
-                                  Icons.privacy_tip_outlined,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 25),
-                              const Text(
-                                'Privacy Policy',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              const SizedBox(width: 70),
-                              const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Colors.black,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 415,
+                        top: 405,
                         left: 20,
                         child: GestureDetector(
                           onTap: () async {

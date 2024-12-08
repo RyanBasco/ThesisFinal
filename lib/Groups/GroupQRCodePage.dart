@@ -1,0 +1,178 @@
+import 'package:flutter/material.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:testing/Groups/QRCodeDisplayPage.dart';
+import 'package:testing/Groups/SelectGroupPage.dart';
+
+class GroupQRCodePage extends StatelessWidget {
+  final String groupId;
+  final List<Map<String, dynamic>> selectedUsers;
+
+  GroupQRCodePage({required this.groupId, this.selectedUsers = const []});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFEEFFA9),
+              Color(0xFFDBFF4C),
+              Color(0xFF51F643),
+            ],
+            stops: [0.15, 0.54, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF288F13),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Regroup',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(20),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Group Mode',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF114F3A),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    QrImageView(
+                      data: groupId,
+                      version: QrVersions.auto,
+                      size: 200.0,
+                    ),
+                    const SizedBox(height: 20),
+                    // Display selected users
+                    if (selectedUsers.isNotEmpty)
+                      Column(
+                        children: selectedUsers.map((user) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 5.0),
+                            child: Text(user['name'] ?? 'Unnamed User'),
+                          );
+                        }).toList(),
+                      )
+                  ],
+                ),
+              ),
+              const SizedBox(height: 60),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => QRCodeDisplayPage(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF288F13),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Switch to Individual',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: Color(0xFF51F643),
+        color: Colors.white,
+        buttonBackgroundColor: Colors.white,
+        height: 65,
+        index: 2, // Set the current index to the QR Code tab
+        items: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.home, size: 24, color: Colors.grey),
+              Text('Home', style: TextStyle(color: Colors.grey, fontSize: 10)),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.group, size: 24, color: Colors.grey),
+              Text('Groups',
+                  style: TextStyle(color: Colors.grey, fontSize: 10)),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.attach_money, size: 24, color: Color(0xFF27AE60)),
+              Text('Transaction',
+                  style: TextStyle(color: Color(0xFF27AE60), fontSize: 10)),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history, size: 24, color: Colors.grey),
+              Text('History',
+                  style: TextStyle(color: Colors.grey, fontSize: 10)),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.person, size: 24, color: Colors.grey),
+              Text('Profile',
+                  style: TextStyle(color: Colors.grey, fontSize: 10)),
+            ],
+          )
+        ],
+        onTap: (index) {
+          // Handle navigation based on the selected index
+        },
+      ),
+    );
+  }
+}

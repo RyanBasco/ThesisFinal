@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -39,43 +39,82 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   void _fetchUserData() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        final DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('Users');
-        final snapshot = await usersRef.child(user.uid).get();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      final DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('Users');
+      final DatabaseReference formsRef = FirebaseDatabase.instance.ref().child('Forms');
 
-        if (snapshot.exists) {
-          final userData = Map<String, dynamic>.from(snapshot.value as Map);
-          setState(() {
-            _firstName = userData['first_name'] ?? '';
-            _lastName = userData['last_name'] ?? '';
-            _birthday = userData['birthday'] ?? '';
-            _email = user.email ?? '';
-            _contactNumber = userData['contact_number'] ?? '';
-            _profileImageUrl = userData['profile_image_url'];
+      // Fetch user data
+      final userSnapshot = await usersRef.child(user.uid).get();
 
-            _nameController.text = '$_firstName $_lastName';
-            _birthdayController.text = _birthday;
-            _emailController.text = _email;
-            _contactNumberController.text = _contactNumber;
-          });
-        }
-      } catch (error) {
-        print('Failed to fetch user data: $error');
+      // Fetch forms data
+      final formsSnapshot = await formsRef.orderByChild('document_id').equalTo(user.uid).get();
+
+      String contactFromForms = '';
+      if (formsSnapshot.exists) {
+        // Extract the first matching form's contact_number
+        final formsData = Map<String, dynamic>.from(formsSnapshot.value as Map);
+        final firstForm = formsData.values.first as Map<String, dynamic>;
+        contactFromForms = firstForm['contact_number'] ?? '';
       }
+
+      if (userSnapshot.exists) {
+        final userData = Map<String, dynamic>.from(userSnapshot.value as Map);
+
+        setState(() {
+          _firstName = userData['first_name'] ?? '';
+          _lastName = userData['last_name'] ?? '';
+          _birthday = userData['birthday'] ?? '';
+          _email = user.email ?? '';
+          _contactNumber = contactFromForms; // Use contact number from Forms
+          _profileImageUrl = userData['profile_image_url'];
+
+          _nameController.text = '$_firstName $_lastName';
+          _birthdayController.text = _birthday;
+          _emailController.text = _email;
+          _contactNumberController.text = _contactNumber;
+        });
+      }
+    } catch (error) {
+      print('Failed to fetch user data: $error');
     }
   }
+}
+
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      setState(() {
-        _profileImage = File(image.path);
-      });
-      await _uploadImageToFirebase(image);
+      // Crop the image
+      final croppedImage = await ImageCropper().cropImage(
+        sourcePath: image.path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        compressQuality: 100,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Image',
+            toolbarColor: const Color(0xFF288F13),
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'Crop Image',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+          ),
+        ],
+      );
+
+      if (croppedImage != null) {
+        setState(() {
+          _profileImage = File(croppedImage.path);
+        });
+        await _uploadImageToFirebase(XFile(croppedImage.path));
+      }
     }
   }
 
@@ -317,7 +356,7 @@ class _EditProfileState extends State<EditProfile> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 80),
+                      const SizedBox(width: 60),
                       const Text(
                         'Edit Profile',
                         style: TextStyle(
@@ -333,7 +372,7 @@ class _EditProfileState extends State<EditProfile> {
                   width: 300,
                   height: 660,
                   padding: const EdgeInsets.all(16.0),
-                  margin: const EdgeInsets.only(top: 10.0, bottom: 20.0),
+                  margin: const EdgeInsets.only(top: 40.0, bottom: 30.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16.0),
@@ -354,7 +393,7 @@ class _EditProfileState extends State<EditProfile> {
                           children: [
                             Positioned(
                               top: 20,
-                              left: 20,
+                              left: 75,
                               child: CircleAvatar(
                                 backgroundColor: Colors.black,
                                 radius: 55,
@@ -368,7 +407,7 @@ class _EditProfileState extends State<EditProfile> {
                             ),
                             Positioned(
                               top: 80,
-                              left: 110,
+                              left: 155,
                               child: GestureDetector(
                                 onTap: _pickImage,
                                 child: Container(

@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/Receipt/AdventureReceipt.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -55,18 +55,20 @@ class _AdventureandoutdoorState extends State<Adventureandoutdoor> {
       if (visitsSnapshot.exists) {
         visitsSnapshot.children.forEach((document) {
           final visitData = Map<String, dynamic>.from(document.value as Map);
-          if (visitData['User']['UID'] == uid && visitData['Category'] == 'Adventure and Outdoor Activities') {
-            String barangayCode = visitData['Establishment']['barangay'] ?? 'Unknown';
-            String cityCode = visitData['Establishment']['city'] ?? 'Unknown';
+          final visitorUid = visitData['User']?['UID'] ?? '';
+          
+          if (visitorUid == uid && visitData['Category'] == 'Adventure and Outdoor Activities') {
+            String barangayCode = visitData['Establishment']?['barangay'] ?? 'Unknown';
+            String cityCode = visitData['Establishment']?['city'] ?? 'Unknown';
             String barangay = barangayMap[barangayCode] ?? 'Unknown';
             String city = cityMap[cityCode] ?? 'Unknown';
 
             setState(() {
               accommodationVisits.add({
-                'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
+                'establishmentName': visitData['Establishment']?['establishmentName'] ?? 'N/A',
                 'address': '$city, $barangay',
                 'date': visitData['Date'] ?? 'N/A',
-                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0, // Add TotalSpend field
+                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0,
               });
             });
           }

@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
-import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:testing/Groups/QRCodeDisplayPage.dart';
+
+
 
 class SignupContinue extends StatefulWidget {
   const SignupContinue({super.key});
@@ -57,6 +60,8 @@ class _SignupContinueState extends State<SignupContinue> {
   bool _isLoadingCities = false;
   bool _isLoadingBarangays = false;
   bool _isLoading = false;
+
+  bool _isRegistered = false; // Add this variable
 
   @override
   void initState() {
@@ -131,7 +136,9 @@ class _SignupContinueState extends State<SignupContinue> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    // Added
+    // Dismiss the keyboard
+    FocusScope.of(context).unfocus();
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -140,8 +147,22 @@ class _SignupContinueState extends State<SignupContinue> {
     );
     if (picked != null) {
       setState(() {
-        _birthdayController.text = DateFormat('MMMM dd, yyyy').format(picked);
+        // Format the date as mm/dd/yy
+        _birthdayController.text = DateFormat('MM/dd/yy').format(picked);
       });
+
+      // Save the selected date and date stamp to Firebase Realtime Database
+      try {
+        String userId = _auth.currentUser?.uid ?? 'unknown_user';
+        String dateStamp = DateFormat('MM/dd/yy').format(DateTime.now()); // Create date stamp
+        await _database.child('Users/$userId').update({
+          'birthday': _birthdayController.text,
+          'date_stamp': dateStamp, // Add date stamp
+        });
+        print('Birthday and date stamp saved successfully');
+      } catch (e) {
+        print('Error saving birthday and date stamp: $e');
+      }
     }
   }
 
@@ -238,7 +259,7 @@ class _SignupContinueState extends State<SignupContinue> {
     }
   }
 
-  Future<void> saveFormData(String userId) async {
+  Future<String> saveFormData(String userId) async {
     try {
       // Decode the codes into human-readable names
       String? decodedRegion = _regions.firstWhere(
@@ -261,38 +282,95 @@ class _SignupContinueState extends State<SignupContinue> {
         orElse: () => {'brgy_name': null},
       )['brgy_name'];
 
-      // Save form data to Firebase Realtime Database
+      // Get the current time in 12-hour format
+      String formattedTimestamp = DateFormat('hh:mm a').format(DateTime.now());
+
+      // Save form data to Firebase Realtime Database using the logged-in user's document ID
       await _database.child('Forms/$userId').set({
+        'first_name': _firstName,
+        'last_name': _lastName,
         'birthday': _birthdayController.text,
         'sex': _selectedSex,
-        'contact': _contactController.text,
-        'country': _selectedCountry,
+        'contact_number': '+63${_contactController.text.trim()}',
+        'countryOfResidence': _selectedCountry,
         'region': _selectedCountry == 'Philippines' ? decodedRegion : null,
         'province': _selectedCountry == 'Philippines' ? decodedProvince : null,
         'city': _selectedCountry == 'Philippines' ? decodedCity : null,
         'barangay': _selectedCountry == 'Philippines' ? decodedBarangay : null,
         'purpose_of_travel': _selectedPurpose,
-        'purpose_details':
-            _selectedPurpose == 'Other' ? _specifyPurposeController.text : null,
-        'marital_status': _selectedMaritalStatus,
+        'other_Purpose': _selectedPurpose == 'Other' ? _specifyPurposeController.text : null,
+        'civil_status': _selectedMaritalStatus,
         'nationality': _selectedNationality,
+        'timestamp': formattedTimestamp, // Use the formatted timestamp
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Form submitted successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // Update the user's registration status in the database
+      await _database.child('Users/$userId').update({
+        'isRegistered': true, // Set the registration status to true
+      });
+
+      return userId; // Return the userId
     } catch (e) {
       print('Error saving form data: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error submitting form: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      rethrow;
     }
+  }
+
+  // Add this function to generate QR code dialog
+  void _showQRCodeDialog(String formId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Success',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF114F3A),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Your form has been registered successfully.',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close dialog
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => QRCodeDisplayPage(
+                          formId: formId,
+                          firstName: _firstName ?? '',
+                          lastName: _lastName ?? '',
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF288F13),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -349,7 +427,7 @@ class _SignupContinueState extends State<SignupContinue> {
                     const SizedBox(height: 20),
                     if (_firstName != null && _lastName != null) ...[
                       Text(
-                        'Full Name: $_firstName $_lastName', // Combined first and last name
+                        'Full Name: $_firstName$_lastName', // Combined first and last name
                         style: const TextStyle(
                           color: Color(0xFF114F3A),
                           fontSize: 18,
@@ -366,30 +444,44 @@ class _SignupContinueState extends State<SignupContinue> {
                         ),
                       ),
                       const SizedBox(height: 10), // Added
-                      GestureDetector(
-                        // Added
-                        onTap: () => _selectDate(context),
-                        child: AbsorbPointer(
-                          child: TextFormField(
-                            controller: _birthdayController,
-                            decoration: InputDecoration(
-                              hintText: 'Select Birthday',
-                              filled: true,
-                              fillColor: const Color(0xFF5CA14E),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF5CA14E),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_today,
+                                color: Colors.white),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _birthdayController,
+                                readOnly: true,
+                                onTap: () => _selectDate(context),
+                                decoration: InputDecoration(
+                                  hintText: 'Select Birthday',
+                                  filled: true,
+                                  fillColor: const Color(0xFF5CA14E),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  hintStyle:
+                                      const TextStyle(color: Colors.white),
+                                ),
+                                style: const TextStyle(color: Colors.white),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please select a birthday';
+                                  }
+                                  return null;
+                                },
                               ),
-                              hintStyle: const TextStyle(color: Colors.white),
                             ),
-                            style: const TextStyle(color: Colors.white),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select a birthday';
-                              }
-                              return null;
-                            },
-                          ),
+                          ],
                         ),
                       ),
 
@@ -444,29 +536,78 @@ class _SignupContinueState extends State<SignupContinue> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Contact Field
-                      const Text(
-                        'Contact',
-                        style: TextStyle(
-                          color: Color(0xFF114F3A),
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(height: 20),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 0.0),
+                        child: Text(
+                          'Contact Information',
+                          style: TextStyle(
+                            color: Color(0xFF114F3A),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _contactController,
-                        decoration: InputDecoration(
-                          hintText: 'Enter Contact Number',
-                          filled: true,
-                          fillColor: const Color(0xFF5CA14E),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          hintStyle: const TextStyle(color: Colors.white),
+                      const SizedBox(height: 5),
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF5CA14E),
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        style: const TextStyle(color: Colors.white),
+                        child: Row(
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Icon(
+                                Icons.phone,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              child: const Text(
+                                '+63 PH',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _contactController,
+                                style: const TextStyle(color: Colors.white),
+                                keyboardType: TextInputType.number,
+                                maxLength: 10,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(10),
+                                ],
+                                decoration: const InputDecoration(
+                                  hintText: 'Contact Number',
+                                  hintStyle: TextStyle(color: Colors.white),
+                                  border: InputBorder.none,
+                                  counterText:
+                                      '', // This hides the character counter
+                                  contentPadding:
+                                      EdgeInsets.symmetric(vertical: 15),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your contact number';
+                                  }
+                                  if (value.length < 10) {
+                                    return 'Contact number must be 10 digits';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 20),
 
@@ -550,12 +691,16 @@ class _SignupContinueState extends State<SignupContinue> {
                                 )
                               : DropdownButtonFormField<String>(
                                   value: _selectedRegionCode,
+                                  isExpanded: true,
                                   items: _regions.map((region) {
                                     return DropdownMenuItem<String>(
                                       value: region['region_code'],
-                                      child: Text(region['region_name'],
-                                          style: const TextStyle(
-                                              color: Colors.white)),
+                                      child: Text(
+                                        region['region_name'],
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (value) async {
@@ -959,21 +1104,167 @@ class _SignupContinueState extends State<SignupContinue> {
                           onPressed: _isLoading
                               ? null
                               : () async {
-                                  if (_formKey.currentState?.validate() ??
-                                      false) {
+                                  bool isValid = true;
+                                  setState(() {
+                                    // Check all required fields
+                                    if (_birthdayController.text.isEmpty) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Please select your birthday'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      isValid = false;
+                                    }
+                                    if (_selectedSex == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content:
+                                              Text('Please select your sex'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      isValid = false;
+                                    }
+                                    if (_contactController.text.isEmpty) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Please enter your contact number'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      isValid = false;
+                                    }
+                                    if (_selectedCountry == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Please select your country'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      isValid = false;
+                                    }
+                                    // Add Philippines-specific validations
+                                    if (_selectedCountry == 'Philippines') {
+                                      if (_selectedRegionCode == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Please select your region'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                        isValid = false;
+                                      }
+                                      if (_selectedProvinceCode == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Please select your province'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                        isValid = false;
+                                      }
+                                      if (_selectedCityCode == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content:
+                                                Text('Please select your city'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                        isValid = false;
+                                      }
+                                      if (_selectedBarangayCode == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Please select your barangay'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                        isValid = false;
+                                      }
+                                    }
+                                    if (_selectedPurpose == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Please select your purpose of travel'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      isValid = false;
+                                    }
+                                    // Check if "Other" is selected and details are provided
+                                    if (_selectedPurpose == 'Other' &&
+                                        _specifyPurposeController
+                                            .text.isEmpty) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Please specify your purpose of travel'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      isValid = false;
+                                    }
+                                    if (_selectedMaritalStatus == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Please select your marital status'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      isValid = false;
+                                    }
+                                    if (_selectedNationality == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Please select your nationality'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      isValid = false;
+                                    }
+                                  });
+
+                                  if (isValid &&
+                                      (_formKey.currentState?.validate() ??
+                                          false)) {
                                     setState(() {
-                                      _isLoading = true; // Start loading
+                                      _isLoading = true;
                                     });
                                     try {
                                       String userId = FirebaseAuth
                                               .instance.currentUser?.uid ??
                                           'unknown_user';
-                                      await saveFormData(userId);
+                                      String formId = await saveFormData(
+                                          userId); // Capture formId
                                       setState(() {
-                                        _isLoading = false; // Stop loading
+                                        _isLoading = false;
+                                        _isRegistered = true; // Update registration status
                                       });
 
-                                      // Show success dialog
+                                      // Show success dialog with "View QR Code" button
                                       showDialog(
                                         context: context,
                                         builder: (context) {
@@ -990,11 +1281,15 @@ class _SignupContinueState extends State<SignupContinue> {
                                                       .pushReplacement(
                                                     MaterialPageRoute(
                                                       builder: (context) =>
-                                                          UserdashboardPageState(),
+                                                          QRCodeDisplayPage(
+                                                        formId: formId,
+                                                        firstName: _firstName ?? '',
+                                                        lastName: _lastName ?? '',
+                                                      ),
                                                     ),
                                                   );
                                                 },
-                                                child: const Text('OK'),
+                                                child: const Text('View QR Code'),
                                               ),
                                             ],
                                           );
@@ -1002,8 +1297,7 @@ class _SignupContinueState extends State<SignupContinue> {
                                       );
                                     } catch (e) {
                                       setState(() {
-                                        _isLoading =
-                                            false; // Stop loading in case of error
+                                        _isLoading = false;
                                       });
                                       showDialog(
                                         context: context,
@@ -1015,8 +1309,7 @@ class _SignupContinueState extends State<SignupContinue> {
                                             actions: [
                                               TextButton(
                                                 onPressed: () {
-                                                  Navigator.of(context)
-                                                      .pop(); // Close dialog
+                                                  Navigator.of(context).pop();
                                                 },
                                                 child: const Text('OK'),
                                               ),

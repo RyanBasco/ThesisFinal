@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/Receipt/Receiptdetailed.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -51,41 +51,82 @@ class _AccommodationState extends State<Accommodation> {
     DatabaseReference visitsRef = FirebaseDatabase.instance.ref('Visits');
 
     try {
-      DataSnapshot visitsSnapshot = await visitsRef.get();
+      setState(() {
+        accommodationVisits.clear();
+      });
 
-      if (visitsSnapshot.exists) {
-        visitsSnapshot.children.forEach((document) {
-          final visitData = Map<String, dynamic>.from(document.value as Map);
-          if (visitData['User']['UID'] == uid && visitData['Category'] == 'Accommodation') {
-            String barangayCode = visitData['Establishment']['barangay'] ?? 'Unknown';
-            String cityCode = visitData['Establishment']['city'] ?? 'Unknown';
-            String barangay = barangayMap[barangayCode] ?? 'Unknown';
-            String city = cityMap[cityCode] ?? 'Unknown';
+      final DataSnapshot visitsSnapshot = await visitsRef.get();
+      
+      // Print debug information
+      print("Snapshot value type: ${visitsSnapshot.value.runtimeType}");
+      print("Snapshot exists: ${visitsSnapshot.exists}");
+      print("Snapshot value: ${visitsSnapshot.value}");
 
-            setState(() {
-              accommodationVisits.add({
-                'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
-                'address': '$city, $barangay',
-                'date': visitData['Date'] ?? 'N/A',
-                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0, // Add TotalSpend field
-              });
-            });
-          }
+      if (!visitsSnapshot.exists || visitsSnapshot.value == null) {
+        setState(() {
+          accommodationVisits.add({
+            'establishmentName': 'Currently no expense in this Accommodation category.',
+            'address': '',
+            'date': '',
+            'totalSpend': 0.0,
+          });
+          isLoading = false;
         });
+        return;
       }
+
+      final data = Map<String, dynamic>.from(visitsSnapshot.value as Map);
+      
+      data.forEach((key, visitData) {
+        try {
+          if (visitData == null) return;
+          
+          final Map<String, dynamic> visit = Map<String, dynamic>.from(visitData);
+          final userInfo = visit['User'];
+          
+          if (userInfo == null) return;
+          
+          final Map<String, dynamic> user = Map<String, dynamic>.from(userInfo);
+          
+          if (user['UID'] != uid || visit['Category'] != 'Accommodation') return;
+          
+          final establishmentInfo = visit['Establishment'];
+          if (establishmentInfo == null) return;
+          
+          final Map<String, dynamic> establishment = Map<String, dynamic>.from(establishmentInfo);
+          
+          final String barangayCode = establishment['barangay']?.toString() ?? 'Unknown';
+          final String cityCode = establishment['city']?.toString() ?? 'Unknown';
+          final String barangay = barangayMap[barangayCode] ?? 'Unknown';
+          final String city = cityMap[cityCode] ?? 'Unknown';
+
+          setState(() {
+            accommodationVisits.add({
+              'establishmentName': establishment['establishmentName']?.toString() ?? 'N/A',
+              'address': '$city, $barangay',
+              'date': visit['Date']?.toString() ?? 'N/A',
+              'totalSpend': double.tryParse(visit['TotalSpend']?.toString() ?? '0.0') ?? 0.0,
+            });
+          });
+        } catch (e) {
+          print("Error processing visit data: $e");
+        }
+      });
 
       if (accommodationVisits.isEmpty) {
         setState(() {
           accommodationVisits.add({
-            'establishmentName': 'Currently no expense in this accommodation category.',
+            'establishmentName': 'Currently no expense in this Accommodation category.',
             'address': '',
             'date': '',
-            'totalSpend': '', // Placeholder TotalSpend value
+            'totalSpend': 0.0,
           });
         });
       }
-    } catch (e) {
+
+    } catch (e, stackTrace) {
       print("Error fetching accommodation visits: $e");
+      print("Stack trace: $stackTrace");
     } finally {
       setState(() {
         isLoading = false;

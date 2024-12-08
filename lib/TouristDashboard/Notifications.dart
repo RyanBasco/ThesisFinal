@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({Key? key}) : super(key: key);
@@ -17,7 +18,12 @@ class _NotificationsState extends State<Notifications> {
   int _selectedIndex = 0;
   final DatabaseReference _databaseRef = FirebaseDatabase.instance.ref();
   bool _isDialogVisible = false;
-  List<Map<String, String?>> _pendingReviews = [];
+  List<Map<String, dynamic>> _pendingReviews = [];
+  Map<String, double> _categoryRatings = {};
+  bool _showRatingScreen = false;
+  String? _currentReviewKey;
+  double _rating = 0.0;
+  String _comment = '';
 
   @override
   void initState() {
@@ -26,147 +32,79 @@ class _NotificationsState extends State<Notifications> {
   }
 
   void _checkForPendingReviews() {
-    _databaseRef.child('pendingReviews').onChildAdded.listen((event) {
+    _databaseRef.child('PendingReviews').onChildAdded.listen((event) {
       final pendingReview = event.snapshot.value as Map<dynamic, dynamic>;
       if (pendingReview['status'] == 'pending') {
         setState(() {
           _pendingReviews.add({
             'reviewKey': event.snapshot.key,
-            'establishmentId': pendingReview['establishment_id']
+            'establishmentId': pendingReview['establishment_id'],
+            'categories': pendingReview['categories']
           });
         });
       }
     });
+
+    _databaseRef.child('PendingReviews').onChildRemoved.listen((event) {
+      setState(() {
+        _pendingReviews.removeWhere((review) => review['reviewKey'] == event.snapshot.key);
+      });
+    });
   }
 
-  void _showReviewDialog(String reviewKey) {
-    double rating = 0.0;
-    String comment = '';
-
-    _isDialogVisible = true;
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          titlePadding: const EdgeInsets.only(top: 16, left: 16, right: 8),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Give Feedback',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _isDialogVisible = false;
-                },
-                child: const Icon(Icons.close, color: Colors.grey),
-              ),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Please provide your rating:'),
-                const SizedBox(height: 16),
-                RatingBar.builder(
-                  initialRating: 0,
-                  minRating: 1,
-                  direction: Axis.horizontal,
-                  allowHalfRating: true,
-                  itemCount: 5,
-                  itemBuilder: (context, _) => const Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                  ),
-                  onRatingUpdate: (newRating) {
-                    rating = newRating;
-                  },
-                ),
-                const SizedBox(height: 16),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Add Comments, if any:',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: TextField(
-                    onChanged: (text) {
-                      comment = text;
-                    },
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter your comments here...',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          actions: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF288F13),
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () {
-                  _submitReview(reviewKey, rating, comment);
-                  Navigator.of(context).pop();
-                  _isDialogVisible = false;
-                },
-                child: const Text('Submit'),
-              ),
-            ),
-          ],
-        );
-      },
-    ).then((_) {
-      _isDialogVisible = false;
+  void _showReviewDialog(String reviewKey, List<dynamic> categories) {
+    setState(() {
+      _showRatingScreen = true;
+      _currentReviewKey = reviewKey;
+      _categoryRatings = Map.fromEntries(
+        categories.map((category) => MapEntry(category['category'].toString(), 0.0))
+      );
     });
   }
 
   void _submitReview(String reviewKey, double rating, String comment) async {
     try {
-      final pendingReviewSnapshot = await _databaseRef.child('pendingReviews/$reviewKey').get();
+      final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
+      if (currentUserId == null) {
+        throw Exception('No user logged in');
+      }
+
+      final pendingReviewSnapshot = await _databaseRef.child('PendingReviews/$reviewKey').get();
       String? establishmentId = pendingReviewSnapshot.value != null
           ? (pendingReviewSnapshot.value as Map)['establishment_id']
           : null;
 
       if (establishmentId != null) {
-        final userSnapshot = await _databaseRef.child('Users/$reviewKey').get();
+        final userSnapshot = await _databaseRef.child('Users/$currentUserId').get();
         if (userSnapshot.exists) {
           final userData = Map<String, dynamic>.from(userSnapshot.value as Map);
           String firstName = userData['first_name'] ?? 'User';
           String lastName = userData['last_name'] ?? '';
 
           await _databaseRef.child('reviews').push().set({
-            'rating': rating,
-            'comment': comment,
+            'categoryRatings': _categoryRatings,
+            'comment': _comment,
             'first_name': firstName,
             'last_name': lastName,
             'establishment_id': establishmentId,
-            'timestamp': DateTime.now().millisecondsSinceEpoch,
+            'timestamp': ServerValue.timestamp,
+            'user_id': currentUserId,
           });
 
-          await _databaseRef.child('pendingReviews/$reviewKey').update({'status': 'completed'});
+          await _databaseRef.child('PendingReviews/$reviewKey').update({'status': 'completed'});
 
           setState(() {
             _pendingReviews.removeWhere((review) => review['reviewKey'] == reviewKey);
+            _showRatingScreen = false;
+            _currentReviewKey = null;
           });
         }
       }
     } catch (e) {
       print('Error submitting review: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to submit review. Please try again.')),
+      );
     }
   }
 
@@ -205,112 +143,262 @@ class _NotificationsState extends State<Notifications> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFFEEFFA9),
-                Color(0xFFDBFF4C),
-                Color(0xFF51F643),
-              ],
-              stops: [0.15, 0.54, 1.0],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+    if (_showRatingScreen) {
+      return GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFEEFFA9),
+                  Color(0xFFDBFF4C),
+                  Color(0xFF51F643),
+                ],
+                stops: [0.15, 0.54, 1.0],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-                child: Row(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.arrow_back, color: Colors.black),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showRatingScreen = false;
+                              _currentReviewKey = null;
+                              _rating = 0.0;
+                              _comment = '';
+                            });
+                          },
+                          child: const CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(Icons.arrow_back, color: Colors.black),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Text(
+                          'Give Feedback',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    
+                    const Text(
+                      'Rate each category:',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    ..._categoryRatings.entries.map((entry) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          entry.key,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        RatingBar.builder(
+                          initialRating: entry.value,
+                          minRating: 1,
+                          direction: Axis.horizontal,
+                          allowHalfRating: false,
+                          itemCount: 5,
+                          itemSize: 30,
+                          itemBuilder: (context, _) => const Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          ),
+                          onRatingUpdate: (rating) {
+                            setState(() {
+                              _categoryRatings[entry.key] = rating;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    )).toList(),
+
+                    const Text(
+                      'Overall Comments:',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      onChanged: (text) {
+                        setState(() {
+                          _comment = text;
+                        });
+                      },
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter your comments here...',
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
                     ),
-                    const SizedBox(width: 80),
-                    const Text(
-                      'Notifications',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                    const SizedBox(height: 24),
+                    
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF288F13),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        onPressed: () {
+                          _submitReview(_currentReviewKey!, _rating, _comment);
+                          setState(() {
+                            _showRatingScreen = false;
+                            _currentReviewKey = null;
+                          });
+                        },
+                        child: const Text('Submit Review'),
                       ),
                     ),
                   ],
                 ),
               ),
-              if (_pendingReviews.isNotEmpty)
-                ..._pendingReviews.map((review) {
-                  return GestureDetector(
-                    onTap: () => _showReviewDialog(review['reviewKey']!),
-                    child: Container(
-                      padding: const EdgeInsets.all(16.0),
-                      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4.0,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFEEFFA9),
+                  Color(0xFFDBFF4C),
+                  Color(0xFF51F643),
+                ],
+                stops: [0.15, 0.54, 1.0],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.arrow_back, color: Colors.black),
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.notifications, color: Colors.amber),
-                          const SizedBox(width: 12),
-                          Flexible(
-                            child: Text(
-                              'You have a pending review to complete',
-                              style: const TextStyle(fontSize: 16, color: Colors.black),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                      const SizedBox(width: 110),
+                      const Text(
+                        'Support',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_pendingReviews.isNotEmpty)
+                  ..._pendingReviews.map((review) {
+                    return GestureDetector(
+                      onTap: () => _showReviewDialog(
+                        review['reviewKey'] as String,
+                        (review['categories'] ?? []) as List<dynamic>
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(16.0),
+                        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 4.0,
+                              offset: Offset(0, 2),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Rate Your Experience',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Share your feedback about your recent visit',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }).toList()
-              else
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      'No Notifications Available',
-                      style: TextStyle(
-                        fontSize: 21,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
+                    );
+                  }).toList()
+                else
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'No Pending Reviews',
+                        style: TextStyle(
+                          fontSize: 21,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: const Color(0xFF2C812A),
-        unselectedItemColor: Colors.black,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.qr_code), label: 'My QR'),
-          BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: 'Wallet'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          selectedItemColor: const Color(0xFF2C812A),
+          unselectedItemColor: Colors.black,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.qr_code), label: 'My QR'),
+            BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: 'Wallet'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          ],
+        ),
       ),
     );
   }

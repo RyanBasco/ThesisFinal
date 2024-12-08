@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/Receipt/FoodReceipt.dart';
-import 'package:testing/TouristDashboard/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -55,19 +55,26 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
 
       if (visitsSnapshot.exists) {
         visitsSnapshot.children.forEach((document) {
-          final visitData = Map<String, dynamic>.from(document.value as Map);
-          if (visitData['User']['UID'] == uid && visitData['Category'] == 'Food and Beverages') {
-            String barangayCode = visitData['Establishment']['barangay'] ?? 'Unknown';
-            String cityCode = visitData['Establishment']['city'] ?? 'Unknown';
+          final visitData = (document.value as Map<Object?, Object?>).map(
+            (key, value) => MapEntry(key.toString(), value),
+          );
+          
+          final userData = visitData['User'] as Map?;
+          final visitUid = userData?['UID'];
+          
+          if (visitUid == uid && visitData['Category'] == 'Food and Beverages') {
+            final establishment = visitData['Establishment'] as Map?;
+            String barangayCode = establishment?['barangay']?.toString() ?? 'Unknown';
+            String cityCode = establishment?['city']?.toString() ?? 'Unknown';
             String barangay = barangayMap[barangayCode] ?? 'Unknown';
             String city = cityMap[cityCode] ?? 'Unknown';
 
             setState(() {
               foodAndBeverageVisits.add({
-                'establishmentName': visitData['Establishment']['establishmentName'] ?? 'N/A',
+                'establishmentName': establishment?['establishmentName']?.toString() ?? 'N/A',
                 'address': '$city, $barangay',
-                'date': visitData['Date'] ?? 'N/A',
-                'totalSpend': visitData['TotalSpend']?.toDouble() ?? 0.0, // Include totalSpend
+                'date': visitData['Date']?.toString() ?? 'N/A',
+                'totalSpend': double.tryParse(visitData['TotalSpend']?.toString() ?? '0.0') ?? 0.0,
               });
             });
           }
@@ -80,7 +87,7 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
             'establishmentName': 'Currently no expense in this Food and Beverages category.',
             'address': '',
             'date': '',
-            'totalSpend': '', // Default value
+            'totalSpend': '',
           });
         });
       }
