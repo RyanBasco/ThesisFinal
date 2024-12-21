@@ -65,6 +65,8 @@ dependencies:
   curved_navigation_bar: ^1.0.3
   image_cropper: ^8.0.2
   provider: ^6.1.2
+  image_gallery_saver: ^2.0.3
+  fl_chart: ^0.69.2
   
 
   

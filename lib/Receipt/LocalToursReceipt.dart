@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:testing/Groups/QrPage.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:testing/Groups/QrPage.dart' as qr;
 
 class LocalDetailPage extends StatefulWidget {
   final String establishmentName;
@@ -41,7 +42,7 @@ class _LocalDetailPageStateState
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => QRPage()),
+          MaterialPageRoute(builder: (context) => const qr.QRPage()),
         );
         break;
       case 2:

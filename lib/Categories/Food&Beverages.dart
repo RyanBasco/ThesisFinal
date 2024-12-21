@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/Receipt/FoodReceipt.dart';
-import 'package:testing/Groups/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart' as qr; // Add this
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -115,7 +115,7 @@ class _FoodandbeveragesState extends State<Foodandbeverages> {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => QRPage()),
+          MaterialPageRoute(builder: (context) => qr.QRPage()),
         );
         break;
       case 2:

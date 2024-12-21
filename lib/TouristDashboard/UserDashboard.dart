@@ -5,13 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/EstablishmentDetails/Details.dart';
-import 'package:testing/Groups/Groups.dart';
-import 'package:testing/TouristDashboard/Notifications.dart';
-import 'package:testing/Groups/QrPage.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/Groups/History.dart';
+import 'package:testing/Groups/Travel.dart';
+import 'package:testing/Expense%20Tracker/Transaction.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 
 class UserdashboardPageState extends StatefulWidget {
   const UserdashboardPageState({super.key});
@@ -60,13 +60,24 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     "Jordan": "Jordan (Capital)",
   };
 
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
+    _initializeAppCheck();
     _searchController.addListener(_filterEstablishments);
     _fetchUserData();
     _fetchEstablishments();
     _loadLocationNames();
+  }
+
+  Future<void> _initializeAppCheck() async {
+    await FirebaseAppCheck.instance.activate(
+      webProvider: ReCaptchaV3Provider('your-recaptcha-site-key'),
+      androidProvider: AndroidProvider.debug,
+      appleProvider: AppleProvider.appAttest,
+    );
   }
 
   @override
@@ -127,7 +138,7 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
     });
   }
 
-  void _fetchUserData() async {
+  Future<void> _fetchUserData() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
@@ -141,10 +152,12 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
           String emailFromDatabase = userData?['email'] ?? '';
 
           if (emailFromDatabase.toLowerCase() == user.email!.toLowerCase()) {
-            setState(() {
-              _firstName = userData?['first_name'] ?? '';
-              _lastName = userData?['last_name'] ?? '';
-            });
+            if (mounted) { // Check if the widget is still mounted
+              setState(() {
+                _firstName = userData?['first_name'] ?? '';
+                _lastName = userData?['last_name'] ?? '';
+              });
+            }
             break;
           }
         }
@@ -176,15 +189,39 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
   }
 
   Future<void> _fetchEstablishments() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      DatabaseReference establishmentsRef =
-          FirebaseDatabase.instance.ref().child('establishments');
-      DataSnapshot snapshot = await establishmentsRef.get();
+      // Fetch establishments and user bookmarks in parallel
+      final Future<DataSnapshot> establishmentsFuture = 
+          FirebaseDatabase.instance.ref().child('establishments').get();
+      
+      final User? user = FirebaseAuth.instance.currentUser;
+      final Future<DataSnapshot>? bookmarksFuture = user != null 
+          ? FirebaseDatabase.instance
+              .ref()
+              .child('Users')
+              .child(user.uid)
+              .child('Bookmarks')
+              .get()
+          : null;
 
-      if (snapshot.exists) {
+      // Wait for both futures to complete
+      final List<DataSnapshot> results = await Future.wait([
+        establishmentsFuture,
+        if (bookmarksFuture != null) bookmarksFuture,
+      ]);
+
+      final establishmentsSnapshot = results[0];
+      final bookmarksSnapshot = bookmarksFuture != null ? results[1] : null;
+
+      if (establishmentsSnapshot.exists) {
         List<Map<String, dynamic>> establishmentsList = [];
+        List<Future<void>> imagesFuture = []; // For parallel image loading
 
-        for (var establishmentSnapshot in snapshot.children) {
+        for (var establishmentSnapshot in establishmentsSnapshot.children) {
           Map<String, dynamic> establishmentData =
               Map<String, dynamic>.from(establishmentSnapshot.value as Map);
           String establishmentId = establishmentSnapshot.key ?? '';
@@ -194,59 +231,53 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
             'establishmentId': establishmentId,
           });
 
-          // Fetch image for each establishment
-          try {
-            String imagePath =
-                'Establishment/$establishmentId/profile_image/latest_image.jpg';
-            String downloadUrl = await FirebaseStorage.instance
+          // Add image fetch to parallel loading queue
+          imagesFuture.add(
+            FirebaseStorage.instance
                 .ref()
-                .child(imagePath)
-                .getDownloadURL();
-            establishmentImageUrls[establishmentId] = downloadUrl;
-          } catch (e) {
-            print("No image found for $establishmentId: $e");
+                .child('Establishment/$establishmentId/profile_image/latest_image.jpg')
+                .getDownloadURL()
+                .then((downloadUrl) {
+                  establishmentImageUrls[establishmentId] = downloadUrl;
+                })
+                .catchError((e) {
+                  print("No image found for $establishmentId: $e");
+                })
+          );
+        }
+
+        // Process bookmarks
+        _isBookmarked.clear();
+        _isBookmarked.addAll(List<bool>.filled(establishmentsList.length, false));
+
+        if (bookmarksSnapshot != null && bookmarksSnapshot.exists) {
+          for (var bookmark in bookmarksSnapshot.children) {
+            String bookmarkKey = bookmark.key ?? '';
+            int index = int.tryParse(bookmarkKey.split('_')[1] ?? '') ?? -1;
+            if (index >= 0 && index < _isBookmarked.length) {
+              _isBookmarked[index] = true;
+            }
           }
         }
 
-        setState(() {
-          _establishments = establishmentsList;
-          _filteredEstablishments = _establishments;
-          _isBookmarked.clear();
-          _isBookmarked
-              .addAll(List<bool>.filled(_establishments.length, false));
-        });
+        if (mounted) { // Check if the widget is still mounted
+          setState(() {
+            _establishments = establishmentsList;
+            _filteredEstablishments = _establishments;
+            _isLoading = false;
+          });
+        }
 
-        await _loadUserBookmarks();
+        // Wait for all images to load in parallel
+        await Future.wait(imagesFuture);
       }
     } catch (error) {
       print('Failed to fetch establishments: $error');
-    }
-  }
-
-  Future<void> _loadUserBookmarks() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      DatabaseReference bookmarksRef = FirebaseDatabase.instance
-          .ref()
-          .child('Users')
-          .child(user.uid)
-          .child('Bookmarks');
-      DataSnapshot bookmarksSnapshot = await bookmarksRef.get();
-
-      if (bookmarksSnapshot.exists) {
-        _isBookmarked.clear();
-        _isBookmarked.addAll(List<bool>.filled(_establishments.length, false));
-
-        for (var bookmark in bookmarksSnapshot.children) {
-          String bookmarkKey = bookmark.key ?? '';
-          int index = int.tryParse(bookmarkKey.split('_')[1] ?? '') ?? -1;
-          if (index >= 0 && index < _isBookmarked.length) {
-            _isBookmarked[index] = true;
-          }
-        }
+      if (mounted) { // Check if the widget is still mounted
+        setState(() {
+          _isLoading = false;
+        });
       }
-
-      setState(() {}); // Refresh UI with updated bookmarks
     }
   }
 
@@ -261,13 +292,13 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
         page = UserdashboardPageState();
         break;
       case 1:
-        page = GroupPage();
-        break;
-      case 2:
         page = QRPage();
         break;
-      case 3:
+      case 2:
         page = RegistrationPage();
+        break;
+      case 3:
+        page = HistoryPage();
         break;
       case 4:
         page = TouristprofilePage();
@@ -280,10 +311,10 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation1, animation2) => page,
-        transitionDuration: Duration.zero, // No transition animation
-        reverseTransitionDuration: Duration.zero, // No reverse transition animation
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return child; // Directly return the child without any transition
+          return child;
         },
       ),
     );
@@ -366,8 +397,8 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.group, size: 24, color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey),
-              Text('Groups', style: TextStyle(color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey),
+              Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
             ],
           ),
           Column(
@@ -427,16 +458,6 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.notifications, size: 30),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Notifications()),
-                        );
-                      },
                     ),
                   ],
                 ),
@@ -657,16 +678,28 @@ class _UserdashboardPageState extends State<UserdashboardPageState> {
                   ),
                 ),
               ),
-              const SizedBox(height: 0),
-              for (int i = 0; i < _filteredEstablishments.length; i++)
-                if ((_selectedLocationIndex == null ||
-                    cityMap[_filteredEstablishments[i]['city']] ==
-                        (cityNameMapping[_locations[_selectedLocationIndex!]] ??
-                            _locations[_selectedLocationIndex!])))
-                  _buildResultBoxWithInitial(
-                    _filteredEstablishments[i]['establishmentName'],
-                    i == 0,
-                    i,
+              _isLoading 
+                ? Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      child: const CircularProgressIndicator(
+                        color: Color(0xFF2C812A),
+                      ),
+                    ),
+                  )
+                : Column(
+                    children: [
+                      for (int i = 0; i < _filteredEstablishments.length; i++)
+                        if ((_selectedLocationIndex == null ||
+                            cityMap[_filteredEstablishments[i]['city']] ==
+                                (cityNameMapping[_locations[_selectedLocationIndex!]] ??
+                                    _locations[_selectedLocationIndex!])))
+                          _buildResultBoxWithInitial(
+                            _filteredEstablishments[i]['establishmentName'],
+                            i == 0,
+                            i,
+                          ),
+                    ],
                   ),
               const SizedBox(height: 20),
             ],

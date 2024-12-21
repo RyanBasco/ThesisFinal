@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:testing/Authentication/TouristLogin.dart';
-import 'package:testing/Groups/Groups.dart';
+import 'package:testing/Groups/History.dart';
 import 'package:testing/Groups/QrPage.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/TouristDashboard/Notifications.dart';
@@ -72,19 +72,18 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
     });
 
     Widget page;
-
     switch (index) {
       case 0:
         page = UserdashboardPageState();
         break;
       case 1:
-        page = GroupPage();
-        break;
-      case 2:
         page = QRPage();
         break;
-      case 3:
+      case 2:
         page = RegistrationPage();
+        break;
+      case 3:
+        page = HistoryPage();
         break;
       case 4:
         page = TouristprofilePage();
@@ -97,10 +96,10 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation1, animation2) => page,
-        transitionDuration: Duration.zero, // No transition animation
-        reverseTransitionDuration: Duration.zero, // No reverse transition animation
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return child; // Directly return the child without any transition
+          return child;
         },
       ),
     );
@@ -115,42 +114,42 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
   buttonBackgroundColor: Colors.white,
   height: 65,
   index: _selectedIndex,
-  animationDuration: Duration(milliseconds: 600), // Slower animation duration
-  animationCurve: Curves.easeInOut, // Smooth curve animation for the nav bar
+  animationDuration: Duration(milliseconds: 600),
+  animationCurve: Curves.easeInOut,
   items: <Widget>[
     Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+        Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? Color(0xFF27AE60) : Colors.grey),
+        Text('Home', style: TextStyle(color: _selectedIndex == 0 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
       ],
     ),
     Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.group, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('Groups', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+        Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey),
+        Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
       ],
     ),
     Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+        Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? Color(0xFF27AE60) : Colors.grey),
+        Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
       ],
     ),
     Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+        Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? Color(0xFF27AE60) : Colors.grey),
+        Text('History', style: TextStyle(color: _selectedIndex == 3 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
       ],
     ),
     Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+        Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? Color(0xFF27AE60) : Colors.grey),
+        Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
       ],
     ),
   ],

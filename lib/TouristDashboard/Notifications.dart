@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
-import 'package:testing/Groups/QrPage.dart';
+import 'package:testing/Expense%20Tracker/Transaction.dart';
+import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 4;
   final DatabaseReference _databaseRef = FirebaseDatabase.instance.ref();
   bool _isDialogVisible = false;
   List<Map<String, dynamic>> _pendingReviews = [];
@@ -113,32 +114,38 @@ class _NotificationsState extends State<Notifications> {
       _selectedIndex = index;
     });
 
+    Widget page;
     switch (index) {
       case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-        );
+        page = UserdashboardPageState();
         break;
       case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => QRPage()),
-        );
+        page = QRPage();
         break;
       case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
-        );
+        page = RegistrationPage();
         break;
       case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => TouristprofilePage()),
-        );
+        page = RegistrationPage();
         break;
+      case 4:
+        page = TouristprofilePage();
+        break;
+      default:
+        return;
     }
+
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => page,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return child;
+        },
+      ),
+    );
   }
 
   @override
@@ -311,7 +318,7 @@ class _NotificationsState extends State<Notifications> {
                           child: Icon(Icons.arrow_back, color: Colors.black),
                         ),
                       ),
-                      const SizedBox(width: 110),
+                      const SizedBox(width: 85),
                       const Text(
                         'Support',
                         style: TextStyle(
@@ -385,19 +392,52 @@ class _NotificationsState extends State<Notifications> {
             ),
           ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: const Color(0xFF2C812A),
-          unselectedItemColor: Colors.black,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.qr_code), label: 'My QR'),
-            BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: 'Wallet'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        bottomNavigationBar: CurvedNavigationBar(
+          backgroundColor: const Color(0xFF51F643),
+          color: Colors.white,
+          buttonBackgroundColor: Colors.white,
+          height: 65,
+          index: _selectedIndex,
+          animationDuration: Duration(milliseconds: 600),
+          animationCurve: Curves.easeInOut,
+          items: <Widget>[
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? Color(0xFF27AE60) : Colors.grey),
+                Text('Home', style: TextStyle(color: _selectedIndex == 0 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey),
+                Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? Color(0xFF27AE60) : Colors.grey),
+                Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? Color(0xFF27AE60) : Colors.grey),
+                Text('History', style: TextStyle(color: _selectedIndex == 3 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? Color(0xFF27AE60) : Colors.grey),
+                Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+              ],
+            ),
           ],
+          onTap: _onItemTapped,
         ),
       ),
     );

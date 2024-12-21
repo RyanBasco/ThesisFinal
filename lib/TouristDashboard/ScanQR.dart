@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/Expense%20Tracker/Transaction.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 

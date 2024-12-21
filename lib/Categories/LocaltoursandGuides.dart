@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/Receipt/LocalToursReceipt.dart';
-import 'package:testing/Groups/QrPage.dart';
+import 'package:testing/Groups/QrPage.dart' as qr; // Add this
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -113,7 +113,7 @@ class _LocaltoursandguidesState extends State<Localtoursandguides> {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => QRPage()),
+          MaterialPageRoute(builder: (context) => qr.QRPage()),
         );
         break;
       case 2:

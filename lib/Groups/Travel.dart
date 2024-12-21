@@ -195,88 +195,89 @@ class _QRPageState extends State<QRPage> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                child: Column(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const Padding(
+                padding:
+                     EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                child: Row(
                   children: [
-                    const Padding(
-                      padding:
-                           EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-                      child: Row(
-                        children: [
-                           SizedBox(width: 10),
-                           Expanded(
-                            child: Text(
-                              'QR Reader',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: Column(
-                        children: [
-                          // Only show Travel Registration if not registered
-                          if (!_isRegistered) 
-                            _buildTravelRegistrationBox(),
-
-                          // Show QR Code button if registered
-                          if (_isRegistered)
-                            GestureDetector(
-                              onTap: () {
-                                _viewQRCode('sampleFormId', 'John', 'Doe');
-                              },
-                              child: Container(
-                                height: 120,
-                                width: 280,
-                                margin: const EdgeInsets.symmetric(vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(9),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 7),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.qr_code,
-                                      size: 60,
-                                      color: Color(0xFF288F13),
-                                    ),
-                                    const SizedBox(width: 15),
-                                    const Text(
-                                      'View QR Code',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                        ],
+                     SizedBox(width: 10),
+                     Expanded(
+                      child: Text(
+                        'QR Reader',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 20),
+              Center(
+                child: Column(
+                  children: [
+                    _isLoading 
+                      ? CircularProgressIndicator()
+                      : Column(
+                          children: [
+                            if (!_isRegistered) 
+                              _buildTravelRegistrationBox(),
+                            if (_isRegistered)
+                              GestureDetector(
+                                onTap: () {
+                                  _viewQRCode('sampleFormId', 'John', 'Doe');
+                                },
+                                child: Container(
+                                  height: 120,
+                                  width: 280,
+                                  margin: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(9),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 7),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.qr_code,
+                                        size: 60,
+                                        color: Color(0xFF288F13),
+                                      ),
+                                      const SizedBox(width: 15),
+                                      const Text(
+                                        'View QR Code',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

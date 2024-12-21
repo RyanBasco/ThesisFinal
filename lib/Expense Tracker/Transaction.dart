@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/Groups/History.dart';
 import 'package:testing/Groups/Travel.dart';
 import 'package:testing/Expense%20Tracker/Categories.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -90,7 +91,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         page = RegistrationPage();
         break;
       case 3:
-        page = RegistrationPage();
+        page = HistoryPage();
         break;
       case 4:
         page = TouristprofilePage();
@@ -240,11 +241,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           const SizedBox(height: 16),
                           const SizedBox(height: 16),
                           SizedBox(
-                            width: double.infinity,
+                            width: 200,
                             height: 200,
-                            child: BarChart(
-                              spendingData: spendingData,
-                              totalSpending: totalSpending,
+                            child: CustomPaint(
+                              painter: PieChartPainter(spendingData: spendingData, totalSpending: totalSpending),
                             ),
                           ),
                           const SizedBox(height: 30),
@@ -285,47 +285,26 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 }
 
-class BarChart extends StatelessWidget {
+class PieChartPainter extends CustomPainter {
   final Map<String, double> spendingData;
   final double totalSpending;
 
-  BarChart({required this.spendingData, required this.totalSpending});
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(double.infinity, 200),
-      painter: BarChartPainter(spendingData: spendingData, totalSpending: totalSpending),
-    );
-  }
-}
-
-class BarChartPainter extends CustomPainter {
-  final Map<String, double> spendingData;
-  final double totalSpending;
-
-  BarChartPainter({required this.spendingData, required this.totalSpending});
+  PieChartPainter({required this.spendingData, required this.totalSpending});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final barWidth = size.width / spendingData.length;
-    double maxHeight = size.height;
+    if (totalSpending == 0) return;
+
+    final rect = Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2);
+    double startAngle = -3.14 / 2;
 
     spendingData.forEach((category, amount) {
-      final barHeight = (amount / totalSpending) * maxHeight;
+      final sweepAngle = (amount / totalSpending) * 2 * 3.14;
       final paint = Paint()
         ..color = _getCategoryColor(category)
         ..style = PaintingStyle.fill;
-
-      canvas.drawRect(
-        Rect.fromLTWH(
-          spendingData.keys.toList().indexOf(category) * barWidth,
-          maxHeight - barHeight,
-          barWidth - 4, // Padding between bars
-          barHeight,
-        ),
-        paint,
-      );
+      canvas.drawArc(rect, startAngle, sweepAngle, true, paint);
+      startAngle += sweepAngle;
     });
   }
 

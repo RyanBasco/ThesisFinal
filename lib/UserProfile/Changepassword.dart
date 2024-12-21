@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:testing/Groups/QrPage.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/Groups/History.dart';
+import 'package:testing/Groups/Travel.dart';
+import 'package:testing/Expense%20Tracker/Transaction.dart';
+import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -13,37 +16,43 @@ class ChangePasswordPage extends StatefulWidget {
 }
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 4;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
+    Widget page;
     switch (index) {
       case 0:
-        // Handle "Home"
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-        );
+        page = UserdashboardPageState();
         break;
       case 1:
-        // Handle "My QR"
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => QRPage()),
-        );
+        page = QRPage();
         break;
       case 2:
-        // Handle "Wallet"
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
-        );
+        page = RegistrationPage();
         break;
-      // case 3: // No need to navigate to the same page (Profile)
+      case 3:
+        page = HistoryPage();
+        break;
+      case 4:
+        page = TouristprofilePage();
+        break;
+      default:
+        return;
     }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+      (route) => false,
+    );
   }
 
   final TextEditingController _currentPasswordController = TextEditingController();
@@ -123,33 +132,55 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Ensure the background color is white
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: const Color(0xFF2C812A),
-        unselectedItemColor: Colors.black,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      backgroundColor: Colors.white,
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: const Color(0xFF51F643),
+        color: Colors.white,
+        buttonBackgroundColor: Colors.white,
+        height: 65,
+        index: _selectedIndex,
+        animationDuration: const Duration(milliseconds: 333),
+        animationCurve: Curves.easeInOut,
+        items: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code),
-            label: 'My QR',
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
           ),
-          BottomNavigationBarItem(
-             icon: Icon(Icons.attach_money),
-             label: 'Expense Tracker',
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
           ),
         ],
+        onTap: (index) {
+          _onItemTapped(index);
+        },
       ),
       body: Container(
         width: double.infinity,

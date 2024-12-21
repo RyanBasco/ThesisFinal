@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
-import 'package:testing/Groups/GroupQRCodePage.dart';
-import 'package:testing/Groups/Groups.dart';
-import 'package:testing/Groups/QrPage.dart';
+import 'package:testing/Expense%20Tracker/Transaction.dart';
+import 'package:testing/Groups/History.dart';
+import 'package:testing/Groups/Travel.dart';
 import 'package:testing/Groups/SelectGroupPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:saver_gallery/saver_gallery.dart';
 
 class QRCodeDisplayPage extends StatefulWidget {
   final String formId;
@@ -29,6 +34,7 @@ class QRCodeDisplayPage extends StatefulWidget {
 
 class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
   int _selectedIndex = 2; // Default to QR Code tab
+  ScreenshotController screenshotController = ScreenshotController();
 
   void _onItemTapped(int index) {
     setState(() {
@@ -45,19 +51,19 @@ class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => GroupPage()),
+          MaterialPageRoute(builder: (context) => QRPage()),
         );
         break;
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => QRPage()),
+          MaterialPageRoute(builder: (context) => RegistrationPage()),
         );
         break;
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
+          MaterialPageRoute(builder: (context) => HistoryPage()),
         );
         break;
       case 4:
@@ -89,6 +95,78 @@ class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
     } else {
       return {'firstName': 'Unknown', 'lastName': 'User', 'userId': ''};
     }
+  }
+
+  Future<void> _saveQrToGallery() async {
+    final status = await Permission.storage.request();
+
+    if (status.isGranted) {
+      final Uint8List? image = await screenshotController.capture();
+
+      if (image != null) {
+        final result = await SaverGallery.saveImage(
+          image,
+          quality: 100,
+          fileName: "QR_Code_${DateTime.now().millisecondsSinceEpoch}",
+          skipIfExists: false,
+        );
+
+        if (result.isSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("QR code saved to gallery!")),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to save QR code.")),
+          );
+        }
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Storage permission denied.")),
+      );
+    }
+  }
+
+  Future<void> _updateScanCount(String userId) async {
+    final DatabaseReference database = FirebaseDatabase.instance.ref();
+    final scanCountRef = database.child('Forms').child(userId).child('scanCount');
+    final archivedRef = database.child('Forms').child(userId).child('archived');
+
+    // Increment the scan count
+    final snapshot = await scanCountRef.get();
+    int scanCount = snapshot.exists ? (snapshot.value as int) : 0;
+
+    scanCount += 1; // Increment the count
+    await scanCountRef.set(scanCount);
+
+    // Archive if scanned twice
+    if (scanCount == 2) {
+        // Move data to Archives
+        final userDataSnapshot = await database.child('Forms').child(userId).get();
+        if (userDataSnapshot.exists) {
+            final userData = userDataSnapshot.value as Map<dynamic, dynamic>;
+
+            // Save the user data to the Archives node
+            await database.child('Archives').child(userId).set(userData);
+
+            // Optionally, remove the user data from Forms
+            await database.child('Forms').child(userId).remove();
+
+            // Mark as archived
+            await archivedRef.set(true);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("QR code archived after two scans.")),
+            );
+        }
+    }
+  }
+
+  // Call this method when the QR code is scanned
+  Future<void> _onQrCodeScanned(String userId) async {
+    await _updateScanCount(userId);
+    // Additional logic for handling the scanned QR code can be added here
   }
 
   @override
@@ -148,10 +226,13 @@ class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          QrImageView(
-                            data: userDetails['userId'] ?? '',
-                            version: QrVersions.auto,
-                            size: 200.0,
+                          Screenshot(
+                            controller: screenshotController,
+                            child: QrImageView(
+                              data: userDetails['userId'] ?? '',
+                              version: QrVersions.auto,
+                              size: 200.0,
+                            ),
                           ),
                           const SizedBox(height: 20),
                           Text(
@@ -183,6 +264,22 @@ class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
                       ),
                       child: const Text(
                         'Switch to Group',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _saveQrToGallery,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF288F13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Save QR Code',
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -224,7 +321,7 @@ class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
                 child: Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
               ),
               SizedBox(height: 5), // Adjust vertical spacing
-              Text('Transac...', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+              Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
             ],
           ),
           Column(

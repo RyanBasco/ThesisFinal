@@ -6,9 +6,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:saver_gallery/saver_gallery.dart';
-import 'package:testing/Groups/Groups.dart';
-import 'package:testing/Groups/QrPage.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/Groups/History.dart';
+import 'package:testing/Groups/Travel.dart';
+import 'package:testing/Expense%20Tracker/Transaction.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 
@@ -273,13 +273,13 @@ class _GenerateQRState extends State<GenerateQR> {
       page = UserdashboardPageState();
       break;
     case 1:
-      page = GroupPage();
-      break;
-    case 2:
       page = QRPage();
       break;
-    case 3:
+    case 2:
       page = RegistrationPage();
+      break;
+    case 3:
+      page = HistoryPage();
       break;
     case 4:
       page = TouristprofilePage();

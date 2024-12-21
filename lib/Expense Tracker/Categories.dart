@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:testing/Categories/Accomodation.dart';
-import 'package:testing/Categories/AdventureandOutdoor.dart';
-import 'package:testing/Categories/AttractionsandActivities.dart';
-import 'package:testing/Categories/Entertainment.dart';
-import 'package:testing/Categories/Food&Beverages.dart';
-import 'package:testing/Categories/LocaltoursandGuides.dart';
-import 'package:testing/Categories/Shopping.dart';
-import 'package:testing/Categories/Transportation.dart';
-import 'package:testing/Categories/TravelandInsurance.dart';
-import 'package:testing/Categories/WellnessandSpa.dart';
-import 'package:testing/Groups/QrPage.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/Groups/History.dart';
+import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
 
@@ -21,43 +17,40 @@ class CategoriesPage extends StatefulWidget {
 
 class _CategoriesPageState extends State<CategoriesPage> {
   int _selectedIndex = 2;
+  String? _selectedCategory;
+  List<Map<String, dynamic>> visits = [];
 
   // Define the list of categories with icons and colors
   final List<Map<String, dynamic>> categories = [
     {
       'name': 'Accommodation',
       'icon': Icons.hotel,
-      'color': Colors.orangeAccent,
+      'color': Colors.blueAccent,
     },
     {
       'name': 'Food and Beverages',
-      'icon': Icons.restaurant_menu,
+      'icon': Icons.restaurant,
       'color': Colors.redAccent,
     },
     {
       'name': 'Transportation',
       'icon': Icons.directions_car,
-      'color': Colors.blueAccent,
+      'color': Colors.greenAccent,
     },
     {
       'name': 'Attractions and Activities',
       'icon': Icons.local_activity,
-      'color': Colors.purpleAccent,
+      'color': Colors.orangeAccent,
     },
     {
       'name': 'Shopping',
-      'icon': Icons.shopping_bag,
-      'color': Colors.greenAccent,
+      'icon': Icons.shopping_cart,
+      'color': Colors.purpleAccent,
     },
     {
       'name': 'Entertainment',
       'icon': Icons.theater_comedy,
       'color': Colors.pinkAccent,
-    },
-    {
-      'name': 'Wellness and Spa Services',
-      'icon': Icons.spa,
-      'color': Colors.teal,
     },
     {
       'name': 'Adventure and Outdoor Activities',
@@ -76,134 +69,151 @@ class _CategoriesPageState extends State<CategoriesPage> {
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchVisits();
+  }
+
+  Future<void> _fetchVisits() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DatabaseReference ref = FirebaseDatabase.instance.ref().child('Visits');
+        DatabaseEvent event = await ref.once();
+
+        if (event.snapshot.value != null) {
+          Map<dynamic, dynamic> visitsData = event.snapshot.value as Map<dynamic, dynamic>;
+
+          List<Map<String, dynamic>> tempVisits = [];
+
+          visitsData.forEach((key, value) {
+            if (value is Map && value['User'] is Map && value['User']['UID'] == user.uid) {
+              tempVisits.add({
+                'category': value['Category'] ?? '',
+                'date': value['Date'] ?? '',
+                'time': value['Time'] ?? '',
+                'totalSpend': value['TotalSpend'] ?? 0,
+              });
+            }
+          });
+
+          // Sort visits by date and time (latest first)
+          tempVisits.sort((a, b) {
+            int dateComparison = b['date'].compareTo(a['date']);
+            if (dateComparison != 0) return dateComparison;
+            return b['time'].compareTo(a['time']);
+          });
+
+          setState(() {
+            visits = tempVisits;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error fetching visits: $e');
+    }
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
+    Widget page;
     switch (index) {
       case 0:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserdashboardPageState()),
-        );
+        page = UserdashboardPageState();
         break;
       case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => QRPage()),
-        );
+        page = QRPage();
         break;
       case 2:
-        break; // Current page
+        page = RegistrationPage();
+        break;
       case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => TouristprofilePage()),
-        );
+        page = HistoryPage();
         break;
+      case 4:
+        page = TouristprofilePage();
+        break;
+      default:
+        return;
     }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+      (route) => false,
+    );
   }
 
-   void navigateToCategoryPage(String categoryName) {
-    switch (categoryName) {
-      case 'Accommodation':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Accommodation()),
-        );
-        break;
-      case 'Food and Beverages':
-         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Foodandbeverages()),
-        );
-        break;
-      case 'Transportation':
-        Navigator.push(
-          context,
-           MaterialPageRoute(builder: (context) => Transportation()),
-           );
-        break;
-      case 'Attractions and Activities':
-         Navigator.push(
-          context,
-           MaterialPageRoute(builder: (context) => Attractionsandactivities()),
-           );
-        break;  
-      case 'Shopping':
-          Navigator.push(
-          context,
-           MaterialPageRoute(builder: (context) => Shopping()),
-           ); 
-        break;
-      case 'Entertainment':
-          Navigator.push(
-          context,
-           MaterialPageRoute(builder: (context) => Entertainment()),
-           ); 
-        break;  
-      case 'Wellness and Spa Services':
-        Navigator.push(
-          context, 
-          MaterialPageRoute(builder: (context) => Wellnessandspa()),
-          );
-        break;
-      case 'Adventure and Outdoor Activities':
-        Navigator.push(context, 
-        MaterialPageRoute(builder: (context) => Adventureandoutdoor()),
-        );
-        break;
-      case 'Travel Insurance':
-        Navigator.push(
-          context, 
-          MaterialPageRoute(builder: (context) => Travelandinsurance()),
-          );
-        break;
-      case 'Local Tours and Guides':
-        Navigator.push(
-          context, 
-          MaterialPageRoute(builder: (context) => Localtoursandguides()),
-          );
-      break;    
-    }
+  void navigateToCategoryPage(String categoryName) {
+    setState(() {
+      _selectedCategory = categoryName;
+    });
   }
-
 
   @override
   Widget build(BuildContext context) {
+    // Filter visits based on the selected category
+    List<Map<String, dynamic>> filteredVisits = _selectedCategory == null
+        ? visits
+        : visits.where((visit) => visit['category'] == _selectedCategory).toList();
+
     return Scaffold(
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: Colors.white,
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: const Color(0xFF2C812A),
-          unselectedItemColor: Colors.black,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code),
-              label: 'My QR',
-            ),
-            BottomNavigationBarItem(
-               icon: Icon(Icons.attach_money),
-               label: 'Expense Tracker',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-        ),
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: const Color(0xFF51F643),
+        color: Colors.white,
+        buttonBackgroundColor: Colors.white,
+        height: 65,
+        index: _selectedIndex,
+        animationDuration: const Duration(milliseconds: 333),
+        animationCurve: Curves.easeInOut,
+        items: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        ],
+        onTap: (index) {
+          _onItemTapped(index);
+        },
       ),
       body: Container(
         width: double.infinity,
@@ -224,7 +234,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 15),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -267,39 +277,57 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              Column(
-                children: categories.map((category) {
-                  return InkWell(
-                    onTap: () => navigateToCategoryPage(category['name']),
-                    child: Container(
-                      height: 80,
-                      width: MediaQuery.of(context).size.width,
-                      margin: const EdgeInsets.symmetric(vertical: 0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: const Color(0xFFA7A7A7)),
-                      ),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: CircleAvatar(
-                              backgroundColor: category['color'],
-                              child: Icon(category['icon'], color: Colors.white),
-                            ),
-                          ),
-                          Text(
-                            category['name'],
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6.0,
+                      offset: Offset(0, 3),
                     ),
-                  );
-                }).toList(),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    DropdownButton<String>(
+                      value: _selectedCategory,
+                      hint: Text('Select a category'),
+                      items: categories.map((category) {
+                        return DropdownMenuItem<String>(
+                          value: category['name'],
+                          child: Text(category['name']),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        navigateToCategoryPage(value!);
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ...filteredVisits.map((visit) {
+                      return ListTile(
+                        title: Text(visit['category']),
+                        subtitle: Text('${visit['date']} at ${visit['time']}'),
+                        trailing: Text(
+                          '₱${visit['totalSpend']}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    if (filteredVisits.isEmpty)
+                      const Text(
+                        'No visits found for this category.',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(height: 50),
             ],

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
-import 'package:testing/Groups/Groups.dart';
-import 'package:testing/Groups/QrPage.dart';
+import 'package:testing/Expense%20Tracker/Transaction.dart';
+import 'package:testing/Groups/History.dart';
+import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'GroupQRCodePage.dart';
@@ -210,35 +210,19 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
     });
 
     final DatabaseReference database = FirebaseDatabase.instance.ref();
+    final currentUser = FirebaseAuth.instance.currentUser;
     
-    try {
-      // First, check if any groups exist with the same name
-      final groupsSnapshot = await database.child('Groups').once();
-      final groupsData = groupsSnapshot.snapshot.value as Map<dynamic, dynamic>?;
-      
-      if (groupsData != null) {
-        bool groupNameExists = false;
-        groupsData.forEach((key, value) {
-          if (value['groupName'] == _groupName) {
-            groupNameExists = true;
-          }
-        });
-        
-        if (groupNameExists) {
-          setState(() {
-            _isLoading = false;
-          });
-          _showWarningDialog('A group with this name already exists. Please choose a different name.');
-          return;
-        }
-      }
-
-      // If no existing group found with the same name, create a new group
-      final newGroupRef = database.child('Groups').push();
-      String groupId = newGroupRef.key!;
-
-      final Map<String, dynamic> groupData = {
+    if (currentUser == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      _showWarningDialog('No user is currently logged in.');
+      return;
+    }
+    
+    final Map<String, dynamic> groupData = {
         'groupName': _groupName,
+        'UID': currentUser.uid,
       };
 
       int userIndex = 1;
@@ -256,18 +240,58 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
         }
       }
 
-      await newGroupRef.set(groupData);
-      setState(() {
-        _isLoading = false; // Set loading state to false
-      });
-      _showGroupCreatedDialog(newGroupRef.key!); // Pass groupId to dialog
-      print('Group created successfully with ID: $groupId');
+      // Add the current user's details as well
+      final currentUserSnapshot = await database.child('Forms').child(currentUser.uid).once();
+      final currentUserDetails = currentUserSnapshot.snapshot.value as Map<dynamic, dynamic>?;
+      
+      if (currentUserDetails != null) {
+        groupData['User 0'] = {
+          'uid': currentUser.uid,
+          ...currentUserDetails,
+        };
+      }
+
+    try {
+        // First, check if any groups exist with the same name
+        final groupsSnapshot = await database.child('Groups').once();
+        final groupsData = groupsSnapshot.snapshot.value as Map<dynamic, dynamic>?;
+
+        if (groupsData != null) {
+            bool groupNameExists = false;
+            String existingGroupId = '';
+            groupsData.forEach((key, value) {
+                if (value['UID'] == currentUser.uid) {
+                    groupNameExists = true;
+                    existingGroupId = key; // Store the existing group ID
+                }
+            });
+
+            if (groupNameExists) {
+                // Overwrite the existing group
+                await database.child('Groups').child(existingGroupId).set(groupData);
+                setState(() {
+                    _isLoading = false;
+                });
+                _showGroupCreatedDialog(existingGroupId);
+                print('Group updated successfully with ID: $existingGroupId');
+                return;
+            }
+        }
+
+        // If no existing group found with the same UID, create a new group
+        final newGroupRef = database.child('Groups').push();
+        String groupId = newGroupRef.key!;
+        await newGroupRef.set(groupData);
+        setState(() {
+            _isLoading = false;
+        });
+        _showGroupCreatedDialog(groupId);
+        print('Group created successfully with ID: $groupId');
     } catch (error) {
-      setState(() {
-        _isLoading = false; // Set loading state to false
-      });
-      print('Error creating group: $error');
-      // Optionally, show an error message to the user
+        setState(() {
+            _isLoading = false;
+        });
+        print('Error creating group: $error');
     }
   }
 
@@ -319,156 +343,157 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFEEFFA9),
-                  Color(0xFFDBFF4C),
-                  Color(0xFF51F643),
-                ],
-                stops: [0.15, 0.54, 1.0],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context); // Navigate to the previous page
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Icon(
-                                Icons.arrow_back,
-                                color: Color(0xFF114F3A),
-                              ),
-                            ),
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFEEFFA9),
+              Color(0xFFDBFF4C),
+              Color(0xFF51F643),
+            ],
+            stops: [0.15, 0.54, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context); // Navigate to the previous page
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
                           ),
-                        ),
-                        const SizedBox(width: 60),
-                        const Text(
-                          'Select Group',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF114F3A),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextField(
-                          controller: _groupNameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Group Name',
-                            hintText: 'Enter group name',
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _groupName = value;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        if (_groupName.isNotEmpty)
-                          Text(
-                            'Group Name: $_groupName',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.arrow_back,
                               color: Color(0xFF114F3A),
                             ),
                           ),
-                        const SizedBox(height: 20),
-                        const SizedBox(height: 20),
-                        const Text(
-                          'Selected Members:',
-                          style: TextStyle(
-                            fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 60),
+                      const Text(
+                        'Select Group',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF114F3A),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: _groupNameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Group Name',
+                          hintText: 'Enter group name',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _groupName = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      if (_groupName.isNotEmpty)
+                        Text(
+                          'Group Name: $_groupName',
+                          style: const TextStyle(
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF114F3A),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        if (_selectedUsers.isNotEmpty)
-                          Column(
-                            children: _selectedUsers.map((user) {
-                              return ListTile(
-                                title: Text(
-                                  '${user['first_name']} ${user['last_name']}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Color(0xFF114F3A),
-                                  ),
+                      const SizedBox(height: 20),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Selected Members:',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF114F3A),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (_selectedUsers.isNotEmpty)
+                        Column(
+                          children: _selectedUsers.map((user) {
+                            return ListTile(
+                              title: Text(
+                                '${user['first_name']} ${user['last_name']}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF114F3A),
                                 ),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.remove_circle, color: Colors.red),
-                                  onPressed: () {
-                                    _confirmRemoveUser(user);
-                                  },
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        const SizedBox(height: 20),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: _showAddMembersDialog,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF288F13),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
                               ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.remove_circle, color: Colors.red),
+                                onPressed: () {
+                                  _confirmRemoveUser(user);
+                                },
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: _showAddMembersDialog,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF288F13),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Text(
-                              'Add Members',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
+                          ),
+                          child: const Text(
+                            'Add Members',
+                            style: TextStyle(
+                              color: Colors.white,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 60),
-                  Center(
+                ),
+                const SizedBox(height: 60),
+                Center(
+                  child: Container(
+                    width: 200,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _createGroup, // Disable button when loading
+                      onPressed: _isLoading ? null : _createGroup,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF288F13),
                         shape: RoundedRectangleBorder(
@@ -487,11 +512,11 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
                             ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Color(0xFF51F643),
@@ -545,13 +570,13 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
               page = UserdashboardPageState();
               break;
             case 1:
-              page = GroupPage();
-              break;
-            case 2:
               page = QRPage();
               break;
-            case 3:
+            case 2:
               page = RegistrationPage();
+              break;
+            case 3:
+              page = HistoryPage();
               break;
             case 4:
               page = TouristprofilePage();

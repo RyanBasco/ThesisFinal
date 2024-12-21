@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:testing/Groups/QrPage.dart';
+import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 

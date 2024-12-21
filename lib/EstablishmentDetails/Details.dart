@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:testing/EstablishmentDetails/Directions.dart';
-import 'package:testing/Groups/QrPage.dart';
-import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/Groups/History.dart';
+import 'package:testing/Groups/Travel.dart';
+import 'package:testing/Expense%20Tracker/Transaction.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class DetailsPage extends StatefulWidget {
   final String establishmentName;
@@ -37,6 +37,7 @@ class _DetailsPageState extends State<DetailsPage> {
   String aboutText = 'Loading...';
   double averageRating = 0.0;
   int totalReviews = 0;
+  String contactInfo = 'Loading...';
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _DetailsPageState extends State<DetailsPage> {
     _fetchEstablishmentImage();
     _fetchAboutText();
     _fetchAverageRating();
+    _fetchContactInfo();
   }
 
   Future<void> _fetchEstablishmentImage() async {
@@ -105,6 +107,24 @@ class _DetailsPageState extends State<DetailsPage> {
     }
   }
 
+  Future<void> _fetchContactInfo() async {
+    try {
+      DatabaseReference dbRef =
+          FirebaseDatabase.instance.ref('establishments/${widget.establishmentId}');
+      final snapshot = await dbRef.child('contact').get();
+
+      if (snapshot.exists) {
+        setState(() {
+          contactInfo = snapshot.value as String;
+        });
+      } else {
+        print('No contact information found for this establishment.');
+      }
+    } catch (e) {
+      print('Error fetching contact information: $e');
+    }
+  }
+
   Future<void> _loadLocationNames() async {
     final String barangayData = await rootBundle.loadString('assets/barangay.json');
     final String cityData = await rootBundle.loadString('assets/city.json');
@@ -139,32 +159,36 @@ class _DetailsPageState extends State<DetailsPage> {
       _selectedIndex = index;
     });
 
+    Widget page;
     switch (index) {
       case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const UserdashboardPageState()),
-        );
+        page = UserdashboardPageState();
         break;
       case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const QRPage()),
-        );
+        page = QRPage();
         break;
       case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
-        );
+        page = RegistrationPage();
         break;
       case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => TouristprofilePage()),
-        );
+        page = HistoryPage();
         break;
+      case 4:
+        page = TouristprofilePage();
+        break;
+      default:
+        return;
     }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+      (route) => false,
+    );
   }
 
   void _toggleBookmark() {
@@ -176,37 +200,52 @@ class _DetailsPageState extends State<DetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: Colors.white,
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: const Color(0xFF2C812A),
-          unselectedItemColor: Colors.black,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code),
-              label: 'My QR',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.attach_money),
-              label: 'Expense Tracker',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-        ),
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: const Color(0xFF51F643),
+        color: Colors.white,
+        buttonBackgroundColor: Colors.white,
+        height: 65,
+        index: _selectedIndex,
+        animationDuration: const Duration(milliseconds: 333),
+        animationCurve: Curves.easeInOut,
+        items: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        ],
+        onTap: _onItemTapped,
       ),
       body: Container(
         width: double.infinity,
@@ -288,11 +327,11 @@ class _DetailsPageState extends State<DetailsPage> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 18, top: 315),
+                      padding: const EdgeInsets.only(left: 7, top: 385),
                       child: Align(
                         alignment: Alignment.bottomLeft,
                         child: Container(
-                          width: 290,
+                          width: MediaQuery.of(context).size.width * 0.85,
                           height: 170,
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
@@ -392,6 +431,55 @@ class _DetailsPageState extends State<DetailsPage> {
                   ],
                 ),
               ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(right: 250),
+                child: const Text(
+                  'Contact',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.only(right: 115),
+                child: Container(
+                  width: 200,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.phone, color: Colors.black),
+                        const SizedBox(width: 8),
+                        Text(
+                          contactInfo,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                 child: Column(
@@ -435,7 +523,6 @@ class _DetailsPageState extends State<DetailsPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
