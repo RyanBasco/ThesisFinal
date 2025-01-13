@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/Groups/QRCodeDisplayPage.dart';
 import 'package:testing/Groups/TouristSignupcontinue.dart';
 import 'package:testing/Groups/History.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
-import 'package:testing/Expense%20Tracker/Transaction.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';

@@ -54,15 +54,26 @@ class _EditProfileState extends State<EditProfile> {
       // Fetch user data
       final userSnapshot = await usersRef.child(user.uid).get();
 
-      // Fetch forms data
-      final formsSnapshot = await formsRef.orderByChild('document_id').equalTo(user.uid).get();
+      // Fetch forms data directly using the UID
+      final formsSnapshot = await formsRef.child(user.uid).get();
 
       String contactFromForms = '';
+      String birthdayFromForms = '';
       if (formsSnapshot.exists) {
-        // Extract the first matching form's contact_number
+        // Debug print to see the forms data
+        print('Forms data found: ${formsSnapshot.value}');
+        
         final formsData = Map<String, dynamic>.from(formsSnapshot.value as Map);
-        final firstForm = formsData.values.first as Map<String, dynamic>;
-        contactFromForms = firstForm['contact_number'] ?? '';
+        
+        // Get contact number and birthday from forms
+        contactFromForms = formsData['contact_number']?.toString() ?? '';
+        birthdayFromForms = formsData['birthday']?.toString() ?? '';
+        
+        // Debug print the retrieved values
+        print('Contact from forms: $contactFromForms');
+        print('Birthday from forms: $birthdayFromForms');
+      } else {
+        print('No forms data found for user: ${user.uid}');
       }
 
       if (userSnapshot.exists) {
@@ -71,11 +82,12 @@ class _EditProfileState extends State<EditProfile> {
         setState(() {
           _firstName = userData['first_name'] ?? '';
           _lastName = userData['last_name'] ?? '';
-          _birthday = userData['birthday'] ?? '';
+          _birthday = birthdayFromForms;
           _email = user.email ?? '';
-          _contactNumber = contactFromForms; // Use contact number from Forms
+          _contactNumber = contactFromForms;
           _profileImageUrl = userData['profile_image_url'];
 
+          // Update the text controllers
           _nameController.text = '$_firstName $_lastName';
           _birthdayController.text = _birthday;
           _emailController.text = _email;

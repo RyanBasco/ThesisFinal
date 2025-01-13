@@ -2,16 +2,21 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/Groups/History.dart';
 import 'package:testing/Groups/QRCodeDisplayPage.dart';
 import 'package:testing/Groups/SelectGroupPage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:saver_gallery/saver_gallery.dart';
+import 'package:testing/TouristDashboard/TouristProfile.dart';
+import 'package:testing/TouristDashboard/UserDashboard.dart';
 
 class GroupQRCodePage extends StatelessWidget {
   final String groupId;
   final List<Map<String, dynamic>> selectedUsers;
   final ScreenshotController screenshotController = ScreenshotController();
+  int _selectedIndex = 1;
 
   GroupQRCodePage({required this.groupId, this.selectedUsers = const []});
 
@@ -44,6 +49,38 @@ class GroupQRCodePage extends StatelessWidget {
         const SnackBar(content: Text("Storage permission denied.")),
       );
     }
+  }
+
+  void _onItemTapped(BuildContext context, int index) {
+    Widget page = Container();
+    switch (index) {
+      case 0:
+        page = UserdashboardPageState();
+        break;
+      case 1:
+        return;
+      case 2:
+        page = RegistrationPage();
+        break;
+      case 3:
+        page = HistoryPage();
+        break;
+      case 4:
+        page = TouristprofilePage();
+        break;
+      default:
+        return;
+    }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+      (route) => false,
+    );
   }
 
   @override
@@ -178,54 +215,53 @@ class GroupQRCodePage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Color(0xFF51F643),
+        backgroundColor: const Color(0xFF51F643),
         color: Colors.white,
         buttonBackgroundColor: Colors.white,
         height: 65,
-        index: 2, // Set the current index to the QR Code tab
+        index: _selectedIndex,
+        animationDuration: const Duration(milliseconds: 333),
+        animationCurve: Curves.easeInOut,
         items: <Widget>[
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.home, size: 24, color: Colors.grey),
-              Text('Home', style: TextStyle(color: Colors.grey, fontSize: 10)),
+              Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.group, size: 24, color: Colors.grey),
-              Text('Groups',
-                  style: TextStyle(color: Colors.grey, fontSize: 10)),
+              Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.attach_money, size: 24, color: Color(0xFF27AE60)),
-              Text('Transaction',
-                  style: TextStyle(color: Color(0xFF27AE60), fontSize: 10)),
+              Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.history, size: 24, color: Colors.grey),
-              Text('History',
-                  style: TextStyle(color: Colors.grey, fontSize: 10)),
+              Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.person, size: 24, color: Colors.grey),
-              Text('Profile',
-                  style: TextStyle(color: Colors.grey, fontSize: 10)),
+              Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
             ],
-          )
+          ),
         ],
         onTap: (index) {
-          // Handle navigation based on the selected index
+          _selectedIndex = index;
+          _onItemTapped(context, index);
         },
       ),
     );

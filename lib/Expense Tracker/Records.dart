@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:testing/Groups/History.dart';
 import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -33,6 +34,10 @@ class _RecordsPageState extends State<RecordsPage> {
         );
         break; // Current page
       case 2:
+       Navigator.push(
+        context, 
+        MaterialPageRoute(builder: (context) => HistoryPage())
+       );
         break;
       case 3:
         Navigator.push(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:testing/Expense%20Tracker/Transaction.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
 import 'package:testing/Groups/History.dart';
 import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -195,8 +195,8 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
   }
 
   void _createGroup() async {
-    if (_selectedUsers.length < 2) {
-      _showWarningDialog('You need to select at least 2 members to create a group.');
+    if (_selectedUsers.length < 1) {
+      _showWarningDialog('You need to select at least 1 member to create a group.');
       return;
     }
 
@@ -223,6 +223,7 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
     final Map<String, dynamic> groupData = {
         'groupName': _groupName,
         'UID': currentUser.uid,
+        'creatorEmail': currentUser.email,
       };
 
       int userIndex = 1;
@@ -234,6 +235,7 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
         if (userDetails != null) {
           groupData['User $userIndex'] = {
             'uid': userId,
+            'email': userDetails['email'],
             ...userDetails,
           };
           userIndex++;

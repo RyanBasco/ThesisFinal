@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:testing/Groups/History.dart';
 import 'package:testing/Groups/Travel.dart';
 import 'package:testing/Expense%20Tracker/Categories.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
@@ -90,7 +91,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         page = RegistrationPage();
         break;
       case 3:
-        page = RegistrationPage();
+        page = HistoryPage();
         break;
       case 4:
         page = TouristprofilePage();

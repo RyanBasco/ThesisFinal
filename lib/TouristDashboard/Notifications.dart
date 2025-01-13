@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:testing/Expense%20Tracker/Transaction.dart';
+import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/Groups/History.dart';
 import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -25,6 +26,7 @@ class _NotificationsState extends State<Notifications> {
   String? _currentReviewKey;
   double _rating = 0.0;
   String _comment = '';
+  Map<String, String> _categoryComments = {};
 
   @override
   void initState() {
@@ -84,7 +86,7 @@ class _NotificationsState extends State<Notifications> {
 
           await _databaseRef.child('reviews').push().set({
             'categoryRatings': _categoryRatings,
-            'comment': _comment,
+            'categoryComments': _categoryComments,
             'first_name': firstName,
             'last_name': lastName,
             'establishment_id': establishmentId,
@@ -126,7 +128,7 @@ class _NotificationsState extends State<Notifications> {
         page = RegistrationPage();
         break;
       case 3:
-        page = RegistrationPage();
+        page = HistoryPage();
         break;
       case 4:
         page = TouristprofilePage();
@@ -155,6 +157,7 @@ class _NotificationsState extends State<Notifications> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
           body: Container(
+            height: MediaQuery.of(context).size.height,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -167,7 +170,7 @@ class _NotificationsState extends State<Notifications> {
                 end: Alignment.bottomCenter,
               ),
             ),
-            child: SafeArea(
+            child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -189,7 +192,7 @@ class _NotificationsState extends State<Notifications> {
                             child: Icon(Icons.arrow_back, color: Colors.black),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 50),
                         const Text(
                           'Give Feedback',
                           style: TextStyle(
@@ -197,6 +200,7 @@ class _NotificationsState extends State<Notifications> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const SizedBox(width: 16),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -235,49 +239,50 @@ class _NotificationsState extends State<Notifications> {
                             });
                           },
                         ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          onChanged: (text) {
+                            setState(() {
+                              _categoryComments[entry.key] = text;
+                            });
+                          },
+                          maxLines: 2,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter your comments for ${entry.key}...',
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                        ),
                         const SizedBox(height: 16),
                       ],
                     )).toList(),
 
-                    const Text(
-                      'Overall Comments:',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      onChanged: (text) {
-                        setState(() {
-                          _comment = text;
-                        });
-                      },
-                      maxLines: 3,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Enter your comments here...',
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF288F13),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                    const SizedBox(height: 32),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 200,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF288F13),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            onPressed: () {
+                              _submitReview(_currentReviewKey!, _rating, _comment);
+                              setState(() {
+                                _showRatingScreen = false;
+                                _currentReviewKey = null;
+                              });
+                            },
+                            child: const Text('Submit Review'),
+                          ),
                         ),
-                        onPressed: () {
-                          _submitReview(_currentReviewKey!, _rating, _comment);
-                          setState(() {
-                            _showRatingScreen = false;
-                            _currentReviewKey = null;
-                          });
-                        },
-                        child: const Text('Submit Review'),
-                      ),
+                      ],
                     ),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),

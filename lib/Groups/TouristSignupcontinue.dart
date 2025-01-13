@@ -27,6 +27,7 @@ class _SignupContinueState extends State<SignupContinue> {
 
   String? _firstName; // Added
   String? _lastName;
+  String? _email; // Added to store the user's email
 
   // Dropdown data
   List<String> _countries = [];
@@ -90,6 +91,7 @@ class _SignupContinueState extends State<SignupContinue> {
         setState(() {
           _firstName = data['first_name'];
           _lastName = data['last_name'];
+          _email = user.email; // Fetch the email from the user object
         });
       }
     } catch (e) {
@@ -97,6 +99,7 @@ class _SignupContinueState extends State<SignupContinue> {
       setState(() {
         _firstName = 'Error';
         _lastName = 'Error';
+        _email = 'Error'; // Handle email error
       });
     }
   }
@@ -147,8 +150,8 @@ class _SignupContinueState extends State<SignupContinue> {
     );
     if (picked != null) {
       setState(() {
-        // Format the date as mm/dd/yy
-        _birthdayController.text = DateFormat('MM/dd/yy').format(picked);
+        // Format the date as MM/dd/yyyy for display
+        _birthdayController.text = DateFormat('MM/dd/yyyy').format(picked);
       });
 
       // Save the selected date and date stamp to Firebase Realtime Database
@@ -156,12 +159,11 @@ class _SignupContinueState extends State<SignupContinue> {
         String userId = _auth.currentUser?.uid ?? 'unknown_user';
         String dateStamp = DateFormat('MM/dd/yy').format(DateTime.now()); // Create date stamp
         await _database.child('Users/$userId').update({
-          'birthday': _birthdayController.text,
-          'date_stamp': dateStamp, // Add date stamp
+          'date_stamp': dateStamp, // Keep only the date stamp
         });
-        print('Birthday and date stamp saved successfully');
+        print('Date stamp saved successfully');
       } catch (e) {
-        print('Error saving birthday and date stamp: $e');
+        print('Error saving date stamp: $e');
       }
     }
   }
@@ -289,7 +291,8 @@ class _SignupContinueState extends State<SignupContinue> {
       await _database.child('Forms/$userId').set({
         'first_name': _firstName,
         'last_name': _lastName,
-        'birthday': _birthdayController.text,
+        'email': _email, // Added to save the email
+        'birthday': DateFormat('MM/dd/yy').format(DateFormat('MM/dd/yyyy').parse(_birthdayController.text)),
         'sex': _selectedSex,
         'contact_number': '+63${_contactController.text.trim()}',
         'countryOfResidence': _selectedCountry,
@@ -427,10 +430,18 @@ class _SignupContinueState extends State<SignupContinue> {
                     const SizedBox(height: 20),
                     if (_firstName != null && _lastName != null) ...[
                       Text(
-                        'Full Name: $_firstName$_lastName', // Combined first and last name
+                        'Full Name: $_firstName $_lastName', // Combined first and last name
                         style: const TextStyle(
                           color: Color(0xFF114F3A),
                           fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 5), // Added spacing
+                      Text(
+                        'Email: $_email', // Display the email
+                        style: const TextStyle(
+                          color: Color(0xFF114F3A),
+                          fontSize: 16,
                         ),
                       ),
                       const SizedBox(height: 20),
