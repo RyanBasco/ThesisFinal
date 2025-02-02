@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:testing/Landingpage/LetsExplore.dart';
-import 'package:testing/Landingpage/getstarted.dart';
 
 class NextPage extends StatelessWidget {
   const NextPage({super.key});

@@ -11,7 +11,6 @@ import 'package:testing/UserProfile/Changepassword.dart';
 import 'package:testing/UserProfile/Editprofile.dart';
 import 'package:testing/UserProfile/HelpCenter.dart';
 import 'package:testing/UserProfile/Mybookmarks.dart';
-import 'package:testing/UserProfile/PrivacyPolicy.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
@@ -406,13 +405,13 @@ class _TouristprofilePageState extends State<TouristprofilePage> {
                               ),
                               const SizedBox(width: 25),
                               const Text(
-                                'Support',
+                                'Pending Reviews',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 113),
+                              const SizedBox(width: 48),
                               const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,

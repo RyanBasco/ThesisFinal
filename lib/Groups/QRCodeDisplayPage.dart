@@ -31,7 +31,7 @@ class QRCodeDisplayPage extends StatefulWidget {
 }
 
 class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
-  int _selectedIndex = 2; // Default to QR Code tab
+  int _selectedIndex = 1; // Default to QR Code tab
   ScreenshotController screenshotController = ScreenshotController();
 
   void _onItemTapped(int index) {
@@ -73,27 +73,47 @@ class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
     }
   }
 
-  Future<Map<String, String>> _fetchUserDetails() async {
-    final DatabaseReference database = FirebaseDatabase.instance.ref();
-    final String? userId = FirebaseAuth.instance.currentUser?.uid;
+Future<Map<String, String>> _fetchUserDetails() async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    return {'firstName': 'Unknown', 'lastName': 'User', 'userId': ''};
+  }
 
-    if (userId == null) {
-      return {'firstName': 'Unknown', 'lastName': 'User', 'userId': ''};
-    }
-
-    final snapshot = await database.child('Forms').child(userId).get();
+  final DatabaseReference database = FirebaseDatabase.instance.ref();
+  
+  try {
+    // Use the actual user.uid instead of widget.formId
+    final snapshot = await database.child('Users').child(user.uid).get();
+    print('Fetching details for userId: ${user.uid}'); // Debug print
+    print('Firebase data: ${snapshot.value}'); // Debug print
 
     if (snapshot.exists) {
       final data = snapshot.value as Map<dynamic, dynamic>;
       return {
         'firstName': data['first_name'] ?? 'Unknown',
         'lastName': data['last_name'] ?? 'User',
-        'userId': userId, // Use userId for QR code
+        'userId': user.uid,
       };
     } else {
-      return {'firstName': 'Unknown', 'lastName': 'User', 'userId': ''};
+      // If data doesn't exist in database, show error
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("User data not found in database")),
+      );
+      return {
+        'firstName': 'Unknown',
+        'lastName': 'User',
+        'userId': user.uid,
+      };
     }
+  } catch (e) {
+    print('Error fetching user details: $e');
+    return {
+      'firstName': 'Unknown',
+      'lastName': 'User',
+      'userId': user.uid,
+    };
   }
+}
 
   Future<void> _saveQrToGallery() async {
     final status = await Permission.storage.request();
@@ -124,47 +144,6 @@ class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
         const SnackBar(content: Text("Storage permission denied.")),
       );
     }
-  }
-
-  Future<void> _updateScanCount(String userId) async {
-    final DatabaseReference database = FirebaseDatabase.instance.ref();
-    final scanCountRef = database.child('Forms').child(userId).child('scanCount');
-    final archivedRef = database.child('Forms').child(userId).child('archived');
-
-    // Increment the scan count
-    final snapshot = await scanCountRef.get();
-    int scanCount = snapshot.exists ? (snapshot.value as int) : 0;
-
-    scanCount += 1; // Increment the count
-    await scanCountRef.set(scanCount);
-
-    // Archive if scanned twice
-    if (scanCount == 2) {
-        // Move data to Archives
-        final userDataSnapshot = await database.child('Forms').child(userId).get();
-        if (userDataSnapshot.exists) {
-            final userData = userDataSnapshot.value as Map<dynamic, dynamic>;
-
-            // Save the user data to the Archives node
-            await database.child('Archives').child(userId).set(userData);
-
-            // Optionally, remove the user data from Forms
-            await database.child('Forms').child(userId).remove();
-
-            // Mark as archived
-            await archivedRef.set(true);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("QR code archived after two scans.")),
-            );
-        }
-    }
-  }
-
-  // Call this method when the QR code is scanned
-  Future<void> _onQrCodeScanned(String userId) async {
-    await _updateScanCount(userId);
-    // Additional logic for handling the scanned QR code can be added here
   }
 
   @override
@@ -311,14 +290,10 @@ class _QRCodeDisplayPageState extends State<QRCodeDisplayPage> {
               Text('Groups', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
             ],
           ),
-          Column(
+         Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                height: 20, // Fixed height for the circle, prevents resizing
-                alignment: Alignment.center, // Aligns the icon in the middle
-                child: Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
-              ),
-              SizedBox(height: 5), // Adjust vertical spacing
+              Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
               Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
             ],
           ),

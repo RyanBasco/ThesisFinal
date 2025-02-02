@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:testing/Groups/QRCodeDisplayPage.dart';
 
@@ -261,63 +261,93 @@ class _SignupContinueState extends State<SignupContinue> {
     }
   }
 
-  Future<String> saveFormData(String userId) async {
-    try {
-      // Decode the codes into human-readable names
-      String? decodedRegion = _regions.firstWhere(
-        (region) => region['region_code'] == _selectedRegionCode,
-        orElse: () => {'region_name': null},
-      )['region_name'];
+ // Add this function at the top of your class
+String generateCustomId() {
+  const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  final Random random = Random();
+  // Generate a 28-character string to match Firebase Auth UID length
+  return String.fromCharCodes(
+    Iterable.generate(
+      28, 
+      (_) => chars.codeUnitAt(random.nextInt(chars.length))
+    )
+  );
+}
 
-      String? decodedProvince = _provinces.firstWhere(
-        (province) => province['province_code'] == _selectedProvinceCode,
-        orElse: () => {'province_name': null},
-      )['province_name'];
+Future<String> saveFormData(String userId) async {
+  try {
+    String formId;
+    DatabaseReference formsRef = _database.child('Forms');
 
-      String? decodedCity = _cities.firstWhere(
-        (city) => city['city_code'] == _selectedCityCode,
-        orElse: () => {'city_name': null},
-      )['city_name'];
-
-      String? decodedBarangay = _barangays.firstWhere(
-        (barangay) => barangay['brgy_code'] == _selectedBarangayCode,
-        orElse: () => {'brgy_name': null},
-      )['brgy_name'];
-
-      // Get the current time in 12-hour format
-      String formattedTimestamp = DateFormat('hh:mm a').format(DateTime.now());
-
-      // Save form data to Firebase Realtime Database using the logged-in user's document ID
-      await _database.child('Forms/$userId').set({
-        'first_name': _firstName,
-        'last_name': _lastName,
-        'email': _email, // Added to save the email
-        'birthday': DateFormat('MM/dd/yy').format(DateFormat('MM/dd/yyyy').parse(_birthdayController.text)),
-        'sex': _selectedSex,
-        'contact_number': '+63${_contactController.text.trim()}',
-        'countryOfResidence': _selectedCountry,
-        'region': _selectedCountry == 'Philippines' ? decodedRegion : null,
-        'province': _selectedCountry == 'Philippines' ? decodedProvince : null,
-        'city': _selectedCountry == 'Philippines' ? decodedCity : null,
-        'barangay': _selectedCountry == 'Philippines' ? decodedBarangay : null,
-        'purpose_of_travel': _selectedPurpose,
-        'other_Purpose': _selectedPurpose == 'Other' ? _specifyPurposeController.text : null,
-        'civil_status': _selectedMaritalStatus,
-        'nationality': _selectedNationality,
-        'timestamp': formattedTimestamp, // Use the formatted timestamp
-      });
-
-      // Update the user's registration status in the database
-      await _database.child('Users/$userId').update({
-        'isRegistered': true, // Set the registration status to true
-      });
-
-      return userId; // Return the userId
-    } catch (e) {
-      print('Error saving form data: $e');
-      rethrow;
+    // Check if an entry with userId already exists
+    DatabaseEvent event = await formsRef.child(userId).once();
+    
+    if (event.snapshot.value != null) {
+      // Generate custom ID instead of using push()
+      formId = generateCustomId();
+    } else {
+      // If no entry exists, use the userId as the key
+      formId = userId;
     }
+
+    // Decode the codes into human-readable names
+    String? decodedRegion = _regions.firstWhere(
+      (region) => region['region_code'] == _selectedRegionCode,
+      orElse: () => {'region_name': null},
+    )['region_name'];
+
+    String? decodedProvince = _provinces.firstWhere(
+      (province) => province['province_code'] == _selectedProvinceCode,
+      orElse: () => {'province_name': null},
+    )['province_name'];
+
+    String? decodedCity = _cities.firstWhere(
+      (city) => city['city_code'] == _selectedCityCode,
+      orElse: () => {'city_name': null},
+    )['city_name'];
+
+    String? decodedBarangay = _barangays.firstWhere(
+      (barangay) => barangay['brgy_code'] == _selectedBarangayCode,
+      orElse: () => {'brgy_name': null},
+    )['brgy_name'];
+
+    // Get the current time in 12-hour format
+    String formattedTimestamp = DateFormat('hh:mm a').format(DateTime.now());
+    String dateStamp = DateFormat('MM/dd/yy').format(DateTime.now());
+
+    // Save form data
+    await formsRef.child(formId).set({
+      'first_name': _firstName,
+      'last_name': _lastName,
+      'email': _email,
+      'birthday': DateFormat('MM/dd/yy').format(DateFormat('MM/dd/yyyy').parse(_birthdayController.text)),
+      'sex': _selectedSex,
+      'contact_number': '+63${_contactController.text.trim()}',
+      'countryOfResidence': _selectedCountry,
+      'region': _selectedCountry == 'Philippines' ? decodedRegion : null,
+      'province': _selectedCountry == 'Philippines' ? decodedProvince : null,
+      'city': _selectedCountry == 'Philippines' ? decodedCity : null,
+      'barangay': _selectedCountry == 'Philippines' ? decodedBarangay : null,
+      'purpose_of_travel': _selectedPurpose,
+      'other_Purpose': _selectedPurpose == 'Other' ? _specifyPurposeController.text : null,
+      'civil_status': _selectedMaritalStatus,
+      'nationality': _selectedNationality,
+      'timestamp': formattedTimestamp,
+      'date_stamp': dateStamp,
+      'userId': userId, // Store the userId for reference
+    });
+
+    // Update the user's registration status
+    await _database.child('Users/$userId').update({
+      'isRegistered': true,
+    });
+
+    return formId; // Return the ID used (either userId or auto-generated)
+  } catch (e) {
+    print('Error saving form data: $e');
+    rethrow;
   }
+}
 
   // Add this function to generate QR code dialog
   void _showQRCodeDialog(String formId) {

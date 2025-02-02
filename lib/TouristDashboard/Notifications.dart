@@ -27,6 +27,7 @@ class _NotificationsState extends State<Notifications> {
   double _rating = 0.0;
   String _comment = '';
   Map<String, String> _categoryComments = {};
+  String _establishmentName = '';
 
   @override
   void initState() {
@@ -34,28 +35,38 @@ class _NotificationsState extends State<Notifications> {
     _checkForPendingReviews();
   }
 
-  void _checkForPendingReviews() {
-    _databaseRef.child('PendingReviews').onChildAdded.listen((event) {
-      final pendingReview = event.snapshot.value as Map<dynamic, dynamic>;
-      if (pendingReview['status'] == 'pending') {
-        setState(() {
-          _pendingReviews.add({
-            'reviewKey': event.snapshot.key,
-            'establishmentId': pendingReview['establishment_id'],
-            'categories': pendingReview['categories']
-          });
-        });
-      }
-    });
+ void _checkForPendingReviews() {
+  final String? currentUserId = FirebaseAuth.instance.currentUser ?.uid;
+  if (currentUserId == null) return;
 
-    _databaseRef.child('PendingReviews').onChildRemoved.listen((event) {
+  _databaseRef.child('PendingReviews').onChildAdded.listen((event) {
+    final pendingReview = event.snapshot.value as Map<dynamic, dynamic>;
+    // Only add review if it's pending and belongs to current user
+    if (pendingReview['status'] == 'pending' && 
+        pendingReview['user_id'] == currentUserId) {
+      setState(() {
+        // Insert the new review at the beginning of the list
+        _pendingReviews.insert(0, {
+          'reviewKey': event.snapshot.key,
+          'establishmentId': pendingReview['establishment_id'],
+          'categories': pendingReview['categories']
+        });
+      });
+    }
+  });
+
+  _databaseRef.child('PendingReviews').onChildRemoved.listen((event) {
+    final removedReview = event.snapshot.value as Map<dynamic, dynamic>;
+    // Only remove if it belongs to current user
+    if (removedReview['user_id'] == currentUserId) {
       setState(() {
         _pendingReviews.removeWhere((review) => review['reviewKey'] == event.snapshot.key);
       });
-    });
-  }
+    }
+  });
+}
 
-  void _showReviewDialog(String reviewKey, List<dynamic> categories) {
+  void _showReviewDialog(String reviewKey, List<dynamic> categories) async {
     setState(() {
       _showRatingScreen = true;
       _currentReviewKey = reviewKey;
@@ -63,53 +74,85 @@ class _NotificationsState extends State<Notifications> {
         categories.map((category) => MapEntry(category['category'].toString(), 0.0))
       );
     });
-  }
 
-  void _submitReview(String reviewKey, double rating, String comment) async {
-    try {
-      final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
-      if (currentUserId == null) {
-        throw Exception('No user logged in');
-      }
+    final pendingReviewSnapshot = await _databaseRef.child('PendingReviews/$reviewKey').get();
+    String? establishmentId = pendingReviewSnapshot.value != null
+        ? (pendingReviewSnapshot.value as Map)['establishment_id']
+        : null;
 
-      final pendingReviewSnapshot = await _databaseRef.child('PendingReviews/$reviewKey').get();
-      String? establishmentId = pendingReviewSnapshot.value != null
-          ? (pendingReviewSnapshot.value as Map)['establishment_id']
-          : null;
-
-      if (establishmentId != null) {
-        final userSnapshot = await _databaseRef.child('Users/$currentUserId').get();
-        if (userSnapshot.exists) {
-          final userData = Map<String, dynamic>.from(userSnapshot.value as Map);
-          String firstName = userData['first_name'] ?? 'User';
-          String lastName = userData['last_name'] ?? '';
-
-          await _databaseRef.child('reviews').push().set({
-            'categoryRatings': _categoryRatings,
-            'categoryComments': _categoryComments,
-            'first_name': firstName,
-            'last_name': lastName,
-            'establishment_id': establishmentId,
-            'timestamp': ServerValue.timestamp,
-            'user_id': currentUserId,
-          });
-
-          await _databaseRef.child('PendingReviews/$reviewKey').update({'status': 'completed'});
-
-          setState(() {
-            _pendingReviews.removeWhere((review) => review['reviewKey'] == reviewKey);
-            _showRatingScreen = false;
-            _currentReviewKey = null;
-          });
-        }
-      }
-    } catch (e) {
-      print('Error submitting review: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit review. Please try again.')),
-      );
+    if (establishmentId != null) {
+        final establishmentSnapshot = await _databaseRef.child('establishments/$establishmentId').get();
+        _establishmentName = establishmentSnapshot.value != null
+            ? (establishmentSnapshot.value as Map)['establishmentName'] ?? 'Unknown Establishment'
+            : '';
+    } else {
+        _establishmentName = 'Unknown Establishment';
     }
   }
+
+
+
+void _submitReview(String reviewKey, double rating, String comment) async {
+  try {
+    final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) {
+      throw Exception('No user logged in');
+    }
+
+    final pendingReviewSnapshot = await _databaseRef.child('PendingReviews/$reviewKey').get();
+    String? establishmentId = pendingReviewSnapshot.value != null
+        ? (pendingReviewSnapshot.value as Map)['establishment_id']
+        : null;
+
+    if (establishmentId != null) {
+      final userSnapshot = await _databaseRef.child('Users/$currentUserId').get();
+      if (userSnapshot.exists) {
+        final userData = Map<String, dynamic>.from(userSnapshot.value as Map);
+        String firstName = userData['first_name'] ?? 'User';
+        String lastName = userData['last_name'] ?? '';
+
+        // Get current date and time with proper formatting
+        final now = DateTime.now();
+        final formattedDate = "${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}/${now.year}";
+        final formattedTime = "${now.hour > 12 ? now.hour - 12 : now.hour}:${now.minute.toString().padLeft(2, '0')} ${now.hour >= 12 ? 'PM' : 'AM'}";
+
+        await _databaseRef.child('reviews').push().set({
+          'categoryRatings': _categoryRatings,
+          'categoryComments': _categoryComments,
+          'first_name': firstName,
+          'last_name': lastName,
+          'establishment_id': establishmentId,
+          'date': formattedDate,
+          'timestamp': formattedTime,
+          'user_id': currentUserId,
+        });
+
+       
+        await _databaseRef.child('PendingReviews/$reviewKey').update({'status': 'completed'});
+
+       
+        setState(() {
+          _pendingReviews.removeWhere((review) => review['reviewKey'] == reviewKey);
+          _showRatingScreen = false;
+          _currentReviewKey = null;
+          _categoryRatings.clear();
+          _categoryComments.clear();
+        });
+
+  
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Review submitted successfully!')),
+        );
+      }
+    }
+  } catch (e) {
+    print('Error submitting review: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to submit review. Please try again.')),
+    );
+  }
+}
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -205,6 +248,15 @@ class _NotificationsState extends State<Notifications> {
                     ),
                     const SizedBox(height: 32),
                     
+                    Text(
+                      _establishmentName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
                     const Text(
                       'Rate each category:',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -295,107 +347,131 @@ class _NotificationsState extends State<Notifications> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFEEFFA9),
-                  Color(0xFFDBFF4C),
-                  Color(0xFF51F643),
-                ],
-                stops: [0.15, 0.54, 1.0],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+        backgroundColor: Colors.white,
+        body: Column(
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFFEEFFA9),
+                    Color(0xFFDBFF4C),
+                    Color(0xFF51F643),
+                  ],
+                  stops: [0.15, 0.54, 1.0],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.arrow_back, color: Colors.black),
+                      ),
+                    ),
+                    const SizedBox(width: 45),
+                    const Text(
+                      'Pending Reviews',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-                  child: Row(
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFFEEFFA9),
+                      Color(0xFFDBFF4C),
+                      Color(0xFF51F643),
+                    ],
+                    stops: [0.15, 0.54, 1.0],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: const CircleAvatar(
-                          backgroundColor: Colors.white,
-                          child: Icon(Icons.arrow_back, color: Colors.black),
+                      if (_pendingReviews.isNotEmpty)
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: _pendingReviews.length,
+                          itemBuilder: (context, index) {
+                            final review = _pendingReviews[index];
+                            return GestureDetector(
+                              onTap: () => _showReviewDialog(
+                                review['reviewKey'] as String,
+                                (review['categories'] ?? []) as List<dynamic>
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.all(16.0),
+                                margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 4.0,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Rate Your Experience',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'Share your feedback about your recent visit',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      else
+                        const Center(
+                          child: Text(
+                            'No Pending Reviews',
+                            style: TextStyle(
+                              fontSize: 21,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 85),
-                      const Text(
-                        'Support',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
                     ],
                   ),
                 ),
-                if (_pendingReviews.isNotEmpty)
-                  ..._pendingReviews.map((review) {
-                    return GestureDetector(
-                      onTap: () => _showReviewDialog(
-                        review['reviewKey'] as String,
-                        (review['categories'] ?? []) as List<dynamic>
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets.all(16.0),
-                        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8.0),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 4.0,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Rate Your Experience',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Share your feedback about your recent visit',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList()
-                else
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        'No Pending Reviews',
-                        style: TextStyle(
-                          fontSize: 21,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
         bottomNavigationBar: CurvedNavigationBar(
           backgroundColor: const Color(0xFF51F643),

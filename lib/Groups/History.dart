@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
+import 'package:testing/Groups/TransactionDetailsPage.dart';
 import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -52,12 +53,14 @@ class _HistoryPageState extends State<HistoryPage> {
         DatabaseEvent event = await ref.once();
 
         if (event.snapshot.value != null) {
-          Map<dynamic, dynamic> visitsData = event.snapshot.value as Map<dynamic, dynamic>;
-          
+          Map<dynamic, dynamic> visitsData =
+              event.snapshot.value as Map<dynamic, dynamic>;
+
           List<Map<String, dynamic>> tempVisits = [];
-          
+
           visitsData.forEach((key, value) {
-            if (value is Map && value['User'] is Map && 
+            if (value is Map &&
+                value['User'] is Map &&
                 value['User']['UID'] == user.uid) {
               tempVisits.add({
                 'category': value['Category'] ?? '',
@@ -68,11 +71,30 @@ class _HistoryPageState extends State<HistoryPage> {
             }
           });
 
-          // Sort visits by date and time (latest first)
+          // Sort by date and time (latest first)
           tempVisits.sort((a, b) {
-            int dateComparison = b['date'].compareTo(a['date']);
+            // First compare dates
+            List<String> datePartsA = a['date'].toString().split('/');
+            List<String> datePartsB = b['date'].toString().split('/');
+
+            // Convert to DateTime objects (assuming MM/DD/YYYY format)
+            DateTime dateA = DateTime(
+              int.parse(datePartsA[2]), // year
+              int.parse(datePartsA[0]), // month
+              int.parse(datePartsA[1]), // day
+            );
+            DateTime dateB = DateTime(
+              int.parse(datePartsB[2]), // year
+              int.parse(datePartsB[0]), // month
+              int.parse(datePartsB[1]), // day
+            );
+
+            int dateComparison =
+                dateB.compareTo(dateA); // Reverse order for latest first
             if (dateComparison != 0) return dateComparison;
-            return b['time'].compareTo(a['time']);
+
+            // If dates are equal, compare times
+            return b['time'].toString().compareTo(a['time'].toString());
           });
 
           setState(() {
@@ -174,7 +196,8 @@ class _HistoryPageState extends State<HistoryPage> {
                     children: [
                       // Dropdown Container
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
@@ -244,36 +267,86 @@ class _HistoryPageState extends State<HistoryPage> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.home,
+                  size: 24,
+                  color: _selectedIndex == 0
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('Home',
+                  style: TextStyle(
+                      color: _selectedIndex == 0
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.travel_explore,
+                  size: 24,
+                  color: _selectedIndex == 1
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('Travel',
+                  style: TextStyle(
+                      color: _selectedIndex == 1
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.attach_money,
+                  size: 24,
+                  color: _selectedIndex == 2
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('Transaction',
+                  style: TextStyle(
+                      color: _selectedIndex == 2
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.history,
+                  size: 24,
+                  color: _selectedIndex == 3
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('History',
+                  style: TextStyle(
+                      color: _selectedIndex == 3
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.person,
+                  size: 24,
+                  color: _selectedIndex == 4
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('Profile',
+                  style: TextStyle(
+                      color: _selectedIndex == 4
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
         ],
@@ -299,113 +372,129 @@ class _HistoryPageState extends State<HistoryPage> {
                 itemCount: visits.length,
                 itemBuilder: (context, index) {
                   final visit = visits[index];
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Colors.grey.withOpacity(0.2),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _getCategoryIcon(visit['category']),
-                          color: const Color(0xFF27AE60),
-                          size: 24,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                visit['category'],
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '${visit['date']} at ${_formatTime(visit['time'])}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          '₱${visit['totalSpend']}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF27AE60),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-      case ViewType.Groups:
-        return isLoading 
-          ? const Center(child: CircularProgressIndicator())
-          : userGroups.isEmpty
-            ? const Center(
-                child: Text(
-                  'No groups found',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              )
-            : ListView.builder(
-                itemCount: userGroups.length,
-                itemBuilder: (context, index) {
-                  final group = userGroups[index];
-                  return ExpansionTile(
-                    leading: const Icon(
-                      Icons.group,
-                      color: Color(0xFF27AE60),
-                      size: 24,
-                    ),
-                    title: Text(
-                      group.groupName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    children: [
-                      // Display members
-                      ...group.users.map((user) => ListTile(
-                        leading: const Icon(Icons.person),
-                        title: Text('${user['first_name']} ${user['last_name']}'),
-                      )),
-                      // Display expenses
-                      ...group.expenses.map((expense) {
-                        IconData iconData = _getCategoryIcon(expense['Category'] ?? 'default');
-                        return ListTile(
-                          leading: Icon(iconData),
-                          title: Text(expense['Category'] ?? 'Unknown Category'),
-                          subtitle: Text('${expense['Date']} at ${_formatTime(expense['Time'])}'),
-                          trailing: Text(
-                            '₱${expense['TotalSpend']}',
-                            style: const TextStyle(
-                              color: Color(0xFF27AE60),
-                              fontWeight: FontWeight.bold,
+                  return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TransactionDetailsPage(
+                              transactionData: visit,
                             ),
                           ),
                         );
-                      }),
-                    ],
-                  );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.grey.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              _getCategoryIcon(visit['category']),
+                              color: const Color(0xFF27AE60),
+                              size: 24,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    visit['category'],
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${visit['date']} at ${_formatTime(visit['time'])}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              '₱${visit['totalSpend']}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF27AE60),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ));
                 },
               );
+      case ViewType.Groups:
+        return isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : userGroups.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No groups found',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: userGroups.length,
+                    itemBuilder: (context, index) {
+                      final group = userGroups[index];
+                      return ExpansionTile(
+                        leading: const Icon(
+                          Icons.group,
+                          color: Color(0xFF27AE60),
+                          size: 24,
+                        ),
+                        title: Text(
+                          group.groupName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        children: [
+                          // Display members
+                          ...group.users.map((user) => ListTile(
+                                leading: const Icon(Icons.person),
+                                title: Text(
+                                    '${user['first_name']} ${user['last_name']}'),
+                              )),
+                          // Display expenses
+                          ...group.expenses.map((expense) {
+                            IconData iconData = _getCategoryIcon(
+                                expense['Category'] ?? 'default');
+                            return ListTile(
+                              leading: Icon(iconData),
+                              title: Text(
+                                  expense['Category'] ?? 'Unknown Category'),
+                              subtitle: Text(
+                                  '${expense['Date']} at ${_formatTime(expense['Time'])}'),
+                              trailing: Text(
+                                '₱${expense['TotalSpend']}',
+                                style: const TextStyle(
+                                  color: Color(0xFF27AE60),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      );
+                    },
+                  );
       default:
-        return const Center(child: Text('Invalid view type')); // Handle unmatched cases
+        return const Center(
+            child: Text('Invalid view type')); // Handle unmatched cases
     }
   }
 
@@ -430,12 +519,12 @@ class _HistoryPageState extends State<HistoryPage> {
       List<String> parts = time.split(':');
       int hours = int.parse(parts[0]);
       int minutes = int.parse(parts[1]);
-      
+
       // Convert to 12-hour format
       String period = hours >= 12 ? 'PM' : 'AM';
       hours = hours > 12 ? hours - 12 : hours;
       hours = hours == 0 ? 12 : hours; // Convert 0 to 12 for midnight
-      
+
       // Format the time with leading zeros for minutes
       return '$hours:${minutes.toString().padLeft(2, '0')} $period';
     } catch (e) {
@@ -443,138 +532,143 @@ class _HistoryPageState extends State<HistoryPage> {
     }
   }
 
-  Future<void> _createGroup(String groupName, List<Map<String, dynamic>> selectedUsers) async {
-  try {
-    final User? currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return;
+  Future<void> _createGroup(
+      String groupName, List<Map<String, dynamic>> selectedUsers) async {
+    try {
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) return;
 
-    final DatabaseReference database = FirebaseDatabase.instance.ref();
+      final DatabaseReference database = FirebaseDatabase.instance.ref();
 
-    // Get the logged-in user's details from the 'Forms' node
-    DatabaseEvent userEvent = await database.child('Forms').child(currentUser.uid).once();
-    final userData = userEvent.snapshot.value as Map<dynamic, dynamic>?;
+      // Get the logged-in user's details from the 'Forms' node
+      DatabaseEvent userEvent =
+          await database.child('Forms').child(currentUser.uid).once();
+      final userData = userEvent.snapshot.value as Map<dynamic, dynamic>?;
 
-    if (userData == null) {
-      print("Logged-in user's details not found.");
-      return;
-    }
-
-    // Create a new group reference
-    final newGroupRef = database.child('Groups').push();
-
-    // Prepare the group data
-    final Map<String, dynamic> groupData = {
-      'User 1': {
-        'uid': currentUser.uid,
-        'first_name': userData['first_name'],
-        'last_name': userData['last_name'],
-      },
-      'groupName': groupName,
-      'UID': currentUser.uid, // Document ID of the logged-in user
-    };
-
-    // Add selected users to the group
-    int userIndex = 2;
-    for (var user in selectedUsers) {
-      DatabaseEvent userEvent = await database.child('Forms').child(user['uid']).once();
-      final selectedUserData = userEvent.snapshot.value as Map<dynamic, dynamic>?;
-
-      if (selectedUserData != null) {
-        groupData['User $userIndex'] = {
-          'uid': user['uid'],
-          'first_name': selectedUserData['first_name'],
-          'last_name': selectedUserData['last_name'],
-        };
-        userIndex++;
+      if (userData == null) {
+        print("Logged-in user's details not found.");
+        return;
       }
-    }
 
-    // Save the group data to the database
-    await newGroupRef.set(groupData);
-    print('Group created successfully with ID: ${newGroupRef.key}');
-  } catch (e) {
-    print('Error creating group: $e');
+      // Create a new group reference
+      final newGroupRef = database.child('Groups').push();
+
+      // Prepare the group data
+      final Map<String, dynamic> groupData = {
+        'User 1': {
+          'uid': currentUser.uid,
+          'first_name': userData['first_name'],
+          'last_name': userData['last_name'],
+        },
+        'groupName': groupName,
+        'UID': currentUser.uid, // Document ID of the logged-in user
+      };
+
+      // Add selected users to the group
+      int userIndex = 2;
+      for (var user in selectedUsers) {
+        DatabaseEvent userEvent =
+            await database.child('Forms').child(user['uid']).once();
+        final selectedUserData =
+            userEvent.snapshot.value as Map<dynamic, dynamic>?;
+
+        if (selectedUserData != null) {
+          groupData['User $userIndex'] = {
+            'uid': user['uid'],
+            'first_name': selectedUserData['first_name'],
+            'last_name': selectedUserData['last_name'],
+          };
+          userIndex++;
+        }
+      }
+
+      // Save the group data to the database
+      await newGroupRef.set(groupData);
+      print('Group created successfully with ID: ${newGroupRef.key}');
+    } catch (e) {
+      print('Error creating group: $e');
+    }
   }
-}
 
   // Add this method to fetch group data
   Future<void> fetchGroupData() async {
     setState(() => isLoading = true);
     try {
-        final User? currentUser = FirebaseAuth.instance.currentUser;
-        if (currentUser == null) return;
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) return;
 
-        final DatabaseReference database = FirebaseDatabase.instance.ref();
-        
-        // Fetch groups where user is a member
-        DatabaseEvent groupsEvent = await database.child('Groups').once();
-        if (groupsEvent.snapshot.value == null) return;
+      final DatabaseReference database = FirebaseDatabase.instance.ref();
 
-        Map<dynamic, dynamic> groupsData = groupsEvent.snapshot.value as Map<dynamic, dynamic>;
-        List<GroupDetails> tempGroups = [];
+      // Fetch groups where user is a member
+      DatabaseEvent groupsEvent = await database.child('Groups').once();
+      if (groupsEvent.snapshot.value == null) return;
 
-        for (var groupEntry in groupsData.entries) {
-            Map<dynamic, dynamic> groupData = groupEntry.value as Map<dynamic, dynamic>;
-            
-            // Check if user is a member of this group
-            bool isMember = false;
-            List<Map<String, dynamic>> groupUsers = [];
-            
-            groupData.forEach((key, value) {
-                if (key.toString().startsWith('User') && value is Map) {
-                    if (value['uid'] == currentUser.uid) {
-                        isMember = true;
-                    }
-                    groupUsers.add({
-                        'uid': value['uid'],
-                        'first_name': value['first_name'],
-                        'last_name': value['last_name'],
-                    });
-                }
-            });
+      Map<dynamic, dynamic> groupsData =
+          groupsEvent.snapshot.value as Map<dynamic, dynamic>;
+      List<GroupDetails> tempGroups = [];
 
-            if (isMember) {
-                // Fetch visits for this group based on GroupID and UID
-                List<Map<String, dynamic>> groupExpenses = [];
-                DatabaseEvent visitsEvent = await database
-                    .child('Visits')
-                    .orderByChild('GroupID')
-                    .equalTo(groupEntry.key) // Match GroupID with document ID
-                    .once();
+      for (var groupEntry in groupsData.entries) {
+        Map<dynamic, dynamic> groupData =
+            groupEntry.value as Map<dynamic, dynamic>;
 
-                if (visitsEvent.snapshot.value != null) {
-                    Map<dynamic, dynamic> visitsData = 
-                        visitsEvent.snapshot.value as Map<dynamic, dynamic>;
-                    
-                    visitsData.forEach((key, value) {
-                        if (value is Map && value['UID'] == currentUser.uid) {
-                            groupExpenses.add({
-                                'TotalSpend': value['TotalSpend'] ?? 0,
-                                'Date': value['Date'] ?? '',
-                                'Time': value['Time'] ?? '',
-                            });
-                        }
-                    });
-                }
+        // Check if user is a member of this group
+        bool isMember = false;
+        List<Map<String, dynamic>> groupUsers = [];
 
-                tempGroups.add(GroupDetails(
-                    groupName: groupData['groupName'] ?? 'Unnamed Group',
-                    users: groupUsers,
-                    expenses: groupExpenses, // Include fetched expenses
-                ));
+        groupData.forEach((key, value) {
+          if (key.toString().startsWith('User') && value is Map) {
+            if (value['uid'] == currentUser.uid) {
+              isMember = true;
             }
-        }
-
-        setState(() {
-            userGroups = tempGroups;
-            isLoading = false;
+            groupUsers.add({
+              'uid': value['uid'],
+              'first_name': value['first_name'],
+              'last_name': value['last_name'],
+            });
+          }
         });
 
+        if (isMember) {
+          // Fetch visits for this group based on GroupID and UID
+          List<Map<String, dynamic>> groupExpenses = [];
+          DatabaseEvent visitsEvent = await database
+              .child('Visits')
+              .orderByChild('GroupID')
+              .equalTo(groupEntry.key) // Match GroupID with document ID
+              .once();
+
+          if (visitsEvent.snapshot.value != null) {
+            Map<dynamic, dynamic> visitsData =
+                visitsEvent.snapshot.value as Map<dynamic, dynamic>;
+
+            visitsData.forEach((key, value) {
+              if (value is Map && value['UID'] == currentUser.uid) {
+                groupExpenses.add({
+                  'TotalSpend': value['TotalSpend'] ?? 0,
+                  'Date': value['Date'] ?? '',
+                  'Time': value['Time'] ?? '',
+                });
+              }
+            });
+          }
+
+          tempGroups.add(GroupDetails(
+            groupName: groupData['groupName'] ?? 'Unnamed Group',
+            users: groupUsers,
+            expenses: groupExpenses, // Include fetched expenses
+          ));
+        }
+      }
+
+      setState(() {
+        userGroups = tempGroups;
+        isLoading = false;
+      });
     } catch (e) {
-        print('Error fetching group data: $e');
-        setState(() => isLoading = false);
+      print('Error fetching group data: $e');
+      setState(() => isLoading = false);
     }
-}
+  }
 
   // Add this helper method to format the enum values
   String _formatViewType(ViewType type) {
@@ -588,4 +682,3 @@ class _HistoryPageState extends State<HistoryPage> {
     }
   }
 }
-

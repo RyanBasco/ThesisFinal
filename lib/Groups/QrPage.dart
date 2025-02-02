@@ -24,46 +24,7 @@ class _QRPageState extends State<QRPage> {
   @override
   void initState() {
     super.initState();
-    _checkRegistrationStatus();
-  }
-
-  Future<void> _checkRegistrationStatus() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        DatabaseEvent event = await FirebaseDatabase.instance
-            .ref()
-            .child('Users/${user.uid}')
-            .once();
-
-        if (event.snapshot.value != null) {
-          Map<dynamic, dynamic> userData = event.snapshot.value as Map<dynamic, dynamic>;
-
-          if (mounted) {
-            setState(() {
-              _isRegistered = userData['isRegistered'] == true;
-            });
-          }
-        }
-      }
-    } catch (e) {
-      print('Error checking registration status: $e');
-      if (mounted) {
-        setState(() {
-          _isRegistered = false;
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    ();
   }
 
   void _onItemTapped(int index) {
@@ -92,94 +53,116 @@ class _QRPageState extends State<QRPage> {
         return;
     }
 
-    // Use pushAndRemoveUntil to clear the navigation stack and prevent animations
     Navigator.pushAndRemoveUntil(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => page,
-        transitionDuration: Duration.zero, // No transition animation
+        transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
       (route) => false,
     );
   }
 
-  // Define the _viewQRCode method
-  void _viewQRCode(String formId, String firstName, String lastName) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => QRCodeDisplayPage(
-          formId: formId,
-          firstName: firstName,
-          lastName: lastName,
-        ),
-      ),
+ void _viewQRCode() async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    final userRef = FirebaseDatabase.instance.ref().child('Users/${user.uid}');
+    try {
+      DatabaseEvent userEvent = await userRef.once();
+      print('User data from Firebase: ${userEvent.snapshot.value}'); // Debug print
+      
+      if (userEvent.snapshot.value != null) {
+        Map<dynamic, dynamic> userData = userEvent.snapshot.value as Map<dynamic, dynamic>;
+        String firstName = userData['first_name'] ?? '';
+        String lastName = userData['last_name'] ?? '';
+
+        print('Fetched firstName: $firstName'); // Debug print
+        print('Fetched lastName: $lastName'); // Debug print
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => QRCodeDisplayPage(
+              formId: user.uid,  // Use actual user ID
+              firstName: firstName,
+              lastName: lastName,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("User data not found")),
+        );
+      }
+    } catch (e) {
+      print('Error fetching user details: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading user details: $e')),
+      );
+    }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("User not authenticated")),
     );
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: CurvedNavigationBar(
-  backgroundColor: const Color(0xFF51F643),
-  color: Colors.white,
-  buttonBackgroundColor: Colors.white,
-  height: 65,
-  index: _selectedIndex,
-  animationDuration: const Duration(milliseconds: 333000),
-  animationCurve: Curves.easeInOut,
-  items: <Widget>[
-    Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
-      ],
-    ),
-    Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
-      ],
-    ),
-    Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('Transaction', 
-          style: TextStyle(
-            color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, 
-            fontSize: 10
+        backgroundColor: const Color(0xFF51F643),
+        color: Colors.white,
+        buttonBackgroundColor: Colors.white,
+        height: 65,
+        index: _selectedIndex,
+        animationDuration: const Duration(milliseconds: 333),
+        animationCurve: Curves.easeInOut,
+        items: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+            ],
           ),
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    ),
-    Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
-      ],
-    ),
-    Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
-        Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
-      ],
-    ),
-  ],
-  onTap: (index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    _onItemTapped(index);
-  },
-),
-
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
+              Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10)),
+            ],
+          ),
+        ],
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+          _onItemTapped(index);
+        },
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -201,12 +184,11 @@ class _QRPageState extends State<QRPage> {
                 child: Column(
                   children: [
                     const Padding(
-                      padding:
-                           EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+                      padding: EdgeInsets.symmetric(vertical: 30, horizontal: 15),
                       child: Row(
                         children: [
-                           SizedBox(width: 10),
-                           Expanded(
+                          SizedBox(width: 10),
+                          Expanded(
                             child: Text(
                               'QR Reader',
                               style: TextStyle(
@@ -225,15 +207,10 @@ class _QRPageState extends State<QRPage> {
                       child: Column(
                         children: [
                           // Only show Travel Registration if not registered
-                          if (!_isRegistered) 
-                            _buildTravelRegistrationBox(),
-
-                          // Show QR Code button if registered
+                          if (!_isRegistered) _buildTravelRegistrationBox(),
                           if (_isRegistered)
                             GestureDetector(
-                              onTap: () {
-                                _viewQRCode('sampleFormId', 'John', 'Doe');
-                              },
+                              onTap: _viewQRCode,
                               child: Container(
                                 height: 120,
                                 width: 280,

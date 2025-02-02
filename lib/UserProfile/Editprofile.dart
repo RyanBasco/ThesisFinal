@@ -130,6 +130,7 @@ class _EditProfileState extends State<EditProfile> {
       if (croppedImage != null) {
         setState(() {
           _profileImage = File(croppedImage.path);
+          _profileImageUrl = null;
         });
         await _uploadImageToFirebase(XFile(croppedImage.path));
       }
