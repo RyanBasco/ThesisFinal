@@ -20,7 +20,6 @@ class _ScanQRState extends State<ScanQR> {
     setState(() {
       _selectedIndex = index;
     });
-
     switch (index) {
       case 0:
         Navigator.push(

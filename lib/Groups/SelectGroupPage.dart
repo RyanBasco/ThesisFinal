@@ -7,6 +7,7 @@ import 'package:testing/Groups/History.dart';
 import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'GroupQRCodePage.dart';
 
 class SelectGroupPage extends StatefulWidget {
@@ -26,6 +27,8 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
   bool _isLoading = false;
   final TextEditingController _groupNameController = TextEditingController();
   String _groupName = '';
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  QRViewController? controller;
 
   @override
   void initState() {
@@ -60,106 +63,137 @@ class _SelectGroupPageState extends State<SelectGroupPage> {
   }
 
   void _showAddMembersDialog() {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      print('No current user logged in');
-      return;
-    }
-
-    List<Map<String, dynamic>> tempSelectedUsers = List<Map<String, dynamic>>.from(_selectedUsers);
-    _filteredUsers = [];
-
     showDialog(
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.8,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Select Members',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _searchController,
-                        decoration: const InputDecoration(
-                          hintText: 'Search by name',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          setDialogState(() {
-                            if (value.isEmpty) {
-                              _filteredUsers = [];
-                            } else {
-                              _filteredUsers = _users.where((user) {
-                                final fullName = '${user['first_name']} ${user['last_name']}'.toLowerCase();
-                                return fullName.contains(value.toLowerCase()) &&
-                                    user['uid'] != currentUser.uid;
-                              }).toList();
-                            }
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      Flexible(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: _filteredUsers.length,
-                          itemBuilder: (context, index) {
-                            final user = _filteredUsers[index];
-                            final isSelected = tempSelectedUsers.contains(user);
+        return AlertDialog(
+          title: const Text('Add Members'),
+          content: const Text('Scan QR code to add a member'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showQRScannerDialog();
+              },
+              child: const Text('Scan QR'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-                            return ListTile(
-                              title: Text('${user['first_name']} ${user['last_name']}'),
-                              trailing: IconButton(
-                                icon: Icon(
-                                  isSelected ? Icons.check_box : Icons.check_box_outline_blank,
-                                  color: isSelected ? Colors.green : null,
-                                ),
-                                onPressed: () {
-                                  setDialogState(() {
-                                    if (isSelected) {
-                                      tempSelectedUsers.remove(user);
-                                    } else {
-                                      tempSelectedUsers.add(user);
-                                    }
-                                  });
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedUsers = List<Map<String, dynamic>>.from(tempSelectedUsers);
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('Done'),
-                      ),
-                    ],
+  void _showQRScannerDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            height: 350,
+            width: 350,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: QRView(
+                    key: qrKey,
+                    onQRViewCreated: _onQRViewCreated,
                   ),
                 ),
-              ),
-            );
-          },
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    'Scan User QR Code',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) async {
+      controller.pauseCamera();
+      
+      // Process the scanned data (assuming it contains user ID)
+      final userId = scanData.code;
+      if (userId != null && userId.isNotEmpty) {
+        Navigator.of(context).pop(); // Close the QR scanner dialog
+        await _addUserFromQRCode(userId);
+      } else {
+        Navigator.of(context).pop(); // Close the QR scanner dialog
+        _showWarningDialog('Invalid QR code');
+      }
+      
+      controller.dispose();
+    });
+  }
+
+  Future<void> _addUserFromQRCode(String userId) async {
+    final DatabaseReference database = FirebaseDatabase.instance.ref();
+    
+    try {
+      final userSnapshot = await database.child('Forms').child(userId).once();
+      final userData = userSnapshot.snapshot.value as Map<dynamic, dynamic>?;
+      
+      if (userData != null) {
+        final newUser = {
+          'uid': userId,
+          'first_name': userData['first_name'],
+          'last_name': userData['last_name'],
+          'selected': true,
+        };
+        
+        // Check if user is already in the selected list
+        final isAlreadySelected = _selectedUsers.any((user) => user['uid'] == userId);
+        
+        if (!isAlreadySelected) {
+          setState(() {
+            _selectedUsers.add(newUser);
+          });
+          _showSuccessDialog('User added successfully!');
+        } else {
+          _showWarningDialog('This user is already in your group');
+        }
+      } else {
+        _showWarningDialog('User not found');
+      }
+    } catch (error) {
+      print('Error adding user: $error');
+      _showWarningDialog('Failed to add user. Please try again.');
+    }
+  }
+
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Success'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
         );
       },
     );

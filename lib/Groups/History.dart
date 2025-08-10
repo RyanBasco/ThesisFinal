@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:testing/Expense%20Tracker/Expensetracker.dart';
-import 'package:testing/Groups/TransactionDetailsPage.dart';
 import 'package:testing/Groups/Travel.dart';
 import 'package:testing/TouristDashboard/TouristProfile.dart';
 import 'package:testing/TouristDashboard/UserDashboard.dart';
@@ -9,9 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 enum ViewType {
-  Transactions,
+  Visits,
   Groups,
-  CheckInOut,
 }
 
 // Add this class to store group details
@@ -35,7 +33,7 @@ class HistoryPage extends StatefulWidget {
 class _HistoryPageState extends State<HistoryPage> {
   int _selectedIndex = 3; // Changed from 1 to 3 since this is now History tab
   List<Map<String, dynamic>> visits = [];
-  ViewType _selectedView = ViewType.Transactions;
+  ViewType _selectedView = ViewType.Visits;
   List<GroupDetails> userGroups = [];
   bool isLoading = false;
 
@@ -55,29 +53,74 @@ class _HistoryPageState extends State<HistoryPage> {
         if (event.snapshot.value != null) {
           Map<dynamic, dynamic> visitsData =
               event.snapshot.value as Map<dynamic, dynamic>;
-
           List<Map<String, dynamic>> tempVisits = [];
+          // Map to track visits count and last visit date for each establishment per month
+          Map<String, Map<String, dynamic>> establishmentMonthlyVisits = {};
 
           visitsData.forEach((key, value) {
-            if (value is Map &&
-                value['User'] is Map &&
-                value['User']['UID'] == user.uid) {
-              tempVisits.add({
-                'category': value['Category'] ?? '',
-                'date': value['Date'] ?? '',
-                'time': value['Time'] ?? '',
-                'totalSpend': value['TotalSpend'] ?? 0,
-              });
+            if (value is Map) {
+              Map<dynamic, dynamic> establishment =
+                  value['Establishment'] ?? {};
+
+              String establishmentName =
+                  establishment['establishmentName'] ?? '';
+              String dateStr = value['Date'] ?? '';
+              String timeStr = value['Time'] ?? '';
+
+              List<String> dateParts = dateStr.split('/');
+              if (dateParts.length == 3) {
+                DateTime visitDate = DateTime(
+                  int.parse(dateParts[2]), // year
+                  int.parse(dateParts[0]), // month
+                  int.parse(dateParts[1]), // day
+                );
+
+                // Create a key for the establishment and month
+                String monthKey =
+                    '${establishmentName}_${visitDate.year}_${visitDate.month}';
+
+                bool shouldInclude = true;
+
+                if (establishmentMonthlyVisits.containsKey(monthKey)) {
+                  var monthData = establishmentMonthlyVisits[monthKey]!;
+                  int visitCount = monthData['count'] as int;
+                  DateTime lastVisit = monthData['lastVisit'] as DateTime;
+
+                  // Check if we already have 2 visits this month
+                  if (visitCount >= 2) {
+                    shouldInclude = false;
+                  } else {
+                    // Check for 3-day gap
+                    int daysDifference =
+                        visitDate.difference(lastVisit).inDays.abs();
+                    shouldInclude = daysDifference >= 3;
+                  }
+                }
+
+                if (shouldInclude) {
+                  // Update or create the monthly visit data
+                  establishmentMonthlyVisits[monthKey] = {
+                    'count':
+                        (establishmentMonthlyVisits[monthKey]?['count'] ?? 0) +
+                            1,
+                    'lastVisit': visitDate,
+                  };
+
+                  tempVisits.add({
+                    'establishmentName': establishmentName,
+                    'date': dateStr,
+                    'time': timeStr,
+                    'establishmentID': establishment['EstablishmentID'] ?? '',
+                  });
+                }
+              }
             }
           });
 
-          // Sort by date and time (latest first)
           tempVisits.sort((a, b) {
-            // First compare dates
             List<String> datePartsA = a['date'].toString().split('/');
             List<String> datePartsB = b['date'].toString().split('/');
 
-            // Convert to DateTime objects (assuming MM/DD/YYYY format)
             DateTime dateA = DateTime(
               int.parse(datePartsA[2]), // year
               int.parse(datePartsA[0]), // month
@@ -89,11 +132,9 @@ class _HistoryPageState extends State<HistoryPage> {
               int.parse(datePartsB[1]), // day
             );
 
-            int dateComparison =
-                dateB.compareTo(dateA); // Reverse order for latest first
+            int dateComparison = dateB.compareTo(dateA);
             if (dateComparison != 0) return dateComparison;
 
-            // If dates are equal, compare times
             return b['time'].toString().compareTo(a['time'].toString());
           });
 
@@ -221,16 +262,12 @@ class _HistoryPageState extends State<HistoryPage> {
                             color: Colors.black,
                             fontWeight: FontWeight.w500,
                           ),
-                          items: [
-                            DropdownMenuItem<ViewType>(
-                              value: ViewType.Transactions,
-                              child: Text('Transactions'),
-                            ),
-                            DropdownMenuItem<ViewType>(
-                              value: ViewType.Groups,
-                              child: Text('Groups'),
-                            ),
-                          ],
+                          items: ViewType.values.map((ViewType type) {
+                            return DropdownMenuItem<ViewType>(
+                              value: type,
+                              child: Text(_formatViewType(type)),
+                            );
+                          }).toList(),
                           onChanged: (ViewType? newValue) {
                             if (newValue != null) {
                               setState(() {
@@ -357,11 +394,11 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Widget _buildSelectedView() {
     switch (_selectedView) {
-      case ViewType.Transactions:
+      case ViewType.Visits:
         return visits.isEmpty
             ? const Center(
                 child: Text(
-                  'No transaction history found',
+                  'No visit history found',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey,
@@ -372,67 +409,48 @@ class _HistoryPageState extends State<HistoryPage> {
                 itemCount: visits.length,
                 itemBuilder: (context, index) {
                   final visit = visits[index];
-                  return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TransactionDetailsPage(
-                              transactionData: visit,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.grey.withOpacity(0.2),
-                              width: 1,
-                            ),
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.grey.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.store,
+                          color: const Color(0xFF27AE60),
+                          size: 24,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                visit['establishmentName'],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '${visit['date']} at ${_formatTime(visit['time'])}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              _getCategoryIcon(visit['category']),
-                              color: const Color(0xFF27AE60),
-                              size: 24,
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    visit['category'],
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${visit['date']} at ${_formatTime(visit['time'])}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              '₱${visit['totalSpend']}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF27AE60),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ));
+                      ],
+                    ),
+                  );
                 },
               );
       case ViewType.Groups:
@@ -673,12 +691,10 @@ class _HistoryPageState extends State<HistoryPage> {
   // Add this helper method to format the enum values
   String _formatViewType(ViewType type) {
     switch (type) {
-      case ViewType.Transactions:
-        return 'Transactions';
+      case ViewType.Visits:
+        return 'Visits';
       case ViewType.Groups:
         return 'Groups';
-      case ViewType.CheckInOut:
-        return 'Check-in/Check-out';
     }
   }
 }

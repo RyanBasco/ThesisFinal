@@ -83,12 +83,15 @@ class _CategoriesPageState extends State<CategoriesPage> {
         DatabaseEvent event = await ref.once();
 
         if (event.snapshot.value != null) {
-          Map<dynamic, dynamic> visitsData = event.snapshot.value as Map<dynamic, dynamic>;
+          Map<dynamic, dynamic> visitsData =
+              event.snapshot.value as Map<dynamic, dynamic>;
 
           List<Map<String, dynamic>> tempVisits = [];
 
           visitsData.forEach((key, value) {
-            if (value is Map && value['User'] is Map && value['User']['UID'] == user.uid) {
+            if (value is Map &&
+                value['User'] is Map &&
+                value['User']['UID'] == user.uid) {
               tempVisits.add({
                 'category': value['Category'] ?? '',
                 'date': value['Date'] ?? '',
@@ -100,9 +103,26 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
           // Sort visits by date and time (latest first)
           tempVisits.sort((a, b) {
-            int dateComparison = b['date'].compareTo(a['date']);
+            // Parse MM/DD/YYYY format to DateTime objects
+            List<String> partsA = a['date'].toString().split('/');
+            List<String> partsB = b['date'].toString().split('/');
+
+            DateTime dateA = DateTime(
+                int.parse(partsA[2]), // year
+                int.parse(partsA[0]), // month
+                int.parse(partsA[1]) // day
+                );
+            DateTime dateB = DateTime(
+                int.parse(partsB[2]), // year
+                int.parse(partsB[0]), // month
+                int.parse(partsB[1]) // day
+                );
+
+            int dateComparison = dateB.compareTo(dateA);
             if (dateComparison != 0) return dateComparison;
-            return b['time'].compareTo(a['time']);
+
+            // If dates are equal, compare times
+            return b['time'].toString().compareTo(a['time'].toString());
           });
 
           setState(() {
@@ -163,7 +183,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
     // Filter visits based on the selected category
     List<Map<String, dynamic>> filteredVisits = _selectedCategory == null
         ? visits
-        : visits.where((visit) => visit['category'] == _selectedCategory).toList();
+        : visits
+            .where((visit) => visit['category'] == _selectedCategory)
+            .toList();
 
     return Scaffold(
       bottomNavigationBar: CurvedNavigationBar(
@@ -178,36 +200,86 @@ class _CategoriesPageState extends State<CategoriesPage> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.home, size: 24, color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('Home', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.home,
+                  size: 24,
+                  color: _selectedIndex == 0
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('Home',
+                  style: TextStyle(
+                      color: _selectedIndex == 0
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.travel_explore, size: 24, color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('Travel', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.travel_explore,
+                  size: 24,
+                  color: _selectedIndex == 1
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('Travel',
+                  style: TextStyle(
+                      color: _selectedIndex == 1
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.attach_money, size: 24, color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('Transaction', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.attach_money,
+                  size: 24,
+                  color: _selectedIndex == 2
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('Transaction',
+                  style: TextStyle(
+                      color: _selectedIndex == 2
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.history, size: 24, color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('History', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.history,
+                  size: 24,
+                  color: _selectedIndex == 3
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('History',
+                  style: TextStyle(
+                      color: _selectedIndex == 3
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.person, size: 24, color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey),
-              Text('Profile', style: TextStyle(color: _selectedIndex == 4 ? const Color(0xFF27AE60) : Colors.grey, fontSize: 10), overflow: TextOverflow.ellipsis),
+              Icon(Icons.person,
+                  size: 24,
+                  color: _selectedIndex == 4
+                      ? const Color(0xFF27AE60)
+                      : Colors.grey),
+              Text('Profile',
+                  style: TextStyle(
+                      color: _selectedIndex == 4
+                          ? const Color(0xFF27AE60)
+                          : Colors.grey,
+                      fontSize: 10),
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
         ],
@@ -234,12 +306,14 @@ class _CategoriesPageState extends State<CategoriesPage> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 15),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 40, horizontal: 15),
                 child: Row(
                   children: [
                     GestureDetector(
                       onTap: () {
-                        Navigator.pop(context); // Navigate back to the previous page
+                        Navigator.pop(
+                            context); // Navigate back to the previous page
                       },
                       child: const CircleAvatar(
                         backgroundColor: Colors.white,
@@ -278,7 +352,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
               ),
               const SizedBox(height: 20),
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.white,
